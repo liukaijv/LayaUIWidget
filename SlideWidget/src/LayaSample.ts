@@ -8,21 +8,17 @@ class GameMain {
         Laya.stage.alignV = "middle";
         Laya.stage.alignH = "middle";
 
-        let images = [
+        let images: string[] = [
             'images/1.jpg',
             'images/2.jpg',
             'images/3.jpg',
             'images/4.jpg',
         ];
-        let slideBox = new Laya.Box();
-        slideBox.pos(0, 0);
-        slideBox.size(Laya.stage.width, 400);
-        Laya.stage.addChild(slideBox);
-        let slide:SlideWidget = new SlideWidget(images, {
+        let slide: SlideWidget = new SlideWidget(images, {
             width: 750,
             height: 400
         });
-        slideBox.addChild(slide);
+        Laya.stage.addChild(slide);
         // laya.debug.DebugTool.init();
         // laya.debug.DebugPanel.init();
     }

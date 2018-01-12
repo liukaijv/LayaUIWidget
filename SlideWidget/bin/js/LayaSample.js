@@ -11,15 +11,11 @@ var GameMain = /** @class */ (function () {
             'images/3.jpg',
             'images/4.jpg',
         ];
-        var slideBox = new Laya.Box();
-        slideBox.pos(0, 0);
-        slideBox.size(Laya.stage.width, 400);
-        Laya.stage.addChild(slideBox);
         var slide = new SlideWidget(images, {
             width: 750,
             height: 400
         });
-        slideBox.addChild(slide);
+        Laya.stage.addChild(slide);
         // laya.debug.DebugTool.init();
         // laya.debug.DebugPanel.init();
     }
