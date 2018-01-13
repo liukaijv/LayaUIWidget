@@ -16,7 +16,10 @@ class GameMain {
         ];
         let slide: SlideWidget = new SlideWidget(images, {
             width: 750,
-            height: 400
+            height: 400,
+            clickHandler: (index: number) => {
+                console.log('clicked:' + index);
+            }
         });
         Laya.stage.addChild(slide);
         // laya.debug.DebugTool.init();

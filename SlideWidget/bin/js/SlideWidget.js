@@ -16,7 +16,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
-var SlideWidget = /** @class */ (function (_super) {
+var SlideWidget = (function (_super) {
     __extends(SlideWidget, _super);
     /**
      *
@@ -260,6 +260,10 @@ var SlideWidget = /** @class */ (function (_super) {
         this.isTouching = false;
         e.stopPropagation();
         var touchEndX = e.stageX, distX = touchEndX - this.touchStartX;
+        //点击
+        if (Math.abs(distX) < 10 && this.options.clickHandler) {
+            this.options.clickHandler(this.current - 1);
+        }
         //滑动范围大于预设值
         if (Math.abs(distX / this.options.width) > this.options.swipeThreshold) {
             if (distX < 0) {
@@ -379,23 +383,22 @@ var SlideWidget = /** @class */ (function (_super) {
         this.slideContainer.destroy();
         this.destroy();
     };
-    // 默认参数
-    SlideWidget.DEFAULTS_OPTIONS = {
-        container: null,
-        width: 750,
-        height: 300,
-        infinite: true,
-        x: 0,
-        y: 0,
-        //默认图片一定要预先加载,用来占位
-        defaultImageUrl: 'images/banner_default.png',
-        autoPlay: true,
-        showDots: false,
-        showPager: true,
-        speed: 300,
-        delay: 4000,
-        swipeThreshold: 0.3
-    };
     return SlideWidget;
 }(Laya.Sprite));
-//# sourceMappingURL=SlideWidget.js.map
+// 默认参数
+SlideWidget.DEFAULTS_OPTIONS = {
+    container: null,
+    width: 750,
+    height: 300,
+    infinite: true,
+    x: 0,
+    y: 0,
+    //默认图片一定要预先加载,用来占位
+    defaultImageUrl: 'images/banner_default.png',
+    autoPlay: true,
+    showDots: false,
+    showPager: true,
+    speed: 300,
+    delay: 4000,
+    swipeThreshold: 0.3
+};
