@@ -18,7 +18,8 @@ interface SlideOptions {
     delay?: number,
     //无限循环滑动
     infinite?: boolean,
-    swipeThreshold?: number
+    swipeThreshold?: number,
+    clickHandler?: (index: number) => void
 }
 
 class SlideWidget extends Laya.Sprite {
@@ -336,6 +337,12 @@ class SlideWidget extends Laya.Sprite {
 
         let touchEndX = e.stageX,
             distX = touchEndX - this.touchStartX;
+
+        //点击
+        if (Math.abs(distX) < 10 && this.options.clickHandler) {
+            this.options.clickHandler(this.current - 1);
+        }
+
         //滑动范围大于预设值
         if (Math.abs(distX / this.options.width) > this.options.swipeThreshold) {
             if (distX < 0) {

@@ -1,5 +1,5 @@
 // 程序入口
-var GameMain = /** @class */ (function () {
+var GameMain = (function () {
     function GameMain() {
         Laya.init(750, 1000);
         Laya.stage.scaleMode = "showall";
@@ -13,7 +13,10 @@ var GameMain = /** @class */ (function () {
         ];
         var slide = new SlideWidget(images, {
             width: 750,
-            height: 400
+            height: 400,
+            clickHandler: function (index) {
+                console.log('clicked:' + index);
+            }
         });
         Laya.stage.addChild(slide);
         // laya.debug.DebugTool.init();
@@ -22,4 +25,3 @@ var GameMain = /** @class */ (function () {
     return GameMain;
 }());
 new GameMain();
-//# sourceMappingURL=LayaSample.js.map
