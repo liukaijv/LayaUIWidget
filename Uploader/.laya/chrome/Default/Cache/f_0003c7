@@ -1,0 +1,391 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        //房间数据处理器
+        var NLRoomControl = /** @class */ (function (_super) {
+            __extends(NLRoomControl, _super);
+            /**
+             * by guo
+             * 俱乐部过来的添加个 ClubId
+             * @param joinGameClubId
+             */
+            function NLRoomControl(joinGameClubId) {
+                var _this = _super.call(this) || this;
+                _this.joinGameClubId = joinGameClubId;
+                return _this;
+            }
+            //离开房间
+            NLRoomControl.prototype.quitRoomRequest = function () {
+                var sitId = this.roomData.getSitIdByPlayerId(HoldemPoker.Sys.players.self.id);
+                this.net.requestNotify("OutRoomRequest", {
+                    roomId: this.roomData.id,
+                    gameId: this.roomData.gameId,
+                    sitId: sitId
+                });
+            };
+            NLRoomControl.prototype.requestJoinRoom = function () {
+                var joinRoomData = {
+                    roomId: this.roomData.id,
+                    invitationCode: this.roomData.invitationCode !== undefined ? this.roomData.invitationCode : "",
+                    // playerId: Sys.players.self.id,
+                    sessionKey: HoldemPoker.Sys.players.account.sessionKey,
+                    gameId: this.roomData.gameId,
+                    joinGameClubId: this.joinGameClubId ? this.joinGameClubId : -1
+                };
+                if (this.joinGameClubId) {
+                    this.roomData.clubId = this.joinGameClubId;
+                }
+                HoldemPoker.BenchmarkHelper.timeEnd('enterGameTest', 'startJoinRoomRequest', false);
+                this.net.requestNotify("JoinRoomRequest", joinRoomData);
+            };
+            NLRoomControl.prototype.requestLookOnRoom = function () {
+            };
+            NLRoomControl.prototype.registerNotify = function () {
+                _super.prototype.registerNotify.call(this);
+                this.net.registerNotifyMsg("ConmmonRankResponse", this, this.onConmmonRankResponse);
+                this.net.registerNotifyMsg("TriggerInsuranceNotify", this, this.onTriggerInsuranceNotify);
+                this.net.registerNotifyMsg("OptionBroadCastResponse", this, this.onOptionBroadCastResponse);
+                this.net.registerNotifyMsg("UnbuyInsuranceResponse", this, this.onUnbuyInsuranceResponse);
+                this.net.registerNotifyMsg("BuyInsuranceResponse", this, this.onBuyInsuranceResponse);
+                this.net.registerNotifyMsg("InsuranceSettlementNotify", this, this.onInsuranceSettlementNotify);
+                this.net.registerNotifyMsg("AdvStandUpResponse", this, this.onAdvStandUpResponse);
+                this.net.registerNotifyMsg("AdvOutRoomResponse", this, this.onAdvOutRoomResponse);
+                this.net.registerNotifyMsg("CancelStandUpResponse", this, this.onCancelStandUpResponse);
+                this.net.registerNotifyMsg("ResetBuyThinkTimeResponse", this, this.onResetTimeResponse);
+                this.net.registerNotifyMsg("InsuranceHoleCardNotify", this, this.onInsuranceHoleCardNotify);
+                this.net.registerNotifyMsg("NoInsuranceNotify", this, this.noInsuranceNotify);
+                this.net.registerNotifyMsg("WaitBuyInsuranceNotify", this, this.waitBuyInsuranceNotify);
+                this.net.registerNotifyMsg("CloseScorecardResponse", this, this.onCloseScorecardResponse);
+                this.net.registerNotifyMsg("NotifyGamePause", this, this.onGmNotify);
+                this.net.registerNotifyMsg("NotifyGameReStart", this, this.onGmNotify);
+                this.net.registerNotifyMsg("NotifyGameDelayed", this, this.onGmNotify);
+                this.net.registerNotifyMsg("NotifyGameErrorRestart", this, this.onGmNotify);
+                this.net.registerNotifyMsg("NotifyGameSettlement", this, this.onGmNotify);
+                this.net.registerNotifyMsg("NotifyGameKickPlayer", this, this.onGmNotify);
+                this.net.registerNotifyMsg("NotifyGameCancelBan", this, this.onGmNotify);
+                this.net.registerNotifyMsg("AddThinkTimeResponse", this, this.onAddActionTime);
+                this.net.registerErrorMsg(HoldemPoker.msg.Codes.ErrInsuranceNotBuyPlayerId, this, this.onErrNotBuyPlayerIdHandle);
+                this.net.registerErrorMsg(HoldemPoker.msg.Codes.ErrInsuranceNotChooseOuts, this, this.onErrNotChooseOutsHandle);
+                this.net.registerErrorMsg(HoldemPoker.msg.Codes.ErrInsuranceAmountIllegal, this, this.onErrAmountIllegalHandle);
+                this.net.registerErrorMsg(HoldemPoker.msg.Codes.ErrInsuranceTimeout, this, this.onErrTimeoutHandle);
+                this.net.registerErrorMsg(HoldemPoker.msg.Codes.ErrInsuranceMustBuyRiverCard, this, this.onErrMustBuyRiverCardHandle);
+                this.net.registerErrorMsg(HoldemPoker.msg.Codes.ErrInsuranceResetTimeCostNotEnough, this, this.onErrResetTimeCostNotEnoughHandle);
+                this.net.registerErrorMsg(HoldemPoker.msg.Codes.ErrInsuranceResetTimeCountMax, this, this.onErrResetTimeCountMaxHandle);
+            };
+            NLRoomControl.prototype.unRegisterNotify = function () {
+                _super.prototype.unRegisterNotify.call(this);
+                this.net.unRegisterNotifyMsg("ConmmonRankResponse");
+                this.net.unRegisterNotifyMsg("TriggerInsuranceNotify");
+                this.net.unRegisterNotifyMsg("OptionBroadCastResponse");
+                this.net.unRegisterNotifyMsg("UnbuyInsuranceResponse");
+                this.net.unRegisterNotifyMsg("BuyInsuranceResponse");
+                this.net.unRegisterNotifyMsg("InsuranceSettlementNotify");
+                this.net.unRegisterNotifyMsg("AdvStandUpResponse");
+                this.net.unRegisterNotifyMsg("AdvOutRoomResponse");
+                this.net.unRegisterNotifyMsg("CancelStandUpResponse");
+                this.net.unRegisterNotifyMsg("ResetBuyThinkTimeResponse");
+                this.net.unRegisterNotifyMsg("InsuranceHoleCardNotify");
+                this.net.unRegisterNotifyMsg("NotifyGamePause");
+                this.net.unRegisterNotifyMsg("NotifyGameReStart");
+                this.net.unRegisterNotifyMsg("NotifyGameDelayed");
+                this.net.unRegisterNotifyMsg("NotifyGameErrorRestart");
+                this.net.unRegisterNotifyMsg("NotifyGameSettlement");
+                this.net.unRegisterNotifyMsg("NotifyGameKickPlayer");
+                this.net.unRegisterNotifyMsg("NotifyGameCancelBan");
+                this.net.unRegisterNotifyMsg("NoInsuranceNotify");
+                this.net.unRegisterNotifyMsg("WaitBuyInsuranceNotify");
+                this.net.unRegisterNotifyMsg("CloseScorecardResponse");
+            };
+            NLRoomControl.prototype.registerUIEvent = function () {
+                _super.prototype.registerUIEvent.call(this);
+                this.gameUI.menuView.on(HoldemPoker.GEvent.NL_REBUY, this, this.onClickRebuy);
+                this.gameUI.menuView.on(HoldemPoker.GEvent.NL_LEAVE_TABLE, this, this.sendLeaveTabel);
+            };
+            NLRoomControl.prototype.currentRankRequest = function () {
+                var room = this.roomData;
+                if (room) {
+                    var data = { roomId: room.id, gameId: room.gameId };
+                    this.net.sendMesage("ConmmonRankRequest", data, Laya.Handler.create(this, this.onConmmonRankResponse), Laya.Handler.create(this, this.onConmmonRankResponseError));
+                }
+            };
+            NLRoomControl.prototype.onConmmonRankResponse = function (data) {
+                console.log(data);
+                // this.gameUI.reAllui.gameRankUI.renderCommonRank(data);
+                this.gameUI.normalGameRankUI.contentView.renderCommonRank(data);
+            };
+            NLRoomControl.prototype.onConmmonRankResponseError = function (data) {
+                console.debug("[Error][PlayMgr] sit down failed. [err=" + data.codes + ", msg=" + data.msg + "]");
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+            };
+            NLRoomControl.prototype.onClickRebuy = function () {
+                //是否从菜单打开的“购买计分牌界面”
+                // this.reBuyFromMenu = true;
+                // let maxBuy = this.roomData.gameData.blind * 100 * 8;
+                // this.gameUI.openReBuyView(maxBuy);
+                ///请求能购买的记分牌最大值,上面的废掉
+                this.net.requestNotify("ScorecardRequest", {
+                    roomId: this.roomData.id,
+                    gameId: this.roomData.gameId,
+                    clubId: this.roomData.clubId,
+                });
+            };
+            NLRoomControl.prototype.getMyRank = function () {
+            };
+            //提前站起返回
+            NLRoomControl.prototype.onAdvStandUpResponse = function (data) {
+                var _this = this;
+                if (data.state !== 1) {
+                    return;
+                }
+                this.isAdvStandUp = true;
+                HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.standUpAutoFoldTip), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cancelStandUp), Laya.Handler.create(this, function () {
+                    _this.isAdvStandUp = false;
+                    var cancelData = {
+                        roomId: _this.roomData.id,
+                        gameId: _this.roomData.gameId,
+                        sitId: _this.roomData.getSelfSeat().sitId
+                    };
+                    _this.net.requestNotify("CancelStandUpRequest", cancelData);
+                }), true);
+            };
+            //提前退出返回
+            NLRoomControl.prototype.onAdvOutRoomResponse = function (data) {
+                if (data.state !== 1) {
+                    return;
+                }
+                this.go(HoldemPoker.PlayState.LeaveState);
+            };
+            NLRoomControl.prototype.onCancelStandUpResponse = function (data) {
+                if (data.state !== 1) {
+                    return;
+                }
+            };
+            //保险
+            NLRoomControl.prototype.onTriggerInsuranceNotify = function (data) {
+                var da = new Date();
+                this.insTime = da.getTime();
+                var cmd = HoldemPoker.InsuranceCommand.cmdInsuranceMessage(data);
+                this.cmdMgr.push(cmd);
+            };
+            NLRoomControl.prototype.onInsuranceHoleCardNotify = function (data) {
+                if (!this.roomData.isInShowDownState) {
+                    //先摊牌
+                    var showdownCmd = HoldemPoker.ShowdownCommand.cmdWithInsMessage(data);
+                    this.cmdMgr.push(showdownCmd);
+                }
+            };
+            NLRoomControl.prototype.onUnbuyInsuranceResponse = function (data) {
+                this.gameUI.insuranceViewUI.Exit();
+                var userName = "";
+                // if (!Sys.players.self.isSelf(data.playerId)) {
+                var seat = this.roomData.getSeatByPlayerId(data.playerId);
+                if (seat) {
+                    userName = HoldemPoker.EmojiHelper.emojiDecode(seat.playerName) + " ";
+                }
+                // }
+                if (HoldemPoker.Sys.players.self.isSelf(data.playerId)) {
+                    userName = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.you);
+                }
+                var tips = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.unbuyInsuranceTip, userName);
+                this.gameUI.buyInsText.text = tips;
+                this.gameUI.buyInsInfo.visible = true;
+                HoldemPoker.Utility.setInsText(this.gameUI.buyInsText, 1);
+                Laya.timer.once(1500, this, this.hideBuyInfo);
+                this.go(HoldemPoker.PlayState.WaitingState);
+            };
+            NLRoomControl.prototype.hideBuyInfo = function () {
+                this.gameUI.buyInsInfo.visible = false;
+                console.log("买保险提示");
+                // this.go(PlayState.WaitingState);
+            };
+            //保险操作
+            NLRoomControl.prototype.sendOption = function (option, outs, buyAmount) {
+                var optionData = {
+                    option: option,
+                    roomId: this.roomData.id,
+                    outsCardNum: outs,
+                    buyAmount: buyAmount
+                };
+                this.net.requestNotify("OptionBroadCastRequest", optionData);
+            };
+            NLRoomControl.prototype.onOptionBroadCastResponse = function (data) {
+                this.gameUI.insuranceViewUI.updateOption(data);
+            };
+            //买保险
+            NLRoomControl.prototype.buyInsurance = function (buyAmount, buyOutsCardNums) {
+                var buyData = {
+                    roomId: this.roomData.id,
+                    buyAmount: buyAmount,
+                    gameId: this.roomData.gameId,
+                    playerId: HoldemPoker.Sys.players.self.id,
+                    buyOutsCardNums: buyOutsCardNums
+                };
+                this.net.requestNotify("BuyInsuranceRequest", buyData);
+            };
+            // 购买保险响应
+            NLRoomControl.prototype.onBuyInsuranceResponse = function (data) {
+                // this.go(PlayState.WaitingState);
+                // let cmd = InsuranceTipsCommand.cmdBuyInsuranceMessage(data);
+                // this.cmdMgr.push(cmd);
+                this.gameUI.insuranceViewUI.Exit();
+                var userName = "";
+                if (!HoldemPoker.Sys.players.self.isSelf(data.playerId)) {
+                    var seat = this.roomData.getSeatByPlayerId(data.playerId);
+                    if (seat) {
+                        userName = HoldemPoker.EmojiHelper.emojiDecode(seat.playerName) + " ";
+                    }
+                }
+                var tips = HoldemPoker.Sys.localization.getFormated("buiedInsuranceTip", userName, data.buyOutsCount, data.buyAmount, data.returnAmount);
+                HoldemPoker.Utility.setInsText(this.gameUI.buyInsText, 2);
+                this.gameUI.buyInsText.text = tips;
+                this.gameUI.buyInsInfo.visible = true;
+                this.go(HoldemPoker.PlayState.WaitingState);
+                Laya.timer.once(2100, this, this.hideBuyInfo);
+            };
+            NLRoomControl.prototype.noInsuranceNotify = function (data) {
+                this.gameUI.noInsuranceData = data;
+            };
+            NLRoomControl.prototype.waitBuyInsuranceNotify = function (data) {
+                var userName = HoldemPoker.EmojiHelper.emojiDecode(data.buyPlayerName);
+                var tip = userName + HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.buyingInsuranceTip);
+                HoldemPoker.Utility.setInsText(this.gameUI.buyInsText, 1);
+                this.gameUI.buyInsText.text = tip;
+                this.gameUI.buyInsInfo.visible = true;
+            };
+            //不买保险
+            NLRoomControl.prototype.UnbuyInsurance = function () {
+                var unbuyData = {
+                    roomId: this.roomData.id
+                };
+                this.net.requestNotify("UnbuyInsuranceRequest", unbuyData);
+            };
+            //保险结算
+            NLRoomControl.prototype.onInsuranceSettlementNotify = function (data) {
+                var cmd = HoldemPoker.InsuranceTipsCommand.cmdInsuranceSettlementMessage(data);
+                this.cmdMgr.push(cmd);
+            };
+            //重置时间
+            NLRoomControl.prototype.resetdowntime = function (roomId) {
+                var data = {
+                    roomId: roomId
+                };
+                this.net.requestNotify("ResetBuyThinkTimeRequest", data);
+            };
+            NLRoomControl.prototype.onResetTimeResponse = function (data) {
+                console.log("重置时间成功，剩余时间为：" + data.restThinkTime);
+                this.gameUI.insuranceViewUI.updateThinkTime(data);
+            };
+            NLRoomControl.prototype.onErrNotBuyPlayerIdHandle = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrInsuranceNotBuyPlayerId));
+            };
+            NLRoomControl.prototype.onErrNotChooseOutsHandle = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrInsuranceNotChooseOuts));
+            };
+            NLRoomControl.prototype.onErrAmountIllegalHandle = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrInsuranceAmountIllegal));
+            };
+            NLRoomControl.prototype.onErrTimeoutHandle = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrInsuranceTimeout));
+            };
+            NLRoomControl.prototype.onErrMustBuyRiverCardHandle = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrInsuranceMustBuyRiverCard));
+            };
+            NLRoomControl.prototype.onErrResetTimeCostNotEnoughHandle = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrInsuranceResetTimeCostNotEnough));
+            };
+            NLRoomControl.prototype.onErrResetTimeCountMaxHandle = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrInsuranceResetTimeCountMax));
+            };
+            /**
+             //gm游戏控制
+             * @param data
+             GAMEPAUSE = 1;  //暂停
+             GAMERESTART = 2;//取消暂停
+             GAMEDELAYED = 3;//延时
+             GAMEERRORRESTART = 4;//错误重启
+             GAMESETTLEMENT = 5;//提前结算
+             GAMEKICKPLAYER = 6;//踢人
+             GAMECANCELBAN = 7;//取消禁止进入房间
+             NOCODES = 8;
+             */
+            NLRoomControl.prototype.onGmNotify = function (data) {
+                var str;
+                var title = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.gameTip);
+                switch (data.gmNotifyEnum.gmNotifyCodes) {
+                    case HoldemPoker.msg.GmNotifyCodes.GAMEPAUSE:
+                        str = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.gamePauseTip);
+                        break;
+                    case HoldemPoker.msg.GmNotifyCodes.GAMERESTART:
+                        break;
+                    case HoldemPoker.msg.GmNotifyCodes.GAMEDELAYED:
+                        str = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.gameDelayTip, data.delayedTime);
+                        break;
+                    case HoldemPoker.msg.GmNotifyCodes.GAMEERRORRESTART:
+                        str = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.gameNextRoundTip);
+                        this.gameUI.playerAction.setPlayerActionVisibe(false);
+                        this.go(HoldemPoker.PlayState.WaitingState);
+                        break;
+                    case HoldemPoker.msg.GmNotifyCodes.GAMESETTLEMENT:
+                        str = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.gameOverSettleTip);
+                        break;
+                    case HoldemPoker.msg.GmNotifyCodes.GAMEKICKPLAYER:
+                        break;
+                    case HoldemPoker.msg.GmNotifyCodes.GAMECANCELBAN:
+                        break;
+                    case HoldemPoker.msg.GmNotifyCodes.NOCODES:
+                        break;
+                }
+                if (str) {
+                    this.gameUI.raiseBlindNotify(0, str, title);
+                }
+            };
+            NLRoomControl.prototype.onCloseScorecardResponse = function (data) {
+                if (data.state === 1) {
+                    this.gameUI.buySlider.visible = false;
+                }
+            };
+            NLRoomControl.prototype.AddThinkTimeRequest = function () {
+                var data = { roomId: this.roomData.id, gameId: this.roomData.gameId };
+                this.net.requestNotify("AddThinkTimeRequest", data);
+            };
+            NLRoomControl.prototype.onAddActionTime = function (data) {
+                if (data.addTime > 0 && HoldemPoker.Sys.players.self.isSelf(data.playerId)) {
+                    this.roomData.addThinkTime = data.addTime;
+                    this.roomData.addThinkTimeCostItemId = data.costItemId;
+                    this.roomData.addThinkTimeCostCount = data.costCount;
+                }
+                if (HoldemPoker.Sys.players.self.isSelf(data.playerId)) {
+                    this.gameUI.updateAddActionBtn();
+                    this.gameUI.playerAction.startPokerTimer(data.restActionTime, Number(data.restActionTime));
+                }
+                else {
+                    var panel = this.gameUI.getSeatByPlayerId(data.playerId);
+                    panel.startPokerClock(data.restActionTime, data.restActionTime);
+                    HoldemPoker.UIAnimator.addActionTime(panel.actionTimeTxt);
+                }
+            };
+            NLRoomControl.prototype.sendLeaveTabel = function () {
+                var data = {
+                    roomId: this.roomData.id,
+                    sitId: this.roomData.selfSitId,
+                    gameId: this.roomData.gameId
+                };
+                this.net.requestNotify("AdvanceLeaveTableRequest", data);
+            };
+            return NLRoomControl;
+        }(HoldemPoker.RoomControl));
+        HoldemPoker.NLRoomControl = NLRoomControl;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=NLRoomControl.js.map

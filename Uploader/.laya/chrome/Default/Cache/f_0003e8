@@ -1,0 +1,902 @@
+/*
+ * @Author: wesai.谢久伟
+ * @Date: 2017-07-03 09:49:10
+ * @Last Modified by: wesai.谢久伟
+ * @Last Modified time: 2017-08-31 20:57:22
+ */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var Event = laya.events.Event;
+        var Rectangle = laya.maths.Rectangle;
+        var Tween = laya.utils.Tween;
+        var Box = laya.ui.Box;
+        var ListView = /** @class */ (function (_super) {
+            __extends(ListView, _super);
+            function ListView() {
+                var _this = _super.call(this) || this;
+                /**指定是否可以选择，若值为true则可以选择，否则不可以选择。 @default false*/
+                _this.selectEnable = false;
+                /**最大分页数。*/
+                _this.totalPage = 0;
+                /**@private */
+                _this._repeatX = 0;
+                /**@private */
+                _this._repeatY = 0;
+                /**@private */
+                _this._repeatX2 = 0;
+                /**@private */
+                _this._repeatY2 = 0;
+                /**@private */
+                _this._spaceX = 0;
+                /**@private */
+                _this._spaceY = 0;
+                /**@private */
+                _this._cells = new Array();
+                /**@private */
+                _this._startIndex = 0;
+                /**@private */
+                _this._selectedIndex = -1;
+                /**@private */
+                _this._page = 0;
+                /**@private */
+                _this._isVertical = true;
+                /**@private */
+                _this._cellSize = 20;
+                /**@private */
+                _this._cellOffset = 0;
+                /**@private */
+                _this._createdLine = 0;
+                _this.onPullListener = null;
+                _this.refreshEnable = true;
+                _this.isLoading = false;
+                _this.superCacheAs = _this.cacheAs;
+                _this.superDataSource = _this.dataSource;
+                return _this;
+            }
+            /**@inheritDoc */
+            ListView.prototype.destroy = function (destroyChild) {
+                if (destroyChild === void 0) { destroyChild = true; }
+                _super.prototype.destroy.call(this, destroyChild);
+                if (this._content) {
+                    this._content.destroy(destroyChild);
+                }
+                if (this._scrollBar) {
+                    this._scrollBar.destroy(destroyChild);
+                }
+                this._content = null;
+                this._scrollBar = null;
+                this._itemRender = null;
+                this._cells = null;
+                this._array = null;
+                this.selectHandler = this.renderHandler = this.mouseHandler = null;
+            };
+            /**@inheritDoc */
+            ListView.prototype.createChildren = function () {
+                this.addChild(this._content = new Box());
+            };
+            Object.defineProperty(ListView.prototype, "cacheAs", {
+                /**@inheritDoc */
+                set: function (value) {
+                    this.superCacheAs = value;
+                    if (this._scrollBar) {
+                        this._$P.cacheAs = null;
+                        if (value !== "none") {
+                            this._scrollBar.on(Event.START, this, this.onScrollStart);
+                        }
+                        else {
+                            this._scrollBar.off(Event.START, this, this.onScrollStart);
+                        }
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+            ListView.prototype.onScrollStart = function () {
+                if (!this._$P.cacheAs) {
+                    (this._$P.cacheAs = this.superCacheAs);
+                }
+                this.superCacheAs = "none";
+                this._scrollBar.once(Event.END, this, this.onScrollEnd);
+            };
+            ListView.prototype.onScrollEnd = function () {
+                this.superCacheAs = this._$P.cacheAs;
+            };
+            Object.defineProperty(ListView.prototype, "content", {
+                /**
+                 * 获取对 <code>List</code> 组件所包含的内容容器 <code>Box</code> 组件的引用。
+                 */
+                get: function () {
+                    return this._content;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "vScrollBarSkin", {
+                /**
+                 * 垂直方向滚动条皮肤。
+                 */
+                get: function () {
+                    return this._scrollBar ? this._scrollBar.skin : null;
+                },
+                set: function (value) {
+                    this.removeChildByName("scrollBar");
+                    var scrollBar = new HoldemPoker.WScrollBar();
+                    scrollBar.name = "scrollBar";
+                    scrollBar.right = 0;
+                    scrollBar.skin = value;
+                    this.scrollBar = scrollBar;
+                    this.scrollBar.setOnPullListener(this);
+                    this.addChild(scrollBar);
+                    this._setCellChanged();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "hScrollBarSkin", {
+                /**
+                 * 水平方向滚动条皮肤。
+                 */
+                get: function () {
+                    return this._scrollBar ? this._scrollBar.skin : null;
+                },
+                set: function (value) {
+                    this.removeChildByName("scrollBar");
+                    var scrollBar = new HoldemPoker.WScrollBar();
+                    scrollBar.name = "scrollBar";
+                    scrollBar.bottom = 0;
+                    scrollBar.skin = value;
+                    this.scrollBar = scrollBar;
+                    this.scrollBar.setOnPullListener(this);
+                    this.addChild(scrollBar);
+                    this._setCellChanged();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "scrollBar", {
+                /**
+                 * 获取对 <code>List</code> 组件所包含的滚动条 <code>ScrollBar</code> 组件的引用。
+                 */
+                get: function () {
+                    return this._scrollBar;
+                },
+                set: function (value) {
+                    if (this._scrollBar !== value) {
+                        this._scrollBar = value;
+                        if (value) {
+                            this._scrollBar.setOnPullListener(this);
+                            this.addChild(this._scrollBar);
+                            this._scrollBar.on(Event.CHANGE, this, this.onScrollBarChange);
+                            this._isVertical = this._scrollBar.isVertical;
+                        }
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "itemRender", {
+                /**
+                 * 单元格渲染器。
+                 * <p><b>取值：</b>
+                 * <ol>
+                 * <li>单元格类对象。</li>
+                 * <li> UI 的 JSON 描述。</li>
+                 * </ol></p>
+                 */
+                get: function () {
+                    return this._itemRender;
+                },
+                set: function (value) {
+                    this._itemRender = value;
+                    this._setCellChanged();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            ListView.prototype.setSize = function (width, height) {
+                this.setWidth(width);
+                this.setHeight(height);
+            };
+            /**@inheritDoc */
+            ListView.prototype.setWidth = function (value) {
+                this.width = value;
+                this._setCellChanged();
+            };
+            /**@inheritDoc */
+            ListView.prototype.setHeight = function (value) {
+                this.height = value;
+                this._setCellChanged();
+            };
+            Object.defineProperty(ListView.prototype, "repeatX", {
+                /**
+                 * 水平方向显示的单元格数量。
+                 */
+                get: function () {
+                    return this._repeatX > 0 ? this._repeatX : this._repeatX2 > 0 ? this._repeatX2 : 1;
+                },
+                set: function (value) {
+                    this._repeatX = value;
+                    this._setCellChanged();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "repeatY", {
+                /**
+                 * 垂直方向显示的单元格数量。
+                 */
+                get: function () {
+                    return this._repeatY > 0 ? this._repeatY : this._repeatY2 > 0 ? this._repeatY2 : 1;
+                },
+                set: function (value) {
+                    this._repeatY = value;
+                    this._setCellChanged();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "spaceX", {
+                /**
+                 * 水平方向显示的单元格之间的间距（以像素为单位）。
+                 */
+                get: function () {
+                    return this._spaceX;
+                },
+                set: function (value) {
+                    this._spaceX = value;
+                    this._setCellChanged();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "spaceY", {
+                /**
+                 * 垂直方向显示的单元格之间的间距（以像素为单位）。
+                 */
+                get: function () {
+                    return this._spaceY;
+                },
+                set: function (value) {
+                    this._spaceY = value;
+                    this._setCellChanged();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            /**
+             * @private
+             * 更改单元格的信息。
+             * @internal 在此销毁、创建单元格，并设置单元格的位置等属性。相当于此列表内容发送改变时调用此函数。
+             */
+            ListView.prototype.changeCells = function () {
+                this._cellChanged = false;
+                if (this._itemRender) {
+                    //销毁老单元格
+                    for (var i = this._cells.length - 1; i > -1; i--) {
+                        this._cells[i].destroy();
+                    }
+                    this._cells.length = 0;
+                    //获取滚动条
+                    this.scrollBar = this.getChildByName("scrollBar");
+                    //自适应宽高
+                    var cell = this.createItem();
+                    var cellWidth = (cell.width + this._spaceX) || 1;
+                    var cellHeight = (cell.height + this._spaceY) || 1;
+                    if (this._width > 0) {
+                        this._repeatX2 = this._isVertical ? Math.round(this._width / cellWidth) : Math.ceil(this._width / cellWidth);
+                    }
+                    if (this._height > 0) {
+                        this._repeatY2 = this._isVertical ? Math.ceil(this._height / cellHeight) : Math.round(this._height / cellHeight);
+                    }
+                    var listWidth = this._width ? this._width : (cellWidth * this.repeatX - this._spaceX);
+                    var listHeight = this._height ? this._height : (cellHeight * this.repeatY - this._spaceY);
+                    this._cellSize = this._isVertical ? cellHeight : cellWidth;
+                    this._cellOffset = this._isVertical ? (cellHeight * Math.max(this._repeatY2, this._repeatY) - listHeight - this._spaceY) : (cellWidth * Math.max(this._repeatX2, this._repeatX) - listWidth - this._spaceX);
+                    if (this._isVertical && this._scrollBar) {
+                        this._scrollBar.height = listHeight;
+                    }
+                    else if (!this._isVertical && this._scrollBar) {
+                        this._scrollBar.width = listWidth;
+                    }
+                    this.setContentSize(listWidth, listHeight);
+                    //创建新单元格				
+                    var numX = this._isVertical ? this.repeatX : this.repeatY;
+                    var numY = (this._isVertical ? this.repeatY : this.repeatX) + (this._scrollBar ? 1 : 0);
+                    this._createItems(0, numX, numY);
+                    this._createdLine = numY;
+                    if (this._array) {
+                        this.array = this._array;
+                        this.runCallLater(this.renderItems);
+                    }
+                }
+            };
+            ListView.prototype._createItems = function (startY, numX, numY) {
+                var box = this._content;
+                var cell = this.createItem();
+                var cellWidth = cell.width + this._spaceX;
+                var cellHeight = cell.height + this._spaceY;
+                if (this.cacheContent) {
+                    var cacheBox = new Box();
+                    cacheBox.cacheAsBitmap = true;
+                    cacheBox.pos((this._isVertical ? 0 : startY) * cellWidth, (this._isVertical ? startY : 0) * cellHeight);
+                    this._content.addChild(cacheBox);
+                    this._content.optimizeScrollRect = true;
+                    box = cacheBox;
+                }
+                for (var k = startY; k < numY; k++) {
+                    for (var l = 0; l < numX; l++) {
+                        cell = this.createItem();
+                        cell.x = (this._isVertical ? l : k) * cellWidth - box.x;
+                        cell.y = (this._isVertical ? k : l) * cellHeight - box.y;
+                        cell.name = "item" + (k * numX + l);
+                        box.addChild(cell);
+                        this.addCell(cell);
+                    }
+                }
+            };
+            ListView.prototype.createItem = function () {
+                /*[IF-FLASH]*/
+                return this._itemRender.prototype !== null ? new this._itemRender() : View.createComp(this._itemRender);
+                //[IF-JS]return _itemRender is Function ? new _itemRender() : View.createComp(_itemRender) as Box;
+            };
+            /**
+             * @private
+             * 添加单元格。
+             * @param cell 需要添加的单元格对象。
+             */
+            ListView.prototype.addCell = function (cell) {
+                cell.on(Event.CLICK, this, this.onCellMouse);
+                cell.on(Event.RIGHT_CLICK, this, this.onCellMouse);
+                cell.on(Event.MOUSE_OVER, this, this.onCellMouse);
+                cell.on(Event.MOUSE_OUT, this, this.onCellMouse);
+                cell.on(Event.MOUSE_DOWN, this, this.onCellMouse);
+                cell.on(Event.MOUSE_UP, this, this.onCellMouse);
+                this._cells.push(cell);
+            };
+            /**
+             * 初始化单元格信息。
+             */
+            ListView.prototype.initItems = function () {
+                if (!this._itemRender && this.getChildByName("item0") !== null) {
+                    this.repeatX = 1;
+                    var count = void 0;
+                    count = 0;
+                    for (var i = 0; i < 10000; i++) {
+                        var cell = this.getChildByName("item" + i);
+                        if (cell) {
+                            this.addCell(cell);
+                            count++;
+                            continue;
+                        }
+                        break;
+                    }
+                    this.repeatY = count;
+                }
+            };
+            /**
+             * 设置可视区域大小。
+             * <p>以（0，0，width参数，height参数）组成的矩形区域为可视区域。</p>
+             * @param width 可视区域宽度。
+             * @param height 可视区域高度。
+             */
+            ListView.prototype.setContentSize = function (width, height) {
+                this._content.width = width;
+                this._content.height = height;
+                if (this._scrollBar) {
+                    if (!this._content.scrollRect) {
+                        this._content.scrollRect = new Rectangle();
+                    }
+                    this._content.scrollRect.setTo(0, 0, width, height);
+                    if (this._content.conchModel) {
+                        this._content.conchModel.scrollRect(0, 0, width, height); //通知微端
+                    }
+                    this.event(Event.RESIZE);
+                }
+            };
+            /**
+             * @private
+             * 单元格的鼠标事件侦听处理函数。
+             */
+            ListView.prototype.onCellMouse = function (e) {
+                if (e.type === Event.MOUSE_DOWN) {
+                    this._isMoved = false;
+                }
+                var cell = e.currentTarget;
+                var index = this._startIndex + this._cells.indexOf(cell);
+                if (index < 0) {
+                    return;
+                }
+                if (e.type === Event.CLICK || e.type === Event.RIGHT_CLICK) {
+                    if (this.selectEnable && !this._isMoved) {
+                        this.selectedIndex = index;
+                    }
+                    else {
+                        this.changeCellState(cell, true, 0);
+                    }
+                }
+                else if ((e.type === Event.MOUSE_OVER || e.type === Event.MOUSE_OUT) && this._selectedIndex !== index) {
+                    this.changeCellState(cell, e.type === Event.MOUSE_OVER, 0);
+                }
+                if (this.mouseHandler) {
+                    this.mouseHandler.runWith([e, index]);
+                }
+            };
+            /**
+             * @private
+             * 改变单元格的可视状态。
+             * @param cell 单元格对象。
+             * @param visable 是否显示。
+             * @param index 单元格的属性 <code>index</code> 值。
+             */
+            ListView.prototype.changeCellState = function (cell, visable, index) {
+                var selectBox = cell.getChildByName("selectBox");
+                if (selectBox) {
+                    this.selectEnable = true;
+                    selectBox.visible = visable;
+                    selectBox.index = index;
+                }
+            };
+            /** @inheritDoc */
+            ListView.prototype.changeSize = function () {
+                _super.prototype.changeSize.call(this);
+                this.setContentSize(this.width, this.height);
+                if (this._scrollBar) {
+                    Laya.timer.once(10, this, this.onScrollBarChange);
+                }
+            };
+            /**
+             * @private
+             * 滚动条的 <code>Event.CHANGE</code> 事件侦听处理函数。
+             */
+            ListView.prototype.onScrollBarChange = function (e) {
+                if (e === void 0) { e = null; }
+                this.runCallLater(this.changeCells);
+                var scrollValue = this._scrollBar.value;
+                var lineX = (this._isVertical ? this.repeatX : this.repeatY);
+                var lineY = (this._isVertical ? this.repeatY : this.repeatX);
+                var scrollLine = Math.floor(scrollValue / this._cellSize);
+                var num;
+                if (!this.cacheContent) {
+                    var index = scrollLine * lineX;
+                    var down = void 0;
+                    var toIndex = void 0;
+                    if (index > this._startIndex) {
+                        num = index - this._startIndex;
+                        down = true;
+                        toIndex = this._startIndex + lineX * (lineY + 1);
+                        this._isMoved = true;
+                    }
+                    else if (index < this._startIndex) {
+                        num = this._startIndex - index;
+                        down = false;
+                        toIndex = this._startIndex - 1;
+                        this._isMoved = true;
+                    }
+                    for (var i = 0; i < num; i++) {
+                        var cell = void 0;
+                        var cellIndex = void 0;
+                        if (down) {
+                            cell = this._cells.shift();
+                            this._cells[this._cells.length] = cell;
+                            cellIndex = toIndex + i;
+                        }
+                        else {
+                            cell = this._cells.pop();
+                            this._cells.unshift(cell);
+                            cellIndex = toIndex - i;
+                        }
+                        var pos = Math.floor(cellIndex / lineX) * this._cellSize;
+                        this._isVertical ? cell.y = pos : cell.x = pos;
+                        this.renderItem(cell, cellIndex);
+                    }
+                    this._startIndex = index;
+                    this.changeSelectStatus();
+                }
+                else {
+                    num = (lineY + 1);
+                    if (this._createdLine - scrollLine < num) {
+                        this._createItems(this._createdLine, lineX, this._createdLine + num);
+                        this._createdLine += num;
+                        this.renderItems(this._createdLine * lineX, 0);
+                    }
+                }
+                var r = this._content.scrollRect;
+                if (this._isVertical) {
+                    r.y = scrollValue;
+                }
+                else {
+                    r.x = scrollValue;
+                }
+                if (this._content.conchModel) {
+                    this._content.conchModel.scrollRect(r.x, r.y, r.width, r.height);
+                }
+                this.repaint();
+            };
+            ListView.prototype.posCell = function (cell, cellIndex) {
+                if (!this._scrollBar) {
+                    return;
+                }
+                var lineX = (this._isVertical ? this.repeatX : this.repeatY);
+                var lineY = (this._isVertical ? this.repeatY : this.repeatX);
+                var pos = Math.floor(cellIndex / lineX) * this._cellSize;
+                this._isVertical ? cell.y = pos : cell.x = pos;
+            };
+            Object.defineProperty(ListView.prototype, "selectedIndex", {
+                /**
+                 * 表示当前选择的项索引。
+                 */
+                get: function () {
+                    return this._selectedIndex;
+                },
+                set: function (value) {
+                    if (this._selectedIndex !== value) {
+                        this._selectedIndex = value;
+                        this.changeSelectStatus();
+                        this.event(Event.CHANGE);
+                        if (this.selectHandler) {
+                            this.selectHandler.runWith(value);
+                        }
+                    }
+                    //if (selectEnable && _scrollBar) {
+                    //let numX: number = _isVertical ? repeatX : repeatY;
+                    //if (value < _startIndex || (value + numX > _startIndex + repeatX * repeatY)) {
+                    //scrollTo(value);
+                    //}
+                    //}
+                },
+                enumerable: true,
+                configurable: true
+            });
+            /**
+             * @private
+             * 改变单元格的选择状态。
+             */
+            ListView.prototype.changeSelectStatus = function () {
+                for (var i = 0, n = this._cells.length; i < n; i++) {
+                    this.changeCellState(this._cells[i], this._selectedIndex === this._startIndex + i, 1);
+                }
+            };
+            Object.defineProperty(ListView.prototype, "selectedItem", {
+                /**
+                 * 当前选中的单元格数据源。
+                 */
+                get: function () {
+                    return this._selectedIndex !== -1 ? this._array[this._selectedIndex] : null;
+                },
+                set: function (value) {
+                    this.selectedIndex = this._array.indexOf(value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "selection", {
+                /**
+                 * 获取或设置当前选择的单元格对象。
+                 */
+                get: function () {
+                    return this.getCell(this._selectedIndex);
+                },
+                set: function (value) {
+                    this.selectedIndex = this._startIndex + this._cells.indexOf(value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "startIndex", {
+                /**
+                 * 当前显示的单元格列表的开始索引。
+                 */
+                get: function () {
+                    return this._startIndex;
+                },
+                set: function (value) {
+                    this._startIndex = value > 0 ? value : 0;
+                    this.callLater(this.renderItems);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            /**
+             * @private
+             * 渲染单元格列表。
+             */
+            ListView.prototype.renderItems = function (from, to) {
+                if (from === void 0) { from = 0; }
+                if (to === void 0) { to = 0; }
+                for (var i = 0, n = to || this._cells.length; i < n; i++) {
+                    this.renderItem(this._cells[i], this._startIndex + i);
+                }
+                this.changeSelectStatus();
+            };
+            /**
+             * 渲染一个单元格。
+             * @param cell 需要渲染的单元格对象。
+             * @param index 单元格索引。
+             */
+            ListView.prototype.renderItem = function (cell, index) {
+                if (index >= 0 && index < this._array.length) {
+                    cell.visible = true;
+                    cell.dataSource = this._array[index];
+                    if (!this.cacheContent) {
+                        //TODO:
+                        this.posCell(cell, index);
+                    }
+                    if (this.hasListener(Event.RENDER)) {
+                        this.event(Event.RENDER, [cell, index]);
+                    }
+                    if (this.renderHandler) {
+                        this.renderHandler.runWith([cell, index]);
+                    }
+                }
+                else {
+                    cell.visible = false;
+                    cell.dataSource = null;
+                }
+            };
+            Object.defineProperty(ListView.prototype, "array", {
+                /**
+                 * 列表数据源。
+                 */
+                get: function () {
+                    return this._array;
+                },
+                set: function (value) {
+                    this.runCallLater(this.changeCells);
+                    this._array = value || [];
+                    var length = this._array.length;
+                    this.totalPage = Math.ceil(length / (this.repeatX * this.repeatY));
+                    //重设selectedIndex
+                    this._selectedIndex = this._selectedIndex < length ? this._selectedIndex : length - 1;
+                    //重设startIndex
+                    this.startIndex = this._startIndex;
+                    //重设滚动条
+                    if (this._scrollBar) {
+                        //自动隐藏滚动条
+                        var numX = this._isVertical ? this.repeatX : this.repeatY;
+                        var numY = this._isVertical ? this.repeatY : this.repeatX;
+                        var lineCount = Math.ceil(length / numX);
+                        var total = this._cellOffset > 0 ? this.totalPage + 1 : this.totalPage;
+                        if (total > 1) {
+                            this._scrollBar.scrollSize = this._cellSize;
+                            this._scrollBar.thumbPercent = numY / lineCount;
+                            this._scrollBar.setScroll(0, (lineCount - numY) * this._cellSize + this._cellOffset, this._isVertical ? this._content.scrollRect.y : this._content.scrollRect.x);
+                            this._scrollBar.target = this._content;
+                        }
+                        else {
+                            this._scrollBar.setScroll(0, 0, 0);
+                            this._scrollBar.target = this._content;
+                        }
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "page", {
+                /**
+                 * 列表的当前页码。
+                 */
+                get: function () {
+                    return this._page;
+                },
+                set: function (value) {
+                    this._page = value;
+                    if (this._array) {
+                        this._page = value > 0 ? value : 0;
+                        this._page = this._page < this.totalPage ? this._page : this.totalPage - 1;
+                        this.startIndex = this._page * this.repeatX * this.repeatY;
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "length", {
+                /**
+                 * 列表的数据总个数。
+                 */
+                get: function () {
+                    return this._array.length;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "dataSource", {
+                /**@inheritDoc */
+                set: function (value) {
+                    this._dataSource = value;
+                    if ((typeof value === "number" && Math.floor(value) === value)) {
+                        this.selectedIndex = Math.floor(value);
+                    }
+                    else if (typeof value === "string") {
+                        this.selectedIndex = parseInt(value);
+                    }
+                    else if (value instanceof Array) {
+                        this.array = value;
+                    }
+                    else {
+                        this.superDataSource = value;
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(ListView.prototype, "cells", {
+                /**
+                 * 单元格集合。
+                 */
+                get: function () {
+                    this.runCallLater(this.changeCells);
+                    return this._cells;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            /**
+             * 刷新列表数据源。
+             */
+            ListView.prototype.refresh = function () {
+                this.array = this._array;
+            };
+            /**
+             * 获取单元格数据源。
+             * @param index 单元格索引。
+             */
+            ListView.prototype.getItem = function (index) {
+                if (index > -1 && index < this._array.length) {
+                    return this._array[index];
+                }
+                return null;
+            };
+            /**
+             * 修改单元格数据源。
+             * @param index 单元格索引。
+             * @param source 单元格数据源。
+             */
+            ListView.prototype.changeItem = function (index, source) {
+                if (index > -1 && index < this._array.length) {
+                    this._array[index] = source;
+                    //如果是可视范围，则重新渲染
+                    if (index >= this._startIndex && index < this._startIndex + this._cells.length) {
+                        this.renderItem(this.getCell(index), index);
+                    }
+                }
+            };
+            /**
+             * 设置单元格数据源。
+             * @param index 单元格索引。
+             * @param source 单元格数据源。
+             */
+            ListView.prototype.setItem = function (index, source) {
+                this.changeItem(index, source);
+            };
+            /**
+             * 添加单元格数据源。
+             * @param souce 数据源。
+             */
+            ListView.prototype.addItem = function (souce) {
+                this._array.push(souce);
+                this.array = this._array;
+            };
+            /**
+             * 添加单元格数据源到对应的数据索引处。
+             * @param souce 单元格数据源。
+             * @param index 索引。
+             */
+            ListView.prototype.addItemAt = function (souce, index) {
+                this._array.splice(index, 0, souce);
+                this.array = this._array;
+            };
+            /**
+             * 通过数据源索引删除单元格数据源。
+             * @param index 需要删除的数据源索引值。
+             */
+            ListView.prototype.deleteItem = function (index) {
+                this._array.splice(index, 1);
+                this.array = this._array;
+            };
+            /**
+             * 通过可视单元格索引，获取单元格。
+             * @param index 可视单元格索引。
+             * @return 单元格对象。
+             */
+            ListView.prototype.getCell = function (index) {
+                this.runCallLater(this.changeCells);
+                if (index > -1 && this._cells) {
+                    return this._cells[(index - this._startIndex) % this._cells.length];
+                }
+                return null;
+            };
+            /**
+             * <p>滚动列表，以设定的数据索引对应的单元格为当前可视列表的第一项。</p>
+             * @param index 单元格在数据列表中的索引。
+             */
+            ListView.prototype.scrollTo = function (index) {
+                if (this._scrollBar) {
+                    var numX = this._isVertical ? this.repeatX : this.repeatY;
+                    this._scrollBar.value = Math.floor(index / numX) * this._cellSize;
+                }
+                else {
+                    this.startIndex = index;
+                }
+            };
+            /**
+             * <p>缓动滚动列表，以设定的数据索引对应的单元格为当前可视列表的第一项。</p>
+             * @param index 单元格在数据列表中的索引。
+             * @param time    缓动时间。
+             * @param complete    缓动结束回掉
+             */
+            ListView.prototype.tweenTo = function (index, time, complete) {
+                if (time === void 0) { time = 200; }
+                if (complete === void 0) { complete = null; }
+                if (this._scrollBar) {
+                    var numX = this._isVertical ? this.repeatX : this.repeatY;
+                    Tween.to(this._scrollBar, { value: Math.floor(index / numX) * this._cellSize }, time, null, complete, 0, true);
+                }
+                else {
+                    this.startIndex = index;
+                    if (complete) {
+                        complete.run();
+                    }
+                }
+            };
+            /**@private */
+            ListView.prototype._setCellChanged = function () {
+                if (!this._cellChanged) {
+                    this._cellChanged = true;
+                    this.callLater(this.changeCells);
+                }
+            };
+            ListView.prototype.commitMeasure = function () {
+                this.runCallLater(this.changeCells);
+            };
+            ListView.prototype.setRefreshEnable = function (value) {
+                this.refreshEnable = value;
+            };
+            ListView.prototype.isRefreshEnable = function () {
+                return this.refreshEnable;
+            };
+            ListView.prototype.isRefreshing = function () {
+                return this.isLoading;
+            };
+            /**
+             * loading完调用
+             *
+             * @memberof ListView
+             */
+            ListView.prototype.refreshComplete = function () {
+                this.isLoading = false;
+            };
+            ListView.prototype.setOnPullListener = function (onPullListener) {
+                this.onPullListener = onPullListener;
+            };
+            ListView.prototype.onPullToRefresh = function () {
+                if (this.onPullListener && this.refreshEnable && !this.isLoading) {
+                    this.isLoading = true;
+                    this.onPullListener.onPullToRefresh();
+                    console.log(">>>>>>>>>>>>>>>onPullToRefresh()<<<<<<<<<<<<<<<<<<");
+                }
+            };
+            ListView.prototype.onPullUpToLoadMore = function () {
+                if (this.onPullListener && this.refreshEnable && !this.isLoading) {
+                    this.isLoading = true;
+                    this.onPullListener.onPullUpToLoadMore();
+                    console.log(">>>>>>>>>>>>>>>onPullUpToLoadMore()<<<<<<<<<<<<<<<<<<");
+                }
+            };
+            return ListView;
+        }(Box));
+        HoldemPoker.ListView = ListView;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=ListView.js.map

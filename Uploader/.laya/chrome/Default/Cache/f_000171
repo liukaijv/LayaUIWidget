@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="gb2312" />
+<meta name="applicable-device" content="pc">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform" />
+<title>JavaScript读二进制文件并用ajax传输二进制流的方法_javascript技巧_脚本之家</title>
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+<meta name="keywords" content="js二进制文件,ajax二进制流" />
+<meta name="description" content="这篇文章主要介绍了JavaScript读二进制文件并用ajax传输二进制流的方法的相关资料,需要的朋友可以参考下" />
+<link rel="alternate" media="only screen and(max-width: 640px)" href="http://m.jb51.net/article/88822.htm" />
+<meta http-equiv="mobile-agent" content="format=html5; url=http://m.jb51.net/article/88822.htm" />
+<meta http-equiv="mobile-agent" content="format=xhtml; url=http://m.jb51.net/article/88822.htm" />
+<script type="text/javascript">
+var tougao="mrr";var lmname="JavaScript";
+(function(){var reWriteUrl=function(url){if(url){var Splits=url.split("/"),siteName=window.location.pathname;if(typeof siteName!=="undefined"){return "http://m.jb51.net"+siteName}}};if(/Android|webOS|iPhone|iPad|Windows Phone|iPod|BlackBerry|SymbianOS|Nokia|Mobile/i.test(navigator.userAgent)){var url=window.location.href;var pathname=window.location.pathname;if(url.indexOf("?pc")<0){try{window.location.href=reWriteUrl(url)}catch(e){}}}})();
+</script>
+<link type="text/css" href="/skin/2016/base.css" rel="stylesheet" />
+<link type="text/css" href="/skin/2016/common.css" rel="stylesheet" />
+<script type="text/javascript" src="//apps.bdimg.com/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+if (!window.jQuery) {
+	var script = document.createElement('script');
+	script.src = "/skin/js/jquery.js";
+	document.body.appendChild(script);}
+</script>
+<script type=text/javascript src="/js/function.js"></script> 
+</head>
+<body>
+<!--head Star -->
+<div id="head">
+  <div class="toolBar">
+  <div class="main">
+    <!--topNav Star -->
+    <div class="topNav clearfix">
+      <ul class="navList fl">
+        <li>
+          <div class="one"><a href="http://www.jb51.net" target="_blank">脚本之家</a></div>
+        </li>
+        <li>
+          <div class="one"><a href="http://www.jb51.net/softs/" target="_blank">软件下载<i class="icon"></i></a></div>
+          <div class="two">
+<a href="/softs/android.html" target="_blank">android软件</a> <a href="/softs/mac.html" target="_blank">MAC软件</a> <a href="/qudong/" target="_blank">驱动下载</a> <a href="/fonts/" target="_blank">字体下载</a> <a href="/dll/" target="_blank">DLL下载</a> </div>
+</li>
+        <li>
+          <div class="one"><a href="/codes/" target="_blank">源码下载<i class="icon"></i></a></div>
+          <div class="two"> <a href="/codes/asp.html" target="_blank">asp源码</a> <a href="/codes/php.html" target="_blank">php源码</a> <a href="/codes/aspnet.html" target="_blank">asp.net源码</a> <a href="/codes/jsp.html" target="_blank">jsp源码</a> <a href="/codes/editor.html" target="_blank">网页编辑器</a> <a href="/codes/list123_1.html" target="_blank">数据库管理</a> <a href="/codes/list124_1.html" target="_blank">常用组件</a> <a href="/jiaoben/" target="_blank">脚本下载</a></div>
+        </li>
+        <li>
+          <div class="one"><a href="http://tools.jb51.net" target="_blank">在线工具<i class="icon"></i></a></div>
+          <div class="two"> <a href="/shouce/" target="_blank">在线手册</a> <a href="/tools/cssyasuo.shtml" target="_blank">CSS格式化</a> <a href="http://tools.jb51.net/code/js" target="_blank">JS格式化</a> <a href="/tools/html-js.htm" target="_blank">Html转化为Js</a> <a href="http://tools.jb51.net/regex/javascript" target="_blank">js正则表达式</a>
+</div>
+        </li>
+        <li>
+          <div class="one"><a href="/w3school/" target="_blank">网页教程基础</a></div>
+        </li>
+			<li>
+          <div class="one"><a href="http://s.jb51.net" target="_blank">服务器常用软件</a></div>
+        </li>
+		<li>
+          <div class="one"><a href="http://m.jb51.net" target="_blank">手机版</a></div>
+          <div class="two"><img src="http://files.jb51.net/images/m.jb51.net.png" data-baiduimageplus-ignore /></div>     
+        </li>
+        <li class="watch">
+          <div class="one"><a href="http://www.jb51.net/about.htm" target="_blank" rel="nofollow" ><i class="icon"></i>关注微信</a></div>
+          <div class="two"><img src="http://files.jb51.net/images/weixin_200.gif" data-baiduimageplus-ignore /></div>
+        </li>
+      </ul>
+      <div class="navUser mt5 fr" id="jb51_topbar" >
+
+      </div>
+    </div>
+    <!--topNav End -->
+  </div>
+</div>
+
+  <div class="main clearfix">
+    <div class="mtb10 clearfix">
+      <div class="logo"><a href="http://www.jb51.net/"><img src="http://www.jb51.net/images/logo.gif" title="脚本之家" alt="脚本之家" /></a></div>
+      <div class="logom fl"><span id="logo_m" class="jbTestPos"></span></div>
+      <div class="logor fr"><span id="logo_r" class="jbTestPos"></span></div>
+    </div>
+<!-- 导航-->
+<DIV class="nav_top clearfix">
+<UL>
+<li><a href="http://www.jb51.net/web/">网页制作</a></li>
+<li><a href="http://www.jb51.net/list/index_1.htm">网络编程</a></li>
+<li><a href="http://www.jb51.net/list/index_96.htm">脚本专栏</a></li>
+<li><a href="http://www.jb51.net/jiaoben/">脚本下载</a></li>
+<li><a href="http://www.jb51.net/list/index_104.htm">数据库</a></li>
+<li><a href="http://www.jb51.net/cms/">CMS教程</a></li>
+<li><a href="http://www.jb51.net/books/">电子书籍</a></li>
+<li><a href="http://www.jb51.net/pingmian/">平面设计</a></li>
+<li><a href="http://www.jb51.net/media/">媒体动画</a></li>
+<li><a href="http://www.jb51.net/os/">操作系统</a></li>
+<li><a href="http://www.jb51.net/yunying/">网站运营</a></li>
+<li><a href="http://www.jb51.net/hack/">网络安全</a></li>
+<li class="last"><a href="http://www.jb51.net/shouce/">在线手册</a></li>
+
+</UL>
+</DIV>
+
+<!--导航结束-->
+<div class="subnav clearfix">
+<ul><li><a href='/list/list_61_1.htm' title="基础知识">基础知识</a></li>
+<li><a href='/list/list_23_1.htm' title="javascript类库">javascript类库</a></li>
+<li><a href='/list/list_22_1.htm' title="表单特效">表单特效</a></li>
+<li><a href='/list/list_18_1.htm' title="广告代码">广告代码</a></li>
+<li><a href='/list/list_43_1.htm' title="网页特效">网页特效</a></li>
+<li><a href='/list/list_26_1.htm' title="黑客性质">黑客性质</a></li>
+<li><a href='/list/list_222_1.htm' title="javascript技巧">javascript技巧</a></li>
+<li><a href='/list/list_232_1.htm' title="DOM">DOM</a></li>
+<li><a href='/list/list_243_1.htm' title="node.js">node.js</a></li>
+<li><a href='/list/list_248_1.htm' title="js其它">js其它</a></li>
+</ul>
+</div>
+<div class="NavBar clearfix ptb10">
+<div class="fl w690">
+<div class="box mb15 mt10"><i class="icon"></i>您的位置：<a href='/'>首页</a> → <a href="/list/index_1.htm" title="网络编程">网络编程</a> → <a href="/list/list_3_1.htm" title="JavaScript">JavaScript</a> → <a href="/list/list_222_1.htm" title="javascript技巧">javascript技巧</a> → 正文内容 js 二进制文件 ajax二进制流</div>
+</div>
+<div class="fr w300"><div class="search">
+<form action="http://so.jb51.net/cse/search" target="_blank">
+    <input type="hidden" name="s" value="10520733385329581432">
+    <input type="hidden" name="ie" value="gbk">
+    <input type="text" name="q" class="key_input" placeholder="请输入关键词">
+    <input type="submit" value="搜索" class="c_btn">
+</form></div></div>
+  </div>
+</div>
+<!--head End -->
+<div class="main mb10 clearfix">
+<div class="clearfix"><span id="tonglan1" class="jbTestPos"></span></div>
+</div>
+
+<!--content Star -->
+<div id="contents">
+ <div class="main clearfix">
+      <div class="w690 fl">
+      <div class="article-content border">
+      <div class="title">
+            <h1 class="YaHei">JavaScript读二进制文件并用ajax传输二进制流的方法</h1>
+            <p>作者：ljzc002  字体：[<a href="javascript:turnbig()">增加</a> <a href="javascript:turnsmall()">减小</a>] 类型：转载 时间：2016-07-18<a href="#comments"> 我要评论</a></p>
+        </div>
+        <div class="art_desc mt10"><div id="art_demo">这篇文章主要介绍了JavaScript读二进制文件并用ajax传输二进制流的方法的相关资料,需要的朋友可以参考下</div></div>
+        <div class="lbd clearfix"><span id="art_up" class="jbTestPos"></span></div>
+        <div id="content">
+<p>综合网上多个教程，加上自己实践得出的方法，目前能够兼容谷歌、IE11、IE10。<br />
+</p>
+<p>htmlbody里的内容，没什么特殊的。</p>
+<div class="jb51code">
+<pre class="brush:js;">
+&lt;div id="dConfirm"&gt;
+&lt;p style="float: left;margin-left: 20px;margin-top: 20px"&gt;
+&lt;form action="javascript: uploadAndSubmit();" name="demoForm" id="demoForm" method="post" enctype="multipart/form-data"&gt;
+&lt;p&gt;上传文件: &lt;input type="file" name="file" id="str_file"/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;input type="submit" value="上传" /&gt;&lt;/p&gt;
+&lt;/form&gt;
+&lt;/p&gt;
+&lt;/div&gt;</pre>
+</div>
+<p><span style="background-color: #ffff00"><strong>读取二进制文件：</strong></span></p>
+<div class="jb51code">
+<pre class="brush:js;">
+function uploadAndSubmit()
+{
+filename=document.getElementById("str_file").value;
+var form = document.forms["demoForm"];
+if(filename!="")
+{
+try
+{
+var obj = new ActiveXObject("ADODB.Stream");//这个必然是IE
+}
+catch(e)
+{
+var file = form["file"].files[0];
+var reader = new FileReader();
+reader.readAsBinaryString(file);//这个读法是异步的
+reader.onloadend=function()
+{
+// 这个事件在读取结束后，无论成功或者失败都会触发
+if (reader.error) {
+console.log(reader.error);
+} else {
+uploadAndSubmit2(reader.result);
+}
+}
+return;
+}
+var bf1=new BinaryFile(filename);//这个读法是同步的
+uploadAndSubmit2(bf1.ReadAll());
+}
+}</pre>
+</div>
+<p>这里要对浏览器类型做一下判断，如果不是IE则使用FileReader进行读取，如果是IE则使用activex控件读取。这里有一个坑，虽然IE11和IE10不支持FileReader对象的方法，但IE11和IE10的“typeof FileReader”并不是“undefined”，难以直接通过是否支持FileReader来区分浏览器。还要注意的是FileReader方法是异步读文件，activex是同步读文件，我一直没想明白这两条路线怎样封装在一个方法里，不知大家有没有好办法。<br />
+</p>
+<p>其中BinaryFile对象的构造方法摘自<a href="http://www.codeproject.com/Articles/17825/Reading-and-Writing-Binary-Files-Using-JScript&#63;msg=3718403#xx3718403xx">http://www.codeproject.com/Articles/17825/Reading-and-Writing-Binary-Files-Using-JScript&#63;msg=3718403#xx3718403xx</a>技术博客，在博客的回复中有一个改进方法据说效率更高，但因为没有看懂，所以选用了原始方法。<br />
+</p>
+<p>原始方法很长：</p>
+<div class="jb51code">
+<pre class="brush:js;">
+//使用ADODB.Stream控件时要注意ISO-8859-1和Windows-1252字符集之间的转换
+function BinaryFile(name)
+{
+var adTypeBinary = 1
+var adTypeText = 2
+var adSaveCreateOverWrite = 2
+// The trick - this is the 'old fassioned' not translation page
+// It lest javascript use strings to act like raw octets
+var codePage='437';
+this.path=name;
+var forward = new Array();
+var backward = new Array();
+// Note - for better performance I should preconvert these hex
+// definitions to decimal - at some point :-) - AJT
+forward['80'] = '00C7';
+forward['81'] = '00FC';
+forward['82'] = '00E9';
+forward['83'] = '00E2';
+forward['84'] = '00E4';
+forward['85'] = '00E0';
+forward['86'] = '00E5';
+forward['87'] = '00E7';
+forward['88'] = '00EA';
+forward['89'] = '00EB';
+forward['8A'] = '00E8';
+forward['8B'] = '00EF';
+forward['8C'] = '00EE';
+forward['8D'] = '00EC';
+forward['8E'] = '00C4';
+forward['8F'] = '00C5';
+forward['90'] = '00C9';
+forward['91'] = '00E6';
+forward['92'] = '00C6';
+forward['93'] = '00F4';
+forward['94'] = '00F6';
+forward['95'] = '00F2';
+forward['96'] = '00FB';
+forward['97'] = '00F9';
+forward['98'] = '00FF';
+forward['99'] = '00D6';
+forward['9A'] = '00DC';
+forward['9B'] = '00A2';
+forward['9C'] = '00A3';
+forward['9D'] = '00A5';
+forward['9E'] = '20A7';
+forward['9F'] = '0192';
+forward['A0'] = '00E1';
+forward['A1'] = '00ED';
+forward['A2'] = '00F3';
+forward['A3'] = '00FA';
+forward['A4'] = '00F1';
+forward['A5'] = '00D1';
+forward['A6'] = '00AA';
+forward['A7'] = '00BA';
+forward['A8'] = '00BF';
+forward['A9'] = '2310';
+forward['AA'] = '00AC';
+forward['AB'] = '00BD';
+forward['AC'] = '00BC';
+forward['AD'] = '00A1';
+forward['AE'] = '00AB';
+forward['AF'] = '00BB';
+forward['B0'] = '2591';
+forward['B1'] = '2592';
+forward['B2'] = '2593';
+forward['B3'] = '2502';
+forward['B4'] = '2524';
+forward['B5'] = '2561';
+forward['B6'] = '2562';
+forward['B7'] = '2556';
+forward['B8'] = '2555';
+forward['B9'] = '2563';
+forward['BA'] = '2551';
+forward['BB'] = '2557';
+forward['BC'] = '255D';
+forward['BD'] = '255C';
+forward['BE'] = '255B';
+forward['BF'] = '2510';
+forward['C0'] = '2514';
+forward['C1'] = '2534';
+forward['C2'] = '252C';
+forward['C3'] = '251C';
+forward['C4'] = '2500';
+forward['C5'] = '253C';
+forward['C6'] = '255E';
+forward['C7'] = '255F';
+forward['C8'] = '255A';
+forward['C9'] = '2554';
+forward['CA'] = '2569';
+forward['CB'] = '2566';
+forward['CC'] = '2560';
+forward['CD'] = '2550';
+forward['CE'] = '256C';
+forward['CF'] = '2567';
+forward['D0'] = '2568';
+forward['D1'] = '2564';
+forward['D2'] = '2565';
+forward['D3'] = '2559';
+forward['D4'] = '2558';
+forward['D5'] = '2552';
+forward['D6'] = '2553';
+forward['D7'] = '256B';
+forward['D8'] = '256A';
+forward['D9'] = '2518';
+forward['DA'] = '250C';
+forward['DB'] = '2588';
+forward['DC'] = '2584';
+forward['DD'] = '258C';
+forward['DE'] = '2590';
+forward['DF'] = '2580';
+forward['E0'] = '03B1';
+forward['E1'] = '00DF';
+forward['E2'] = '0393';
+forward['E3'] = '03C0';
+forward['E4'] = '03A3';
+forward['E5'] = '03C3';
+forward['E6'] = '00B5';
+forward['E7'] = '03C4';
+forward['E8'] = '03A6';
+forward['E9'] = '0398';
+forward['EA'] = '03A9';
+forward['EB'] = '03B4';
+forward['EC'] = '221E';
+forward['ED'] = '03C6';
+forward['EE'] = '03B5';
+forward['EF'] = '2229';
+forward['F0'] = '2261';
+forward['F1'] = '00B1';
+forward['F2'] = '2265';
+forward['F3'] = '2264';
+forward['F4'] = '2320';
+forward['F5'] = '2321';
+forward['F6'] = '00F7';
+forward['F7'] = '2248';
+forward['F8'] = '00B0';
+forward['F9'] = '2219';
+forward['FA'] = '00B7';
+forward['FB'] = '221A';
+forward['FC'] = '207F';
+forward['FD'] = '00B2';
+forward['FE'] = '25A0';
+forward['FF'] = '00A0';
+backward['C7'] = '80';
+backward['FC'] = '81';
+backward['E9'] = '82';
+backward['E2'] = '83';
+backward['E4'] = '84';
+backward['E0'] = '85';
+backward['E5'] = '86';
+backward['E7'] = '87';
+backward['EA'] = '88';
+backward['EB'] = '89';
+backward['E8'] = '8A';
+backward['EF'] = '8B';
+backward['EE'] = '8C';
+backward['EC'] = '8D';
+backward['C4'] = '8E';
+backward['C5'] = '8F';
+backward['C9'] = '90';
+backward['E6'] = '91';
+backward['C6'] = '92';
+backward['F4'] = '93';
+backward['F6'] = '94';
+backward['F2'] = '95';
+backward['FB'] = '96';
+backward['F9'] = '97';
+backward['FF'] = '98';
+backward['D6'] = '99';
+backward['DC'] = '9A';
+backward['A2'] = '9B';
+backward['A3'] = '9C';
+backward['A5'] = '9D';
+backward['20A7'] = '9E';
+backward['192'] = '9F';
+backward['E1'] = 'A0';
+backward['ED'] = 'A1';
+backward['F3'] = 'A2';
+backward['FA'] = 'A3';
+backward['F1'] = 'A4';
+backward['D1'] = 'A5';
+backward['AA'] = 'A6';
+backward['BA'] = 'A7';
+backward['BF'] = 'A8';
+backward['2310'] = 'A9';
+backward['AC'] = 'AA';
+backward['BD'] = 'AB';
+backward['BC'] = 'AC';
+backward['A1'] = 'AD';
+backward['AB'] = 'AE';
+backward['BB'] = 'AF';
+backward['2591'] = 'B0';
+backward['2592'] = 'B1';
+backward['2593'] = 'B2';
+backward['2502'] = 'B3';
+backward['2524'] = 'B4';
+backward['2561'] = 'B5';
+backward['2562'] = 'B6';
+backward['2556'] = 'B7';
+backward['2555'] = 'B8';
+backward['2563'] = 'B9';
+backward['2551'] = 'BA';
+backward['2557'] = 'BB';
+backward['255D'] = 'BC';
+backward['255C'] = 'BD';
+backward['255B'] = 'BE';
+backward['2510'] = 'BF';
+backward['2514'] = 'C0';
+backward['2534'] = 'C1';
+backward['252C'] = 'C2';
+backward['251C'] = 'C3';
+backward['2500'] = 'C4';
+backward['253C'] = 'C5';
+backward['255E'] = 'C6';
+backward['255F'] = 'C7';
+backward['255A'] = 'C8';
+backward['2554'] = 'C9';
+backward['2569'] = 'CA';
+backward['2566'] = 'CB';
+backward['2560'] = 'CC';
+backward['2550'] = 'CD';
+backward['256C'] = 'CE';
+backward['2567'] = 'CF';
+backward['2568'] = 'D0';
+backward['2564'] = 'D1';
+backward['2565'] = 'D2';
+backward['2559'] = 'D3';
+backward['2558'] = 'D4';
+backward['2552'] = 'D5';
+backward['2553'] = 'D6';
+backward['256B'] = 'D7';
+backward['256A'] = 'D8';
+backward['2518'] = 'D9';
+backward['250C'] = 'DA';
+backward['2588'] = 'DB';
+backward['2584'] = 'DC';
+backward['258C'] = 'DD';
+backward['2590'] = 'DE';
+backward['2580'] = 'DF';
+backward['3B1'] = 'E0';
+backward['DF'] = 'E1';
+backward['393'] = 'E2';
+backward['3C0'] = 'E3';
+backward['3A3'] = 'E4';
+backward['3C3'] = 'E5';
+backward['B5'] = 'E6';
+backward['3C4'] = 'E7';
+backward['3A6'] = 'E8';
+backward['398'] = 'E9';
+backward['3A9'] = 'EA';
+backward['3B4'] = 'EB';
+backward['221E'] = 'EC';
+backward['3C6'] = 'ED';
+backward['3B5'] = 'EE';
+backward['2229'] = 'EF';
+backward['2261'] = 'F0';
+backward['B1'] = 'F1';
+backward['2265'] = 'F2';
+backward['2264'] = 'F3';
+backward['2320'] = 'F4';
+backward['2321'] = 'F5';
+backward['F7'] = 'F6';
+backward['2248'] = 'F7';
+backward['B0'] = 'F8';
+backward['2219'] = 'F9';
+backward['B7'] = 'FA';
+backward['221A'] = 'FB';
+backward['207F'] = 'FC';
+backward['B2'] = 'FD';
+backward['25A0'] = 'FE';
+backward['A0'] = 'FF';
+var hD="0123456789ABCDEF";
+this.d2h = function(d)
+{
+var h = hD.substr(d&15,1);
+while(d&gt;15) {d&gt;&gt;=4;h=hD.substr(d&15,1)+h;}
+return h;
+}
+this.h2d = function(h)
+{
+return parseInt(h,16);
+}
+this.WriteAll = function(what)
+{
+//Create Stream object
+//var BinaryStream = WScript.CreateObject("ADODB.Stream");
+var BinaryStream = new ActiveXObject("ADODB.Stream");
+//Specify stream type - we cheat and get string but 'like' binary
+BinaryStream.Type = adTypeText;
+BinaryStream.CharSet = '437';
+//Open the stream
+BinaryStream.Open();
+// Write to the stream
+BinaryStream.WriteText(this.Forward437(what));
+// Write the string to the disk
+BinaryStream.SaveToFile(this.path, adSaveCreateOverWrite);
+// Clearn up
+BinaryStream.Close();
+}
+this.ReadAll = function()
+{
+//Create Stream object - needs ADO 2.5 or heigher
+//var BinaryStream = WScript.CreateObject("ADODB.Stream")
+var BinaryStream = new ActiveXObject("ADODB.Stream");
+//Specify stream type - we cheat and get string but 'like' binary
+BinaryStream.Type = adTypeText;
+BinaryStream.CharSet = codePage;
+//Open the stream
+BinaryStream.Open();
+//Load the file data from disk To stream object
+BinaryStream.LoadFromFile(this.path);
+//Open the stream And get binary 'string' from the object
+var what = BinaryStream.ReadText;
+// Clean up
+BinaryStream.Close();
+return this.Backward437(what);
+}
+/* Convert a octet number to a code page 437 char code */
+this.Forward437 = function(inString)
+{
+var encArray = new Array();
+var tmp='';
+var i=0;
+var c=0;
+var l=inString.length;
+var cc;
+var h;
+for(;i&lt;l;++i)
+{
+c++;
+if(c==128)
+{
+encArray.push(tmp);
+tmp='';
+c=0;
+}
+cc=inString.charCodeAt(i);
+if(cc&lt;128)
+{
+tmp+=String.fromCharCode(cc);
+}
+else
+{
+h=this.d2h(cc);
+h=forward[''+h];
+tmp+=String.fromCharCode(this.h2d(h));
+}
+}
+if(tmp!='')
+{
+encArray.push(tmp);
+}
+// this loop progressive concatonates the
+// array elements entil there is only one
+var ar2=new Array();
+for(;encArray.length&gt;1;)
+{
+var l=encArray.length;
+for(var c=0;c&lt;l;c+=2)
+{
+if(c+1==l)
+{
+ar2.push(encArray[c]);
+}
+else
+{
+ar2.push(''+encArray[c]+encArray[c+1]);
+}
+}
+encArray=ar2;
+ar2=new Array();
+}
+return encArray[0];
+}
+/* Convert a code page 437 char code to a octet number*/
+this.Backward437 = function(inString)
+{
+var encArray = new Array();
+var tmp='';
+var i=0;
+var c=0;
+var l=inString.length;
+var cc;
+var h;
+for(;i&lt;l;++i)
+{
+c++;
+if(c==128)
+{
+encArray.push(tmp);
+tmp='';
+c=0;
+}
+cc=inString.charCodeAt(i);
+if(cc&lt;128)
+{
+tmp+=String.fromCharCode(cc);
+}
+else
+{
+h=this.d2h(cc);
+h=backward[''+h];
+tmp+=String.fromCharCode(this.h2d(h));
+}
+}
+if(tmp!='')
+{
+encArray.push(tmp);
+}
+// this loop progressive concatonates the
+// array elements entil there is only one
+var ar2=new Array();
+for(;encArray.length&gt;1;)
+{
+var l=encArray.length;
+for(var c=0;c&lt;l;c+=2)
+{
+if(c+1==l)
+{
+ar2.push(encArray[c]);
+}
+else
+{
+ar2.push(''+encArray[c]+encArray[c+1]);
+}
+}
+encArray=ar2;
+ar2=new Array();
+}
+return encArray[0];
+}
+}</pre>
+</div>
+<p>其中主体部分是：</p>
+<div class="jb51code">
+<pre class="brush:js;">
+this.ReadAll = function()
+{
+//Create Stream object - needs ADO 2.5 or heigher
+//var BinaryStream = WScript.CreateObject("ADODB.Stream")
+var BinaryStream = new ActiveXObject("ADODB.Stream");
+//Specify stream type - we cheat and get string but 'like' binary
+BinaryStream.Type = adTypeText;
+BinaryStream.CharSet = codePage;
+//Open the stream
+BinaryStream.Open();
+//Load the file data from disk To stream object
+BinaryStream.LoadFromFile(this.path);
+//Open the stream And get binary 'string' from the object
+var what = BinaryStream.ReadText;
+// Clean up
+BinaryStream.Close();
+return this.Backward437(what);
+}</pre>
+</div>
+<p>这里就是使用"ADODB.Stream"控件读取文件的方法，可以看到作者使用的读取类型是adTypeText（2），是在用文本读取方式读二进制文件！而按照文档改为adTypeBinary（1）类型后则读不到任何内容，不知道是为什么。<br />
+</p>
+<p>其余部分代码则是在做编码转换工作，大体意思是读文件时要使用“ISO-8859-1”字符集，用http发送文件时则要使用“Windows-1252”字符集，这两种字符集只有极少数字符有差别，所以在读到的数据中找到有区别的部分一一转换为另一种字符集表示。<br />
+</p>
+<p><span style="background-color: #ffff00"><strong>ajax发送二进制流：</strong></span></p>
+<div class="jb51code">
+<pre class="brush:js;">
+function uploadAndSubmit2(BinaryContent)
+{
+Url = UrlHead + "Cook.ashx";
+xmlHttp=new XMLHttpRequest();
+xmlHttp.open("POST",Url + "&#63;method=post&func=file_upload&fileName=" + encodeURIComponent(filename.split("\\")[filename.split("\\").length-1]));//IE处理汉字url
+xmlHttp.sendAsBinary(BinaryContent);
+xmlHttp.onreadystatechange = function ()
+{
+if (xmlHttp.readyState == 4) {
+if (xmlHttp.status == 200) {
+var str=xmlHttp.response;
+alert(str);
+xmlHttp.abort();
+}
+}
+}
+}</pre>
+</div>
+<p>为了进行二进制传输这里没有使用兼容旧版本IE的“window.ActiveXObject("Msxm12.XMLHTTP")”和“window.ActiveXObject("Microsoft.XMLHTTP")”，不知大家有没有支持这两种activex控件的二进制传输方法。<br />
+</p>
+<p>在一篇教程里第六行前面有一行：<br />
+</p>
+<p>xmlHttp.overrideMimeType('text\/plain; charset=x-user-defined');//:x-user-defined告诉浏览器不要解析返回数据 <br />
+加上这个一行后浏览器将不会对后台返回的数据的编码格式进行解析，具体来讲就是返回到前台的中文文本都显示为“ ”或“口”，我估计作者这样做是为了在前台接收后台传来的二进制数据。<br />
+</p>
+<p>事实上只有火狐的XMLHttpRequest支持sendAsBinary方法，为了在IE和谷歌下使用，需要给XMLHttpRequest增加一个原型方法：</p>
+<div class="jb51code">
+<pre class="brush:js;">
+//给XMLHttpRequest的原型添加二进制发送功能
+XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
+function byteValue(x) {
+return x.charCodeAt(0) & 0xff;
+}
+var ords = Array.prototype.map.call(datastr, byteValue);
+var ui8a = new Uint8Array(ords);
+this.send(ui8a.buffer);
+}</pre>
+</div>
+<p>这里的代码就不太懂了，其中第六行IE8不支持、第七行IE9不支持。<br />
+</p>
+<p>后台使用的是java serverlet，以下是最终调用的java类的代码：</p>
+<div class="jb51code">
+<pre class="brush:js;">
+public String FileUpload(HttpServletRequest request) throws IOException
+{
+request.setCharacterEncoding("UTF-8");
+BufferedInputStream fileIn = new BufferedInputStream(request.getInputStream()); 
+String fn = request.getParameter("fileName"); 
+byte[] buf = new byte[1024]; 
+File file = new File("d:/" + fn); 
+BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(file)); 
+try
+{ 
+while (true) 
+{ 
+// 读取数据
+int bytesIn = fileIn.read(buf, 0, 1024); 
+System.out.println(bytesIn); 
+if (bytesIn == -1) 
+{ 
+break; 
+} 
+else 
+{ 
+fileOut.write(buf, 0, bytesIn); 
+} 
+} 
+fileOut.flush(); 
+return("保存成功");
+}
+catch(Exception e)
+{
+return "保存失败，原因："+e.toString();
+}
+finally
+{ 
+fileOut.close(); 
+}
+}</pre>
+</div>
+<p>以上所述是小编给大家介绍的JavaScript读二进制文件并用ajax传输二进制流的方法，希望对大家有所帮助，如果大家有任何疑问请给我留言，小编会及时回复大家的。在此也非常感谢大家对脚本之家网站的支持！</p>
+
+</div><!--endmain-->
+<div class="art_xg">
+<h4>您可能感兴趣的文章:</h4><ul><li><a href="/article/112396.htm" title="解决IE下AjaxSubmit上传文件提示下载文件问题" target="_blank">解决IE下AjaxSubmit上传文件提示下载文件问题</a></li><li><a href="/article/77581.htm" title="Ajax请求过程中下载文件在FireFox(火狐)浏览器下的兼容问题" target="_blank">Ajax请求过程中下载文件在FireFox(火狐)浏览器下的兼容问题</a></li><li><a href="/article/122797.htm" title="Ajax请求二进制流进行处理（ajax异步下载文件）的简单方法" target="_blank">Ajax请求二进制流进行处理（ajax异步下载文件）的简单方法</a></li></ul>
+</div>
+<div class="lbd clearfix">
+<span id="art_down" class="jbTestPos"></span>
+</div>
+<div id="shoucang"></div>
+<div class="tags mt10">
+<strong>Tags：</strong><a href="http://common.jb51.net/tag/js/1.htm" target="_blank" title="搜索关于js的文章">js</a> <a href="http://common.jb51.net/tag/%E4%BA%8C%E8%BF%9B%E5%88%B6/1.htm" target="_blank" title="搜索关于二进制的文章">二进制</a> <a href="http://common.jb51.net/tag/%E6%96%87%E4%BB%B6/1.htm" target="_blank" title="搜索关于文件的文章">文件</a> <a href="http://common.jb51.net/tag/ajax/1.htm" target="_blank" title="搜索关于ajax的文章">ajax</a> <a href="http://common.jb51.net/tag/%E6%B5%81/1.htm" target="_blank" title="搜索关于流的文章">流</a> 
+</div>
+<DIV class="relatedarticle clearfix mt5">
+<H2>相关文章</H2>
+<ul><li><span>2006-11-11</span><a href="/article/4355.htm" title="来访统计" target="_blank">来访统计</a></li><li><span>2017-05-05</span><a href="/article/113949.htm" title="Bootstrap table学习笔记（2） 前后端分页模糊查询" target="_blank">Bootstrap table学习笔记（2） 前后端分页模糊查询</a></li><li><span>2017-03-03</span><a href="/article/110030.htm" title="ES6使用let命令更简单的实现块级作用域实例分析" target="_blank">ES6使用let命令更简单的实现块级作用域实例分析</a></li><li><span>2008-12-12</span><a href="/article/16885.htm" title="关于IE7 IE8弹出窗口顶上" target="_blank">关于IE7 IE8弹出窗口顶上</a></li><li><span>2015-04-04</span><a href="/article/63541.htm" title="JavaScript使用pop方法移除数组最后一个元素用法实例" target="_blank">JavaScript使用pop方法移除数组最后一个元素用法实例</a></li><li><span>2016-11-11</span><a href="/article/97878.htm" title="Bootstrap中定制LESS-颜色及导航条(推荐)" target="_blank">Bootstrap中定制LESS-颜色及导航条(推荐)</a></li><li><span>2016-05-05</span><a href="/article/85191.htm" title="BootStrap中Datetimepicker和uploadify插件应用实例小结" target="_blank">BootStrap中Datetimepicker和uploadify插件应用实例小结</a></li><li><span>2016-07-07</span><a href="/article/88186.htm" title="封装获取dom元素的简单实例" target="_blank">封装获取dom元素的简单实例</a></li><li><span>2017-10-10</span><a href="/article/125951.htm" title="打造通用的匀速运动框架(实例讲解)" target="_blank">打造通用的匀速运动框架(实例讲解)</a></li><li><span>2007-05-05</span><a href="/article/10002.htm" title="用javascript实现的支持lrc歌词的播放器" target="_blank">用javascript实现的支持lrc歌词的播放器</a></li></ul>
+</DIV>
+<div class="lbd clearfix mt5">
+<span id="art_down2" class="jbTestPos"></span>
+</div>
+<a href="#comments"></a>
+<div id="comments">
+<H2>最新评论</H2>
+<div class="pd5"><div id="SOHUCS" sid="art_88822"></div></div>
+</div>
+      </div><!--endborder-->
+      </div><!--end fl-->
+      
+<div class="w300 fr">
+<div class="r300 clearfix"><span id="side_up" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">大家感兴趣的内容</H4>
+<UL class="newsList newList-in">
+<li><EM class="no1">1</EM><a href="/article/14397.htm" title="js刷新页面方法大全" target="_blank">js刷新页面方法大全</a></li><li><EM class="no2">2</EM><a href="/article/25403.htm" title="js页面跳转常用的几种方式" target="_blank">js页面跳转常用的几种方式</a></li><li><EM class="no3">3</EM><a href="/article/35535.htm" title="JS中setTimeout()的用法详解" target="_blank">JS中setTimeout()的用法详解</a></li><li><EM class="no4">4</EM><a href="/article/42482.htm" title="JS截取字符串常用方法详细整理" target="_blank">JS截取字符串常用方法详细整理</a></li><li><EM class="no5">5</EM><a href="/article/64330.htm" title="JS设置cookie、读取cookie、删除cookie" target="_blank">JS设置cookie、读取cookie、删除</a></li><li><EM class="no6">6</EM><a href="/article/35691.htm" title="JS打开新窗口的2种方式" target="_blank">JS打开新窗口的2种方式</a></li><li><EM class="no7">7</EM><a href="/article/43136.htm" title="js 将json字符串转换为json对象的方法解析" target="_blank">js 将json字符串转换为json对象的</a></li><li><EM class="no8">8</EM><a href="/article/52038.htm" title="js数组与字符串的相互转换方法" target="_blank">js数组与字符串的相互转换方法</a></li><li><EM class="no9">9</EM><a href="/article/24101.htm" title="javascript深入理解js闭包" target="_blank">javascript深入理解js闭包</a></li><li><EM class="no10">10</EM><a href="/article/34502.htm" title="js关闭当前页面(窗口)的几种方式总结" target="_blank">js关闭当前页面(窗口)的几种方式</a></li>
+</UL>
+</DIV>
+</DIV>
+<div class="r300 clearfix mt10"><span id="idctu" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">最近更新的内容</H4>
+<UL class="newsListA">
+<ul><li><a href="/article/64207.htm" title="JavaScript实现页面5秒后自动跳转的方法" target="_blank">JavaScript实现页面5秒后自动跳转的方法</a></li><li><a href="/article/15652.htm" title="IE浏览器PNG图片透明效果代码" target="_blank">IE浏览器PNG图片透明效果代码</a></li><li><a href="/article/61203.htm" title="js图片模糊切换显示特效的方法" target="_blank">js图片模糊切换显示特效的方法</a></li><li><a href="/article/117551.htm" title="JavaScript操作文件_动力节点Java学院整理" target="_blank">JavaScript操作文件_动力节点Java学院整理</a></li><li><a href="/article/26766.htm" title="IE6/7/8/9中Table/Select的innerHTML不能赋值的解决方法" target="_blank">IE6/7/8/9中Table/Select的innerHTML不能</a></li><li><a href="/article/110131.htm" title="ES6 Promise对象概念与用法分析" target="_blank">ES6 Promise对象概念与用法分析</a></li><li><a href="/article/84538.htm" title="在JavaScript中对HTML进行反转义详解" target="_blank">在JavaScript中对HTML进行反转义详解</a></li><li><a href="/article/100091.htm" title="javascript中数组（Array)对象和字符串（String)对象的常用方法总结" target="_blank">javascript中数组（Array)对象和字符串（</a></li><li><a href="/article/6810.htm" title="js模拟滤镜的图片渐显效果" target="_blank">js模拟滤镜的图片渐显效果</a></li><li><a href="/article/83770.htm" title="JavaScript希尔排序、快速排序、归并排序算法" target="_blank">JavaScript希尔排序、快速排序、归并排序</a></li></ul>
+</UL>
+</DIV>
+</DIV>   
+<div class="r300 clearfix mt10"><span id="idctu1" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">常用在线小工具</H4>
+<ul class="newsListA"><span id="bctools" class="jbTestPos"></span></ul>
+</DIV>
+</DIV>
+<div class="r300 clearfix mt10" id="idctu2"><span id="idctu2" class="jbTestPos"></span></div>
+<div class="mt10 rFixedBox">
+<span id="r_2" class="jbTestPos"></span>
+</div>
+      
+      
+      </div><!--end fr-->
+      </div>
+</div><!--end content-->
+<div id="footer">
+<div class="main clearfix">
+<p>
+<a href="http://www.jb51.net/about.htm" target="_blank">关于我们</a> - 
+<a href="http://www.jb51.net/support.htm" target="_blank">广告合作</a> - 
+<a href="http://www.jb51.net/linkus.htm" target="_blank">联系我们</a> -  
+<a href="http://www.jb51.net/sm.htm" target="_blank">免责声明</a> -  
+<a href="http://www.jb51.net/sitemap.htm" target="_blank">网站地图</a> - 
+<a href="tencent://message/?uin=461478385&Site=http://www.jb51.net" target="_blank">投诉建议</a> - 
+<a href="http://www.jb51.net/up.htm" target="_blank">在线投稿</a>
+</p>
+<p>&copy;CopyRight 2006-2017 JB51.Net Inc All Rights Reserved. 脚本之家 版权所有</p>
+</div>
+</div><!--end footer-->
+<link type="text/css" rel="stylesheet" href="/jslib/syntaxhighlighter/styles/shCore.css" />
+<link type="text/css" rel="Stylesheet" href="/jslib/syntaxhighlighter/styles/shThemeDefault.css" />
+<script type="text/javascript" src="/jslib/syntaxhighlighter/scripts/shCore.js"></script>
+<script type="text/javascript" src="/jslib/syntaxhighlighter/scripts/shAutoloader.js"></script>
+<script type="text/javascript">
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+if (top.location != self.location)top.location=self.location;
+$(function(){
+	$('#content').find('img').each(function(){
+        var img = this;
+        if (img.width >= 650){
+            img.style.width = "650px";
+            img.style.height = "auto";
+            //$(img).removeAttr('height');
+            var aTag = document.createElement('a');
+            aTag.href = img.src;
+			aTag.target="_blank";
+            $(aTag).addClass('bPic')
+            .insertAfter(img).append(img)
+          }
+    });
+	$(window).scroll(function()
+    {	
+    	//rFixedBox跟随滚动
+    	var h = $(window).height();
+        var top = $(window).scrollTop();
+    	var rFixedBox = $('.rFixedBox').prev().offset();
+        var fixedTop = rFixedBox.top;
+		
+        if(top>=fixedTop+344)
+        {
+			var h1 = parseInt($('#content').children('.main').height());
+			if(parseInt(top) + 340 < h1){
+				$('.rFixedBox').css({'position':'fixed','top': 0});
+			}else{
+				$('.rFixedBox').css({'position':'absolute','top': h1-510});
+			}
+        }
+        else
+        {
+            $('.rFixedBox').css({'position':'static', 'top':0});   
+        }	
+       /* return true;*/
+    });
+/*$(document).ready(function() {
+  $("#content img").unveil();
+});	*/
+SyntaxHighlighter.autoloader(
+	'applescript			/jslib/syntaxhighlighter/scripts/shBrushAppleScript.js',
+	'actionscript3 as3		/jslib/syntaxhighlighter/scripts/shBrushAS3.js',
+	'bash shell				/jslib/syntaxhighlighter/scripts/shBrushBash.js',
+	'coldfusion cf			/jslib/syntaxhighlighter/scripts/shBrushColdFusion.js',
+	'cpp c					/jslib/syntaxhighlighter/scripts/shBrushCpp.js',
+	'obj-c objc				/jslib/syntaxhighlighter/scripts/shBrushObjC.js',
+	'c# c-sharp csharp		/jslib/syntaxhighlighter/scripts/shBrushCSharp.js',
+	'css					/jslib/syntaxhighlighter/scripts/shBrushCss.js',
+	'delphi pascal			/jslib/syntaxhighlighter/scripts/shBrushDelphi.js',
+	'diff patch pas			/jslib/syntaxhighlighter/scripts/shBrushDiff.js',
+	'erl erlang				/jslib/syntaxhighlighter/scripts/shBrushErlang.js',
+	'groovy					/jslib/syntaxhighlighter/scripts/shBrushGroovy.js',
+	'haxe hx				/jslib/syntaxhighlighter/scripts/shBrushHaxe.js',
+	'java					/jslib/syntaxhighlighter/scripts/shBrushJava.js',
+	'jfx javafx				/jslib/syntaxhighlighter/scripts/shBrushJavaFX.js',
+	'js jscript javascript	/jslib/syntaxhighlighter/scripts/shBrushJScript.js',
+	'perl pl				/jslib/syntaxhighlighter/scripts/shBrushPerl.js',
+	'php					/jslib/syntaxhighlighter/scripts/shBrushPhp.js',
+	'text plain				/jslib/syntaxhighlighter/scripts/shBrushPlain.js',
+	'py python				/jslib/syntaxhighlighter/scripts/shBrushPython.js',
+	'ruby rails ror rb		/jslib/syntaxhighlighter/scripts/shBrushRuby.js',
+	'scala					/jslib/syntaxhighlighter/scripts/shBrushScala.js',
+	'sql					/jslib/syntaxhighlighter/scripts/shBrushSql.js',
+	'vb vbnet				/jslib/syntaxhighlighter/scripts/shBrushVb.js',
+	'ps powershell			/jslib/syntaxhighlighter/scripts/shBrushPowerShell.js',
+	'xml xhtml xslt html	/jslib/syntaxhighlighter/scripts/shBrushXml.js'
+);
+SyntaxHighlighter.all();
+});
+var ourl="http://www.cnblogs.com/ljzc002/archive/2016/07/18/5681277.html";
+</script>
+<script type="text/javascript" src='http://icws.jb51.net/good/arct.js'></script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<div id="tongji">
+<script type="text/javascript" src="http://tongji.jbzj.com/tongji/tongji.js"></script>
+<script type="text/javascript">
+//tu+
+var cpro_id = "u1893014";
+document.write('<scri'+'pt src="http://cpro.baidustatic.com/cpro/ui/i.js" type="text/javascript"></s'+'cript>');
+</script>
+<script charset="utf-8" type="text/javascript" src="http://changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+window.changyan.api.config({
+appid: 'cyrHH3dwi',
+conf: 'prod_1dc5dc80970106099d43fe242b7465fc'
+});
+</script>
+</div> 
+<script type="text/javascript" src="http://www.jb51.net/pl.asp?id=88822"></script>
+</body>
+</html>
+<!-- published at 2017/12/15 8:40:32By dxycms qq:461478385  -->

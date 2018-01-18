@@ -1,0 +1,605 @@
+// /*
+//  * @Author: devilsome.曾挚
+//  * @Date: 2017-02-09 01:35:58
+//  * @Last Modified by: wesai.谢久伟
+//  * @Last Modified time: 2017-10-26 16:59:39
+//  */
+//
+// namespace wesai.HoldemPoker {
+//
+//     /**
+//      * 列表项
+//      */
+//     export class ClubMemberItemUI extends ui.club.ClubMemberItemViewUI {
+//
+//         constructor() {
+//             super();
+//             this.width = Laya.stage.width;
+//         }
+//
+//         public renderItemData(data: msg.ClubPlayer) {
+//
+//             this.memberName.text = EmojiHelper.emojiDecode(data.playerName);
+//             Utility.loadImg(this.memberAvatar.avatarImg, GPLAYER_DEFAULT_ICON, data.playerHeaderUrl);
+//             this.IDNum.text = "ID " + data.playerId;
+//             this.creatorIcon.visible = data.playerDuties === msg.Corpus.PRESIDENT;
+//         }
+//
+//     }
+//
+//     /**
+//      * 管理员
+//      */
+//     export class ClubMemberAuthItemUI extends ui.club.ClubMemberAuthItemViewUI {
+//
+//         constructor() {
+//             super();
+//             this.width = Laya.stage.width;
+//         }
+//
+//         public renderItemData(data: msg.ClubPlayer, isOwner: boolean) {
+//
+//             this.memberName.text = EmojiHelper.emojiDecode(data.playerName);
+//             Utility.loadImg(this.memberAvatar.avatarImg, GPLAYER_DEFAULT_ICON, data.playerHeaderUrl);
+//             this.IDNum.text = "ID " + data.playerId;
+//             this.creatorIcon.visible = data.playerDuties === msg.Corpus.PRESIDENT;
+//             this.setManager.visible = false;
+//             this.unsetManager.visible = false;
+//             if (!isOwner && data.playerDuties === msg.Corpus.VICE_PRESIDENT) {
+//                 this.unsetManager.visible = true;
+//             }
+//             if (data.playerDuties === msg.Corpus.NORMAL) {
+//                 this.setManager.visible = true;
+//             }
+//
+//         }
+//
+//     }
+//
+//     /**
+//      *修改item
+//      */
+//     export class ClubMemberEditUI extends ui.club.ClubMemberEditItemViewUI {
+//
+//         constructor() {
+//             super();
+//             this.width = Laya.stage.width;
+//         }
+//
+//         public renderItemData(data: msg.ClubPlayer, isOwner: boolean) {
+//
+//             this.memberName.text = EmojiHelper.emojiDecode(data.playerName);
+//             Utility.loadImg(this.memberAvatar.avatarImg, GPLAYER_DEFAULT_ICON, data.playerHeaderUrl);
+//             this.IDNum.text = "ID " + data.playerId;
+//             if (!isOwner && data.playerDuties === msg.Corpus.VICE_PRESIDENT) {
+//                 this.deleteBtn.visible = false;
+//             }
+//             if (data.playerDuties === msg.Corpus.PRESIDENT) {
+//                 this.deleteBtn.visible = false;
+//             }
+//             this.creatorIcon.visible = data.playerDuties === msg.Corpus.PRESIDENT;
+//         }
+//
+//     }
+//
+//     enum ActionState {
+//         Normal,
+//         KickOUt,
+//         Auth
+//     }
+//
+//     /**
+//      * 成员列表
+//      */
+//     export class ClubMemberListUI extends ui.club.ClubMemberListViewUI implements GameUIBase {
+//
+//         private boxHeaderHeight: number = 66;
+//
+//         private listItemHeight: number = 100;
+//
+//         private gapHeight: number = 30;
+//
+//         private memberData: msg.ClubPlayer[] = [];
+//
+//         // 列表数据
+//         private memberListData: msg.ClubPlayer[] = [];
+//         private managerListData: msg.ClubPlayer[] = [];
+//
+//         public clubStore: ClubStore;
+//         private player: PlayerData;
+//
+//         public static selectedMemberId: number;
+//
+//         private page: number = 1;
+//         private pageSize: number = 30;
+//         private isLoading: boolean = false;
+//         private loadingOffset: number = 40;
+//         private hasMoreData: boolean = true;
+//
+//         //页面状
+//         private actionState: ActionState = ActionState.Normal;
+//
+//         private renderHandler: Laya.Handler = new Laya.Handler(this, this.updateItem);
+//         private renderEditHandler: Laya.Handler = new Laya.Handler(this, this.updateEditItem);
+//         private renderAuthHandler: Laya.Handler = new Laya.Handler(this, this.updateAuthItem);
+//
+//         private playerInfoView: ClubPlayerInfoUI;
+//
+//         private actionBtnDisplay = {
+//             default: Sys.localization.get(stringtable.manage),
+//             cancel: Sys.localization.get(stringtable.cancel)
+//         };
+//
+//         constructor() {
+//             super();
+//             // 注册页面事件
+//             this.createList();
+//         }
+//
+//         Initalize() {
+//             this.onLanguageChanged();
+//             this.clubStore = Sys.clubStore.self;
+//             this.player = Sys.players.self;
+//
+//             //隐藏菜单按钮
+//             this.actionBtn.visible = false;
+//             this.memberBox.visible = false;
+//
+//             this.RegisterUIEvent();
+//
+//             //取数据
+//             this.getMembers();
+//
+//             Sys.club.getClubById(this.clubStore.currentClubId).then((club: msg.Club) => {
+//                 //人数
+//                 let vipLevelData = JSON.parse(club.vipLevel);
+//                 this.memberNum.text = "(" + club.playerNumber + '/' + vipLevelData.playerNumber + ")";
+//             });
+//
+//         }
+//
+//         RegisterUIEvent(): void {
+//
+//             this.header.backBtn.on(Laya.Event.CLICK, this, this.onBack);
+//
+//             this.actionBtn.on(Laya.Event.CLICK, this, this.toggleMenu);
+//
+//             Laya.stage.on(Laya.Event.CLICK, this, this.hideMenu);
+//
+//             this.actionKickBtn.on(Laya.Event.CLICK, this, this.onActionKickOut);
+//
+//             this.actionAuthBtn.on(Laya.Event.CLICK, this, this.onActionAuth);
+//
+//             if (this.scrollPanel.vScrollBar) {
+//                 this.scrollPanel.vScrollBar.on(Laya.Event.END, this, this.onInfinite);
+//             }
+//
+//         }
+//
+//         UnregisterUIEvent(): void {
+//             this.header.backBtn.off(Laya.Event.CLICK, this, this.onBack);
+//
+//             this.actionBtn.off(Laya.Event.CLICK, this, this.toggleMenu);
+//
+//             Laya.stage.off(Laya.Event.CLICK, this, this.hideMenu);
+//
+//             this.actionKickBtn.off(Laya.Event.CLICK, this, this.onActionKickOut);
+//
+//             this.actionAuthBtn.off(Laya.Event.CLICK, this, this.onActionAuth);
+//
+//             if (this.scrollPanel.vScrollBar) {
+//                 this.scrollPanel.vScrollBar.off(Laya.Event.END, this, this.onInfinite);
+//             }
+//         }
+//
+//         onLanguageChanged(): void {
+//             this.header.titleLabel.text = Sys.localization.get(stringtable.clubMember);
+//             this.actionBtn.label = Sys.localization.get(stringtable.manage);
+//             this.actionKickBtn.label = Sys.localization.get(stringtable.kickOutMember);
+//             this.actionAuthBtn.label = Sys.localization.get(stringtable.setManager);
+//             this.memberLabel.text = Sys.localization.get(stringtable.members);
+//         }
+//
+//         Refresh() {
+//
+//         }
+//
+//         Dispose() {
+//             this.UnregisterUIEvent();
+//         }
+//
+//         public getMembers() {
+//
+//             Sys.ui.startLoading('', 1);
+//             // 成员
+//             Sys.club.clubMembers({
+//                 clubId: this.clubStore.currentClubId,
+//                 page: this.page,
+//                 pageSize: this.pageSize
+//             }).then((result: msg.FindClubPlayerResponse) => {
+//                 if (result.clubPlayer.length < this.pageSize) {
+//                     this.hasMoreData = false;
+//                 }
+//                 this.isLoading = false;
+//                 Sys.ui.stopLoading();
+//                 if (result && result.clubPlayer) {
+//                     CommonHelper.setAvatarCacheBatch(result.clubPlayer, 'playerId', 'playerHeaderUrl');
+//                     this.memberData = CommonHelper.arrayUnique(this.memberData.concat(result.clubPlayer), 'playerId');
+//                     this.resolveListData(this.memberData);
+//                 }
+//             }).catch(err => {
+//                 console.log(err);
+//             });
+//         }
+//
+//         /**
+//          * 处理listData
+//          * @param players
+//          */
+//         private resolveListData(players: any) {
+//             //成员
+//             this.memberListData = players.filter(item => item.playerDuties === msg.Corpus.NORMAL);
+//             //管理员
+//             this.managerListData = players.filter(item => item.playerDuties < msg.Corpus.NORMAL);
+//             //人数
+//             // let vipLevelData = JSON.parse(this.clubStore.club.vipLevel);
+//             // this.memberNum.text = "(" + players.length + '/' + vipLevelData.playerNumber + ")";
+//             //根据数据结果，显示操作菜单
+//             this.setMenuAuth();
+//             //更新列表
+//             this.updateList();
+//         }
+//
+//         /**
+//          * 更新列表
+//          */
+//         private updateList() {
+//             this.memberList.array = this.memberListData;
+//             this.memberList.refresh();
+//             this.managerList.array = this.managerListData;
+//             this.managerList.refresh();
+//             this.managerBox.visible = this.managerListData.length > 0;
+//             this.memberBox.visible = this.memberListData.length > 0;
+//             //更新位置
+//             this.layout();
+//         }
+//
+//         // 创建成员列表
+//         private createList() {
+//
+//             this.scrollPanel.vScrollBar.elasticBackTime = SCROLLBAR_ELASTIC_TIME;
+//             this.scrollPanel.vScrollBar.elasticDistance = SCROLLBAR_ELASTIC_DISTANCE;
+//
+//             this.memberList.itemRender = ClubMemberItemUI;
+//             this.memberList.selectEnable = true;
+//             this.memberList.renderHandler = this.renderHandler;
+//             this.memberList.mouseHandler = new Laya.Handler(this, this.onMouse, [this.memberList]);
+//             this.memberList.array = this.memberListData;
+//
+//             this.managerList.itemRender = ClubMemberItemUI;
+//             this.managerList.selectEnable = true;
+//             this.managerList.renderHandler = this.renderHandler;
+//             this.managerList.mouseHandler = new Laya.Handler(this, this.onMouse, [this.managerList]);
+//             this.managerList.array = this.managerListData;
+//         }
+//
+//         /**
+//          * 默认状态
+//          */
+//         private renderNormalState() {
+//
+//             this.actionState = ActionState.Normal;
+//
+//             this.memberList.itemRender = ClubMemberItemUI;
+//             this.memberList.renderHandler = this.renderHandler;
+//             this.memberList.array = this.memberListData;
+//             this.memberList.refresh();
+//
+//             this.managerList.itemRender = ClubMemberItemUI;
+//             this.managerList.renderHandler = this.renderHandler;
+//             this.managerList.array = this.managerListData;
+//             this.managerList.refresh();
+//
+//         }
+//
+//         /**
+//          * 编辑状态
+//          */
+//         private renderKickOutState() {
+//
+//             this.actionState = ActionState.KickOUt;
+//
+//             this.memberList.itemRender = ClubMemberEditUI;
+//             this.memberList.renderHandler = this.renderEditHandler;
+//             this.memberList.array = this.memberListData;
+//             this.memberList.refresh();
+//             if (this.player.id !== this.clubStore.club.presidentId) {
+//                 return;
+//             }
+//             this.managerList.itemRender = ClubMemberEditUI;
+//             this.managerList.renderHandler = this.renderEditHandler;
+//             this.managerList.array = this.managerListData;
+//             this.managerList.refresh();
+//
+//         }
+//
+//         /**
+//          * 管理员设置状态
+//          */
+//         private renderAuthState() {
+//
+//             this.actionState = ActionState.Auth;
+//
+//             this.memberList.itemRender = ClubMemberAuthItemUI;
+//             this.memberList.renderHandler = this.renderAuthHandler;
+//             this.memberList.array = this.memberListData;
+//             this.memberList.refresh();
+//             if (this.player.id !== this.clubStore.club.presidentId) {
+//                 return;
+//             }
+//             this.managerList.itemRender = ClubMemberAuthItemUI;
+//             this.managerList.renderHandler = this.renderAuthHandler;
+//             this.managerList.array = this.managerListData;
+//             this.managerList.refresh();
+//
+//         }
+//
+//         /**
+//          * 显示成员信息
+//          * @param playerId
+//          */
+//         private showPlayerInfo(playerId: number) {
+//             Sys.club.getClubMemberInfo({
+//                 playerId: playerId
+//             }).then((result: msg.PlayerInfoResponse) => {
+//                 if (!this.playerInfoView) {
+//                     this.playerInfoView = new ClubPlayerInfoUI();
+//                 }
+//                 this.playerInfoView.Initalize();
+//                 this.playerInfoView.setupData(result);
+//                 this.addChild(this.playerInfoView);
+//             }).catch(() => {
+//                 MessageDialog.showWithText(Sys.localization.get(stringtable.getMemberInfoFailure));
+//             });
+//         }
+//
+//         /**
+//          * @param cell
+//          * @param index
+//          */
+//         private updateItem(cell: ClubMemberItemUI) {
+//             cell.renderItemData(cell.dataSource);
+//         }
+//
+//         /**
+//          * 编辑状态
+//          * @private
+//          * @param {ClubMemberEditUI} cell
+//          * @memberof ClubMemberListUI
+//          */
+//         private updateEditItem(cell: ClubMemberEditUI) {
+//             cell.renderItemData(cell.dataSource, this.player.id === this.clubStore.club.presidentId);
+//         }
+//
+//         /**
+//          * @param cell
+//          * @param index
+//          */
+//         private updateAuthItem(cell: ClubMemberAuthItemUI) {
+//             cell.renderItemData(cell.dataSource, cell.dataSource.playerId === this.clubStore.club.presidentId);
+//         }
+//
+//
+//         /**
+//          * 点击item
+//          * @param e
+//          * @param index
+//          */
+//         private onMouse(list: Laya.List, e: Laya.Event, index: number) {
+//             if (e.type === Laya.Event.CLICK) {
+//                 const selectedCell = list.getCell(index);
+//                 if (e.target === selectedCell.getChildByName("deleteBtn")) {
+//                     this.deleteManager(list.selectedItem);
+//                     return;
+//                 } else if (e.target === selectedCell.getChildByName("setManager")) {
+//                     this.setManager(list.selectedItem);
+//                 } else if (e.target === selectedCell.getChildByName("unsetManager")) {
+//                     this.unsetManager(list.selectedItem);
+//                 }
+//                 if (this.actionState === ActionState.Normal) {
+//                     ClubMemberListUI.selectedMemberId = list.selectedItem.playerId;
+//                     this.showPlayerInfo(list.selectedItem.playerId);
+//                 }
+//             }
+//         }
+//
+//         /**
+//          * 删除成员
+//          * @param data
+//          */
+//         public deleteManager(data: msg.ClubPlayer) {
+//             MessagePrompt.openPrompt(Sys.localization.getFormated(stringtable.kickOUtMemeberTip, data.playerName), new Laya.Handler(this, () => {
+//                 Sys.club.kickOut({
+//                     clubId: data.clubId,
+//                     playerId: data.playerId
+//                 }).then(() => {
+//                     MessageDialog.showWithText(Sys.localization.get(stringtable.kickOutSuccess));
+//                     this.getMembers();
+//                 }).catch(error => {
+//                     if (error && error.codes === msg.Codes.ErrAlreadyUseCreditScoreIsNotZero) {
+//                         MessageDialog.showWithText(Sys.localization.getFormated(stringtable.ErrAlreadyUseCreditScoreIsNotZeroKick, data.playerName));
+//                     } else {
+//                         // MessageDialog.showWithText(Sys.localization.get(stringtable.kickOutFailure));
+//                     }
+//                 });
+//             }));
+//         }
+//
+//         /**
+//          * 重新布局页面
+//          */
+//         private layout() {
+//             this.managerList.height = this.managerListData.length * this.listItemHeight;
+//             this.memberList.height = this.memberListData.length * this.listItemHeight;
+//             //我管理的列表不存在，把我加入的位置放前面去
+//             if (this.managerBox.visible === false) {
+//                 this.memberBox.y = 0;
+//             } else {
+//                 this.memberBox.y = this.managerList.height + this.gapHeight + this.boxHeaderHeight;
+//             }
+//             this.scrollPanel.refresh();
+//
+//             this.memberNum.x = (Laya.stage.width + this.header.titleLabel.textField.textWidth) / 2 + 30;
+//         }
+//
+//         /**
+//          * toggle菜单
+//          * @param e
+//          */
+//         private toggleMenu(e: Laya.Event) {
+//             e.stopPropagation();
+//             //不在normal状态，重置到normal状态
+//             if (this.actionState !== ActionState.Normal) {
+//                 this.renderNormalState();
+//                 this.actionBtn.label = this.actionBtnDisplay.default;
+//             } else {
+//                 this.menuBox.visible = !this.menuBox.visible;
+//             }
+//         }
+//
+//         /**
+//          * 隐藏菜单
+//          */
+//         private hideMenu() {
+//             this.menuBox.visible = false;
+//         }
+//
+//         /**
+//          * 后退
+//          */
+//         private onBack() {
+//             Sys.clubFsm.back();
+//         }
+//
+//         /**
+//          * 点击menu踢出
+//          */
+//         private onActionKickOut() {
+//             this.renderKickOutState();
+//             this.actionBtn.label = this.actionBtnDisplay.cancel;
+//         }
+//
+//         /**
+//          * 点击menu权限
+//          */
+//         private onActionAuth() {
+//             this.renderAuthState();
+//             this.actionBtn.label = this.actionBtnDisplay.cancel;
+//         }
+//
+//         /**
+//          * 设置管理员
+//          * @param data
+//          */
+//         private setManager(data: msg.ClubPlayer) {
+//             Sys.club.upgradePrivilege({
+//                 clubId: data.clubId,
+//                 playerId: data.playerId
+//             }).then(flag => {
+//                 if (flag) {
+//                     this.getMembers();
+//                 }
+//             });
+//         }
+//
+//         /**
+//          * 取消管理员
+//          * @param data
+//          */
+//         private unsetManager(data: msg.ClubPlayer) {
+//             MessagePrompt.openPrompt(Sys.localization.getFormated("removeClubManagerTip", data.playerName), new Laya.Handler(this, () => {
+//                 Sys.club.downgradePrivilege({
+//                     clubId: data.clubId,
+//                     playerId: data.playerId
+//                 }).then(isSuccess => {
+//                     if (isSuccess) {
+//                         this.getMembers();
+//                     }
+//                 });
+//             }));
+//         }
+//
+//         /**
+//          * 菜单权限控制
+//          */
+//         private setMenuAuth() {
+//
+//             let club = this.clubStore.club;
+//             //管理员才显示菜单按钮
+//             if (club.isManager === true) {
+//                 //会长才显示提升权限按钮
+//                 if (this.player.id === club.presidentId) {
+//                     //只有会长一人不显示操作菜单
+//                     if (this.isOnlyPresident()) {
+//                         this.actionBtn.visible = false;
+//                     } else {
+//                         //恢复工作
+//                         this.actionBtn.visible = true;
+//                         this.actionAuthBtn.visible = true;
+//                         this.dividerLine.visible = true;
+//                         this.menuBox.height = 195;
+//                     }
+//                 } else {
+//                     //都是管理员不显示操作菜单
+//                     if (this.memberListData.length === 0) {
+//                         this.actionBtn.visible = false;
+//                     } else {
+//                         //恢复工作
+//                         this.actionBtn.visible = true;
+//                         this.actionAuthBtn.visible = false;
+//                         this.dividerLine.visible = false;
+//                         this.menuBox.height = 105;
+//                     }
+//                 }
+//             } else {
+//                 //成员不显示操作菜单
+//                 this.actionBtn.visible = false;
+//             }
+//
+//             //再次确认一下，如果没有菜单按钮，重置为normal状态
+//             if (this.actionBtn.visible === false) {
+//                 this.renderNormalState();
+//             }
+//         }
+//
+//         /**
+//          * 只有会长一人
+//          * @returns {boolean}
+//          */
+//         private isOnlyPresident(): boolean {
+//             return this.memberListData.length === 0 && this.managerListData.length === 1 && this.managerListData.filter(item => item.playerDuties === msg.Corpus.PRESIDENT).length === 1;
+//         }
+//
+//         /**
+//          * 无限加载
+//          */
+//         private onInfinite() {
+//             if (this.isLoading || this.scrollPanel.vScrollBar.max === 0) {
+//                 return;
+//             }
+//
+//             if (this.scrollPanel.vScrollBar.max - this.scrollPanel.vScrollBar.value <= this.loadingOffset) {
+//                 if (!this.hasMoreData) {
+//                     MessageDialog.showWithText(Sys.localization.get(stringtable.noMoreData));
+//                     return;
+//                 }
+//                 this.isLoading = true;
+//                 this.page++;
+//                 this.getMembers();
+//             }
+//
+//         }
+//
+//     }
+// } 
+//# sourceMappingURL=ClubMemberListUIBak.js.map

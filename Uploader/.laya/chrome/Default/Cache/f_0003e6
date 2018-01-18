@@ -1,0 +1,1399 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+/**
+ * 录像UI
+ */
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        // 通过Resourc命名空间来导出每个模块需要用的资源
+        var VideoView = /** @class */ (function (_super) {
+            __extends(VideoView, _super);
+            function VideoView(vc) {
+                var _this = _super.call(this) || this;
+                _this.selfSeatId = -1;
+                _this.isPlaying = false;
+                _this.thinkTimesFF = 1;
+                _this.animationRate = 1;
+                _this.isGains = false;
+                //自己亮牌
+                _this.aniRaio = 15;
+                _this.initDragon();
+                _this.seatPosition = HoldemPoker.Sys.gameCfg["seatPosition"];
+                _this.videoControl = vc;
+                _this.panels = [];
+                _this.seatData = [];
+                _this.positionArray = _this.getPositions(_this.videoControl.seatNumber);
+                if (HoldemPoker.Sys.isPad && !_this.setPad && _this.positionArray) {
+                    // this.inGameBg.skin = "pad/ingame_bg.png";
+                    _this.setPad = new HoldemPoker.IngameSetPad(_this, _this.videoControl.seatNumber);
+                    // this.setPad.setMyCard(this.myCardBox);
+                }
+                if (HoldemPoker.Sys.isPad && !_this.positionArray) {
+                    return _this;
+                }
+                return _this;
+            }
+            VideoView.prototype.initDragon = function () {
+                this.dragonHole = new HoldemPoker.DragonAni("1334/dragonHole/dragon_hole_ani.sk", this);
+                this.dragonFlop = new HoldemPoker.DragonAni("1334/dragonPubDealing/dragon_pub_deal_flop.sk", this);
+                this.dragonTurn = new HoldemPoker.DragonAni("1334/dragonPubDealing/dragon_pub_deal_turn.sk", this);
+                this.dragonRiver = new HoldemPoker.DragonAni("1334/dragonPubDealing/dragon_pub_deal_river.sk", this);
+            };
+            VideoView.prototype.holePlay = function () {
+                if (this.dragonHole.aniEnable) {
+                    this.dragonHole.visible = true;
+                    this.dragonHole.play(0, false, true);
+                    this.dragonHole.mArmature.playbackRate(this.animationRate);
+                    return true;
+                }
+                return false;
+            };
+            VideoView.prototype.Initalize = function () {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.Sys.ui.push(this);
+                this.zOrder = 10000;
+                this.titleBox.zOrder = 2;
+                this.RegisterUIEvent();
+                this.startPlay.visible = true;
+                this.startBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.startRound);
+                this.flopBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.flopRound);
+                this.turnBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.turnRound);
+                this.riverBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.riverRound);
+                this.videoCollect.skin = this.videoControl.videoInfo.collected ? "1334/ingame/video_collected.png" : "1334/ingame/video_collect.png";
+                this.handCardBg1.skin = HoldemPoker.Utility.getCardBackSkin();
+                this.handCardBg2.skin = HoldemPoker.Utility.getCardBackSkin();
+                if (this.dragonFlop) {
+                    this.dragonFlop.setSlotSkin('cardbg_1', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                    this.dragonFlop.setSlotSkin('cardbg_2', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                    this.dragonFlop.setSlotSkin('cardbg_3', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                }
+                if (this.dragonTurn) {
+                    this.dragonTurn.setSlotSkin('cardbg', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                }
+                if (this.dragonRiver) {
+                    this.dragonRiver.setSlotSkin('cardbg', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                }
+                if (this.videoControl.videoData) {
+                    this.setPanels();
+                }
+            };
+            VideoView.prototype.setPanels = function () {
+                for (var _i = 0, _a = this.videoControl.actions; _i < _a.length; _i++) {
+                    var action = _a[_i];
+                    if (!action.flag && action.phase === -1) {
+                        action.flag = 1;
+                        switch (action.type) {
+                            case HoldemPoker.OptionEnum.EMPTYSEAT:
+                                this.initalizeSeat(action.data);
+                                break;
+                            case HoldemPoker.OptionEnum.ONSEAT:
+                                this.setSeats(action.data);
+                                break;
+                        }
+                    }
+                }
+            };
+            VideoView.prototype.setSlider = function () {
+                this.sliderBar.min = this.videoControl.videoData.handBeginTime;
+                this.sliderBar.max = this.videoControl.timeLine.baseTime;
+                // this.sliderBar.value = this.videoControl.videoData.handBeginTime + 10000;
+                this.sliderBar.showLabel = false;
+                this.sliderBar._progress.sizeGrid = "0,20,0,20,0";
+                this.countUp.text = "00:00";
+                this.countDown.text = "-" + HoldemPoker.Utility.toSimpleTimePattern((this.videoControl.timeLine.baseTime - this.videoControl.videoData.handBeginTime) / 1000);
+            };
+            //设置各个节点
+            VideoView.prototype.setPhase = function () {
+                console.log(this.videoControl.phaseList);
+                for (var _i = 0, _a = this.videoControl.phaseList; _i < _a.length; _i++) {
+                    var phase = _a[_i];
+                    var x = (phase.baseTime - this.videoControl.videoData.handBeginTime) / (this.videoControl.timeLine.baseTime - this.videoControl.videoData.handBeginTime);
+                    switch (phase.phase) {
+                        case 0:
+                            this.flopBtn.x = this.btnBox.width * x;
+                            if (this.flopBtn.x < this.startBtn.x + 60) {
+                                this.flopBtn.x = this.startBtn.x + 60;
+                            }
+                            this.flopBtn.visible = true;
+                            break;
+                        case 1:
+                            this.turnBtn.x = (this.btnBox.width * x) - 25;
+                            if (this.turnBtn.x < this.flopBtn.x + 60) {
+                                this.turnBtn.x = this.flopBtn.x + 60;
+                            }
+                            this.turnBtn.visible = true;
+                            break;
+                        case 2:
+                            this.riverBtn.x = (this.btnBox.width * x) - 28;
+                            if (this.riverBtn.x < this.turnBtn.x + 60) {
+                                this.riverBtn.x = this.turnBtn.x + 60;
+                            }
+                            this.riverBtn.visible = true;
+                            break;
+                    }
+                    console.log("=====" + (phase.baseTime - this.videoControl.videoData.handBeginTime) / (this.videoControl.timeLine.baseTime - this.videoControl.videoData.handBeginTime));
+                }
+            };
+            VideoView.prototype.Refresh = function () {
+            };
+            VideoView.prototype.Dispose = function () {
+            };
+            VideoView.prototype.RegisterUIEvent = function () {
+                this.startPlay.on(Laya.Event.CLICK, this, this.start);
+                this.pauseBtn.on(Laya.Event.CLICK, this, this.play);
+                this.startBtn.on(Laya.Event.CLICK, this, this.onPhase, [-1]);
+                this.flopBtn.on(Laya.Event.CLICK, this, this.onPhase, [0]);
+                this.turnBtn.on(Laya.Event.CLICK, this, this.onPhase, [1]);
+                this.riverBtn.on(Laya.Event.CLICK, this, this.onPhase, [2]);
+                this.ff_video_btn.on(Laya.Event.CLICK, this, this.onFFVideo);
+                this.showControlPanelBtn.on(Laya.Event.CLICK, this, this.showCP);
+                this.blackBtn.on(Laya.Event.CLICK, this, this.onClose);
+                this.videoCollect.on(Laya.Event.CLICK, this, this.onCollect);
+            };
+            VideoView.prototype.UnregisterUIEvent = function () {
+            };
+            VideoView.prototype.onLanguageChanged = function () {
+            };
+            VideoView.prototype.flopPlay = function () {
+                if (this.dragonFlop.aniEnable) {
+                    this.dragonFlop.visible = true;
+                    HoldemPoker.Sys.audio.play("card_turning");
+                    Laya.timer.once(400, this, function () {
+                        HoldemPoker.Sys.audio.play("button_click");
+                    });
+                    this.dragonFlop.play(0, false, true);
+                    this.dragonFlop.mArmature.playbackRate(this.animationRate);
+                    return true;
+                }
+                return false;
+            };
+            VideoView.prototype.turnPlay = function () {
+                if (this.dragonTurn.aniEnable) {
+                    this.dragonTurn.visible = true;
+                    Laya.timer.once(200, this, function () {
+                        HoldemPoker.Sys.audio.play("card_turning");
+                    });
+                    this.dragonTurn.play(0, false, true);
+                    this.dragonTurn.mArmature.playbackRate(this.animationRate);
+                    return true;
+                }
+                return false;
+            };
+            VideoView.prototype.riverPlay = function () {
+                if (this.dragonRiver.aniEnable) {
+                    this.dragonRiver.visible = true;
+                    Laya.timer.once(300, this, function () {
+                        HoldemPoker.Sys.audio.play("card_turning");
+                    });
+                    this.dragonRiver.play(0, false, true);
+                    this.dragonRiver.mArmature.playbackRate(this.animationRate);
+                    return true;
+                }
+                return false;
+            };
+            //#######骨骼动画############
+            VideoView.prototype.start = function () {
+                this.setSlider();
+                this.setPhase();
+                this.startPlay.visible = false;
+                this.showCP();
+                this.videoControl.startVideo();
+                this.isPlaying = true;
+            };
+            VideoView.prototype.play = function () {
+                if (this.isPlaying) {
+                    this.pauseBtn.skin = "1334/ingame/video_playy.png";
+                    this.videoControl.pauseVideo();
+                    this.stopAllClock(1);
+                    this.isPlaying = false;
+                }
+                else {
+                    this.pauseBtn.skin = "1334/ingame/video_pause.png";
+                    this.videoControl.startVideo();
+                    this.stopAllClock(2);
+                    this.isPlaying = true;
+                }
+            };
+            VideoView.prototype.clearPanels = function () {
+                for (var i = 0, a = this.panels; i < a.length; i++) {
+                    var panel = a[i];
+                    var seat = this.getSeatBySitId(panel.serverPos);
+                    panel.updateBySeat(seat);
+                    panel.updateBet(null, 0);
+                    panel.showdown(false);
+                    panel.updateImgCards(null);
+                    panel.clearStatus(true);
+                }
+            };
+            VideoView.prototype.onPhase = function (p) {
+                this.asyncCollectBetAnimation();
+                this.clearBets();
+                this.clearPanels();
+                this.stopAllClock();
+                this.isPlaying = false;
+                this.pauseBtn.skin = "1334/ingame/video_playy.png";
+                this.videoControl.pauseVideo();
+                this.videoControl.pubCard = [];
+                this.videoControl.resetAction(p);
+                this.isGains = false;
+                if (!this.vf) {
+                    this.vf = new HoldemPoker.VFlop(this.videoControl);
+                }
+                for (var i = 0; i < 5; i++) {
+                    this.vf.showBoardCard(i, null);
+                }
+                this.buyInsInfo.visible = false;
+                // switch (p) {
+                //     case 0:
+                //         for (let card of this.videoControl.videoData.pubCards) {
+                //             if (card && this.videoControl.pubCard.length < 3) {
+                //                 this.videoControl.pubCard.push(card);
+                //             }
+                //         }
+                //         for (let i = 0; i < 3; i++) {
+                //             this.vf.showBoardCard(i, this.videoControl.pubCard[i]);
+                //         }
+                //         break;
+                //     case 1:
+                //         for (let card of this.videoControl.videoData.pubCards) {
+                //             if (card && this.videoControl.pubCard.length < 4) {
+                //                 this.videoControl.pubCard.push(card);
+                //             }
+                //         }
+                //         if (this.videoControl.pubCard.length > 3 && this.videoControl.pubCard[3]) {
+                //             for (let i = 0; i < 4; i++) {
+                //                 this.vf.showBoardCard(i, this.videoControl.pubCard[i]);
+                //             }
+                //         }
+                //         break;
+                //     case 2:
+                //         for (let card of this.videoControl.videoData.pubCards) {
+                //             if (card && this.videoControl.pubCard.length < 5) {
+                //                 this.videoControl.pubCard.push(card);
+                //             }
+                //         }
+                //         if (this.videoControl.pubCard.length > 4 && this.videoControl.pubCard[3]) {
+                //             for (let i = 0; i < 5; i++) {
+                //                 this.vf.showBoardCard(i, this.videoControl.pubCard[i]);
+                //             }
+                //         }
+                //         break;
+                // }
+                // if (p === -1) {
+                // this.sliderBar.value = this.videoControl.videoData.handBeginTime + 500;
+                // this.videoControl.baseTime = this.videoControl.videoData.handBeginTime + 500;
+                //     this.updatePot(0);
+                //     this.updateRoundPot(0);
+                //     return;
+                // }
+                for (var _i = 0, _a = this.videoControl.phaseList; _i < _a.length; _i++) {
+                    var phase = _a[_i];
+                    if (phase.phase === p) {
+                        for (var _b = 0, _c = this.videoControl.videoData.pubCards; _b < _c.length; _b++) {
+                            var card = _c[_b];
+                            if (card && this.videoControl.pubCard.length < phase.pubCardNum) {
+                                this.videoControl.pubCard.push(card);
+                            }
+                        }
+                        for (var i = 0; i < phase.pubCardNum; i++) {
+                            this.vf.showBoardCard(i, this.videoControl.pubCard[i]);
+                        }
+                        this.sliderBar.value = phase.baseTime;
+                        this.videoControl.baseTime = phase.baseTime;
+                        this.countUp.text = HoldemPoker.Utility.toSimpleTimePattern((this.videoControl.baseTime - this.videoControl.videoData.handBeginTime) / 1000) + "";
+                        this.countDown.text = "-" + HoldemPoker.Utility.toSimpleTimePattern((this.videoControl.timeLine.baseTime - this.videoControl.baseTime) / 1000);
+                        if (p === -1) {
+                            this.sliderBar.value = this.videoControl.videoData.handBeginTime + 500;
+                            this.videoControl.baseTime = this.videoControl.videoData.handBeginTime + 500;
+                            this.countUp.text = "00:00";
+                            this.countDown.text = "-" + HoldemPoker.Utility.toSimpleTimePattern((this.videoControl.timeLine.baseTime - this.videoControl.videoData.handBeginTime) / 1000);
+                        }
+                        this.videoControl.videoData.pot = phase.pot;
+                        this.updatePot(phase.pot);
+                        this.updateRoundPot(phase.pot);
+                        this.sidePotsShow(phase.pots);
+                        for (var _d = 0, _e = phase.sitGolds; _d < _e.length; _d++) {
+                            var sg = _e[_d];
+                            var seat = this.getSeatByPlayerId(sg.playerId);
+                            seat.bankroll = sg.gold;
+                            seat.madeHands = sg.handPower;
+                            if (sg.state) {
+                                seat.actionState = sg.state;
+                            }
+                            else {
+                                seat.actionState = 0 /* GAME_IN_STATE */;
+                            }
+                            var panel = this.getPanelByServerPos(seat.sitId);
+                            panel.updateByNewRound(seat, seat.isDealer);
+                            panel.updateChipText(seat.bankroll);
+                            if (seat.actionState === 2 /* ALLIN_STATE */) {
+                                panel.showAllinState(true);
+                            }
+                        }
+                        this.vf.setCardHighlight();
+                        this.foldHoleCards();
+                        break;
+                    }
+                }
+                this.showSmallCards();
+                this.updateMadeHands();
+            };
+            VideoView.prototype.onFFVideo = function () {
+                if (this.videoControl.ff === 100) {
+                    this.videoControl.ff = 50;
+                    this.animationRate = 2;
+                    this.ff_number.text = "X2";
+                    this.thinkTimesFF = 2;
+                    this.setPanelFF(2);
+                }
+                else if (this.videoControl.ff === 50) {
+                    this.videoControl.ff = 25;
+                    this.animationRate = 4;
+                    this.thinkTimesFF = 4;
+                    this.ff_number.text = "X4";
+                    this.setPanelFF(4);
+                }
+                else {
+                    this.videoControl.ff = 100;
+                    this.animationRate = 1;
+                    this.thinkTimesFF = 1;
+                    this.ff_number.text = "X1";
+                    this.setPanelFF(1);
+                }
+            };
+            VideoView.prototype.setPanelFF = function (ff) {
+                for (var _i = 0, _a = this.panels; _i < _a.length; _i++) {
+                    var panel = _a[_i];
+                    panel.onVideoFF(ff);
+                }
+            };
+            VideoView.prototype.showCP = function () {
+                var _this = this;
+                if (this.startPlay.visible) {
+                    return;
+                }
+                if (!this.titleBox.visible) {
+                    HoldemPoker.UIAnimator.videoTitleShow(this.titleBox);
+                }
+                // this.showControlPanelBtn.mouseEnabled = false;
+                if (this.controlPanel.visible) {
+                    this.controlPanel.visible = false;
+                    this.controlPanel.alpha = 0;
+                    this.titleBox.visible = false;
+                }
+                else {
+                    this.controlPanel.visible = true;
+                    this.controlPanel.alpha = 1;
+                    HoldemPoker.UIAnimator.alphaTo0(this.controlPanel, Laya.Handler.create(this, function () {
+                        _this.controlPanel.visible = false;
+                        _this.showControlPanelBtn.mouseEnabled = true;
+                        HoldemPoker.UIAnimator.videoTitleHide(_this.titleBox);
+                    }));
+                }
+            };
+            VideoView.prototype.onClose = function () {
+                HoldemPoker.Sys.net.event(HoldemPoker.GEvent.VIDEO_COLLECT);
+                this.videoControl.pauseVideo();
+                HoldemPoker.Sys.ui.pop();
+            };
+            VideoView.prototype.onCollect = function () {
+                var data = this.videoControl.videoInfo;
+                var request = data.collected ? 'CancelCollectVideoRequest' : 'CollectVideoRequest';
+                HoldemPoker.Sys.net.sendMesage(request, {
+                    recordId: data.recordId,
+                    gameId: data.gameId,
+                    handCount: data.handCount,
+                }, new Laya.Handler(this, this.onResolveCollect), new Laya.Handler(this, this.onCollectError));
+            };
+            VideoView.prototype.onResolveCollect = function (data) {
+                var msg = !this.videoControl.videoInfo.collected ? HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.videoCllectOk) : HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cacelVideoCllectOK);
+                HoldemPoker.MessageDialog.showWithText(msg);
+                this.videoControl.videoInfo.collected = !this.videoControl.videoInfo.collected;
+                this.videoCollect.skin = this.videoControl.videoInfo.collected ? "1334/ingame/video_collected.png" : "1334/ingame/video_collect.png";
+            };
+            VideoView.prototype.onCollectError = function (err) {
+                if (err.codes) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(err.codes));
+                }
+            };
+            //////////////////////////////////////////////////////
+            VideoView.prototype.initalizeSeat = function (count) {
+                console.log("=======>initalizeSeat");
+                this.roomName.text = this.videoControl.videoData.roomName;
+                this.positionArray = this.getPositions(this.videoControl.seatNumber);
+                for (var i = 0; i < count; ++i) {
+                    var positions = this.positionArray[i];
+                    var panel = new HoldemPoker.PlayerPanelUI(this.videoControl.seatNumber);
+                    panel.serverPos = i;
+                    if (HoldemPoker.Sys.isPad) {
+                        panel.scale(1.4, 1.4);
+                    }
+                    panel.pos(positions[0], positions[1]);
+                    panel.Initalize();
+                    this.addChild(panel);
+                    this.panels.push(panel);
+                }
+                var ante = "";
+                if (this.videoControl.videoData.ante > 0) {
+                    ante = "(" + this.videoControl.videoData.ante + ")";
+                }
+                this.blindBetLabel.text = this.videoControl.videoData.sb + "/" + this.videoControl.videoData.bb + ante;
+            };
+            VideoView.prototype.setSeats = function (sits) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _i, sits_1, sit, isbb, issb, isSt, isfb, hc, d, panel, powerType, name_1, seatData, p, seat;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>setSeats");
+                                for (_i = 0, sits_1 = sits; _i < sits_1.length; _i++) {
+                                    sit = sits_1[_i];
+                                    isbb = sit.bb;
+                                    issb = sit.sb;
+                                    isSt = sit.st;
+                                    isfb = sit.forceBB;
+                                    hc = sit.holeCards;
+                                    d = sit.dearler;
+                                    panel = this.getPanelByServerPos(sit.sitId);
+                                    powerType = sit.handPowerType;
+                                    name_1 = decodeURI(sit.playerName);
+                                    seatData = sit;
+                                    seatData.playerName = name_1;
+                                    seatData.isDealer = d;
+                                    seatData.isBB = isbb;
+                                    seatData.isSB = issb;
+                                    seatData.isStraddle = isSt;
+                                    seatData.isforce = isfb;
+                                    seatData.actionResult = 0 /* NO_ACTION */;
+                                    seatData.bankroll = sit.lastBankroll;
+                                    seatData.holeCards = hc;
+                                    seatData.madeHands = powerType;
+                                    seatData.initalizeBankroll = seatData.bankroll;
+                                    this.seatData.push(seatData);
+                                    // panel.updateBySeat(seatData, d);
+                                    // if (panel && seatData.sitId === 1) {///自己
+                                    //     this.updateSeatServerPos(1);
+                                    //     await UIAnimator.asyncPlayerIconMove(panel);
+                                    //     this.showMyCard(seatData);
+                                    // }
+                                    // this.showSmallCard();
+                                    if (HoldemPoker.Sys.players.self.isSelf(seatData.playerId)) {
+                                        this.selfSeatId = seatData.sitId;
+                                    }
+                                    // else {
+                                    // panel.updateSelfCardTypes(null);
+                                    // }
+                                }
+                                if (!(this.selfSeatId >= 0)) return [3 /*break*/, 2];
+                                this.updateSeatServerPos(this.selfSeatId);
+                                p = this.getPanelByServerPos(this.selfSeatId);
+                                seat = this.getSeatBySitId(this.selfSeatId);
+                                if (!p) return [3 /*break*/, 2];
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncPlayerIconMove(p)];
+                            case 1:
+                                _a.sent();
+                                this.showMyCard(seat);
+                                _a.label = 2;
+                            case 2:
+                                this.showSmallCards();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.showMyCard = function (seatData) {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, this.playHoleCardsAni(seatData.holeCards)];
+                            case 1:
+                                _a.sent();
+                                // this.showSmallCards();
+                                this.updateMadeHands(); //更新自己的手牌信息
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.postAnte = function (ante) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var vante;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                this.videoControl.videoData.pot = 0;
+                                if (!(ante > 0)) return [3 /*break*/, 2];
+                                console.log("=======>postAnte");
+                                vante = new HoldemPoker.VAnte(ante);
+                                return [4 /*yield*/, vante.asyncAnteAnimation(this.panels, this.videoControl)];
+                            case 1:
+                                _a.sent();
+                                _a.label = 2;
+                            case 2: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.postBB = function (sits) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var vbb;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>postBB");
+                                vbb = new HoldemPoker.VBlind();
+                                return [4 /*yield*/, vbb.asyncChipPlayGrpAni(this.panels, this.videoControl)];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.onThinkTime = function (think) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var sd, panel;
+                    return __generator(this, function (_a) {
+                        console.log("=======>onThinkTime");
+                        this.stopAllClock();
+                        sd = this.getSeatByPlayerId(think.playerId);
+                        panel = this.getPanelByServerPos(sd.sitId);
+                        panel.startPokerClock(think.thinkTime, think.thinkTime);
+                        return [2 /*return*/];
+                    });
+                });
+            };
+            VideoView.prototype.playerCall = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var sd, call;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>playerCall");
+                                this.stopAllClock();
+                                sd = this.getSeatByPlayerId(option.playerId);
+                                if (!sd.bet) {
+                                    sd.bet = 0;
+                                }
+                                sd.bet = sd.bet + option.betGold;
+                                sd.actionResult = 1 /* CALL_ACTION */;
+                                sd.bankroll = sd.bankroll - option.betGold;
+                                call = new HoldemPoker.VCall();
+                                return [4 /*yield*/, call.showCall(sd, this.videoControl, option.betGold)];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.playerCheck = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var sd, check;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>playerCheck");
+                                this.stopAllClock();
+                                sd = this.getSeatByPlayerId(option.playerId);
+                                if (!sd.bet) {
+                                    sd.bet = 0;
+                                }
+                                sd.bet = sd.bet + option.betGold;
+                                sd.actionResult = 4 /* CHECK_ACTION */;
+                                check = new HoldemPoker.VCheck();
+                                return [4 /*yield*/, check.showCheck(sd, this.videoControl)];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.playerFold = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var sd, fold;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>playerFold");
+                                this.stopAllClock();
+                                sd = this.getSeatByPlayerId(option.playerId);
+                                if (!sd.bet) {
+                                    sd.bet = 0;
+                                }
+                                sd.bet = sd.bet + option.betGold;
+                                sd.actionResult = 2 /* FOLD_ACTION */;
+                                sd.actionState = 1 /* FOLD_STATE */;
+                                fold = new HoldemPoker.VFold();
+                                return [4 /*yield*/, fold.showFold(sd, this.videoControl)];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.playerRaise = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var sd, raise;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>playerRaise");
+                                this.stopAllClock();
+                                sd = this.getSeatByPlayerId(option.playerId);
+                                if (!sd.bet) {
+                                    sd.bet = 0;
+                                }
+                                sd.bet = sd.bet + option.betGold;
+                                sd.actionResult = 8 /* RAISE_ACTION */;
+                                sd.bankroll = sd.bankroll - option.betGold;
+                                raise = new HoldemPoker.VRaise();
+                                return [4 /*yield*/, raise.showRaise(sd, this.videoControl, option.betGold)];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.playerAllIn = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var sd, allin;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>playerAllIn");
+                                this.stopAllClock();
+                                sd = this.getSeatByPlayerId(option.playerId);
+                                if (!sd.bet) {
+                                    sd.bet = 0;
+                                }
+                                sd.bet = sd.bet + option.betGold;
+                                sd.actionResult = 16 /* ALLIN_ACTION */;
+                                sd.actionState = 2 /* ALLIN_STATE */;
+                                sd.bankroll = 0;
+                                allin = new HoldemPoker.VAllin();
+                                return [4 /*yield*/, allin.allinAni(sd, this.videoControl, option.betGold)];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.pubCard = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _i, _a, card, _b, _c, power, seat;
+                    return __generator(this, function (_d) {
+                        switch (_d.label) {
+                            case 0:
+                                console.log("=======>pubCard");
+                                return [4 /*yield*/, this.asyncCollectBetAnimation()];
+                            case 1:
+                                _d.sent();
+                                this.clearBets();
+                                this.updateRoundPot(this.videoControl.videoData.pot);
+                                this.videoControl.pots = option.pots;
+                                if (!this.vf) {
+                                    this.vf = new HoldemPoker.VFlop(this.videoControl);
+                                }
+                                this.vf.showPubCard(option.postCards);
+                                this.videoControl.pubCard = [];
+                                for (_i = 0, _a = option.postCards; _i < _a.length; _i++) {
+                                    card = _a[_i];
+                                    this.videoControl.pubCard.push(card);
+                                }
+                                for (_b = 0, _c = option.handPowers; _b < _c.length; _b++) {
+                                    power = _c[_b];
+                                    if (HoldemPoker.Sys.players.self.isSelf(power.playerId)) {
+                                        seat = this.getSeatByPlayerId(power.playerId);
+                                        seat.madeHands = power.handPower;
+                                    }
+                                }
+                                this.updateMadeHands();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.showDown = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _i, _a, hand, seat, _b, _c, power, seat, panel;
+                    return __generator(this, function (_d) {
+                        switch (_d.label) {
+                            case 0:
+                                console.log("=======>showDown");
+                                return [4 /*yield*/, this.asyncCollectBetAnimation()];
+                            case 1:
+                                _d.sent();
+                                this.clearBets();
+                                for (_i = 0, _a = option.flopHandCards; _i < _a.length; _i++) {
+                                    hand = _a[_i];
+                                    seat = this.getSeatByPlayerId(hand.playerId);
+                                    if (HoldemPoker.Sys.players.self.isSelf(seat.playerId)) {
+                                        this.showSelfCards = hand.flopHandCards;
+                                        console.log(this.showSelfCards);
+                                    }
+                                    else {
+                                        seat.holeCards = hand.flopHandCards;
+                                    }
+                                }
+                                return [4 /*yield*/, this.asyncPlayerShowdown()];
+                            case 2:
+                                _d.sent();
+                                for (_b = 0, _c = option.handPowers; _b < _c.length; _b++) {
+                                    power = _c[_b];
+                                    seat = this.getSeatByPlayerId(power.playerId);
+                                    if (seat) {
+                                        seat.madeHands = power.handPower;
+                                        panel = this.getPanelByServerPos(seat.sitId);
+                                        if (panel) {
+                                            panel.winnerCardType.text = HoldemPoker.Utility.handPowerToString(seat.madeHands);
+                                            panel.winnerCardTypeBg.visible = true;
+                                        }
+                                    }
+                                }
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            VideoView.prototype.playerBuyIns = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var vins;
+                    return __generator(this, function (_a) {
+                        console.log("=======>playerBuyIns");
+                        vins = new HoldemPoker.VIns(this.videoControl);
+                        vins.setData(option);
+                        return [2 /*return*/];
+                    });
+                });
+            };
+            VideoView.prototype.playerBuyInsSetter = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var vins;
+                    return __generator(this, function (_a) {
+                        console.log("=======>playerBuyInsSetter");
+                        vins = new HoldemPoker.VIns(this.videoControl);
+                        vins.afterBuyInsTips(option);
+                        return [2 /*return*/];
+                    });
+                });
+            };
+            VideoView.prototype.gains = function (option) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var vg;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log("=======>gains");
+                                return [4 /*yield*/, this.asyncCollectBetAnimation()];
+                            case 1:
+                                _a.sent();
+                                this.buyInsInfo.visible = false;
+                                this.clearBets();
+                                this.updateRoundPot(this.videoControl.videoData.pot);
+                                vg = new HoldemPoker.VGains(this.videoControl, option);
+                                vg.showWinner();
+                                this.isGains = true;
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            /** //停止桌面上的倒计时
+             *
+             * @param type :1、暂停  2、恢复
+             */
+            VideoView.prototype.stopAllClock = function (type) {
+                //停止桌面上其他的计时器
+                for (var i = 0, a = this.panels; i < a.length; i++) {
+                    var panel = a[i];
+                    if (type === 1) {
+                        panel.pauseCountDown();
+                    }
+                    else if (type === 2) {
+                        panel.resumeCountDown();
+                    }
+                    else {
+                        panel.stopPokerClock();
+                    }
+                }
+            };
+            /**
+          * 更新底池  两个底池 这个用来每次收取筹码时  更新这个底池
+          *
+          * @param {number} pot
+          *
+          * @memberOf InGameUI
+          */
+            VideoView.prototype.updateRoundPot = function (pot) {
+                if (pot && pot > 0) {
+                    this.roundPot.visible = true;
+                    this.roundPot.text = HoldemPoker.Utility.toNumberPattern(pot);
+                }
+                else {
+                    this.roundPot.visible = false;
+                    this.roundPot.text = "";
+                }
+            };
+            /**
+             * 更新底池
+             *
+             * @param {number} pot
+             *
+             * @memberOf InGameUI
+             */
+            VideoView.prototype.updatePot = function (pot) {
+                // pot = this.videoControl.pot;
+                if (pot && pot > 0) {
+                    this.potLabel.visible = true;
+                    this.potLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.pot) + HoldemPoker.Utility.toNumberPattern(pot);
+                    this.potImage.visible = true;
+                }
+                else {
+                    this.potLabel.visible = false;
+                    this.potImage.visible = false;
+                    this.potLabel.text = "";
+                }
+            };
+            VideoView.prototype.clearBets = function () {
+                for (var i = 0; i < this.videoControl.videoData.sitCount; i++) {
+                    var seat = this.getSeatByIdx(i);
+                    if (seat) {
+                        //在清空筹码的时候 做 筹码图片的默认赋值 清空之后使用默认的筹码图片
+                        //seat.betImgColor = Utility.getBetImgColor(0, 0);
+                        seat.bet = 0;
+                        var panel = this.getPanelByServerPos(seat.sitId);
+                        if (panel) {
+                            panel.updateBet(null, 0);
+                        }
+                    }
+                }
+            };
+            VideoView.prototype.clearPanelBets = function (panels) {
+                if (panels) {
+                    for (var i = 0; i < panels.length; i++) {
+                        var panel = panels[i];
+                        if (panel) {
+                            panel.updateBet(null, 0);
+                        }
+                    }
+                }
+            };
+            VideoView.prototype.getPositions = function (playerCount) {
+                console.log(playerCount + "  ----+++--");
+                console.log(this.seatPosition[playerCount - 2]);
+                if (playerCount >= 2 && playerCount <= 9) {
+                    return this.seatPosition[playerCount - 2];
+                }
+                return null;
+            };
+            VideoView.prototype.getPanelByServerPos = function (srvpos) {
+                for (var i = 0; i < this.panels.length; i++) {
+                    if (this.panels[i].serverPos === srvpos) {
+                        return this.panels[i];
+                    }
+                }
+                return null;
+            };
+            VideoView.prototype.getPanelByIndex = function (index) {
+                if (index >= 0 && index < this.panels.length) {
+                    return this.panels[index];
+                }
+                return null;
+            };
+            VideoView.prototype.getSelfSeat = function () {
+                return this.getSeatBySitId(this.selfSeatId);
+            };
+            VideoView.prototype.getSeatBySitId = function (sitId) {
+                if (this.seatData) {
+                    for (var i = 0; i < this.seatData.length; i++) {
+                        if (this.seatData[i]
+                            && this.seatData[i].sitId === sitId) {
+                            return this.seatData[i];
+                        }
+                    }
+                }
+                return null;
+            };
+            VideoView.prototype.getSeatByPlayerId = function (playerId) {
+                if (this.seatData) {
+                    for (var i = 0; i < this.seatData.length; i++) {
+                        if (this.seatData[i]
+                            && this.seatData[i].playerId === playerId) {
+                            return this.seatData[i];
+                        }
+                    }
+                }
+                return null;
+            };
+            VideoView.prototype.getSeatByIdx = function (idx) {
+                if (this.seatData && idx >= 0 && idx < this.seatData.length) {
+                    return this.seatData[idx];
+                }
+                return null;
+            };
+            //------------------------清桌面
+            VideoView.prototype.asyncCollectBetAnimation = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var panels;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, HoldemPoker.Utility.waitForSeconds(500)];
+                            case 1:
+                                _a.sent();
+                                panels = this.getAllBetPanels(2 /* BET_STATE */, false);
+                                //收筹码 先清空panels 上的 bet筹码数值 播放收筹码动画
+                                this.clearPanelBets(panels);
+                                //清除面板上的状态
+                                this.clearPanelStatus(null);
+                                //bet筹码动画
+                                return [4 /*yield*/, this.asyncChipToPotGrpAni(panels)];
+                            case 2:
+                                //bet筹码动画
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            /**
+           *获取所有有下注操作的面板
+           */
+            VideoView.prototype.getAllBetPanels = function (betType, bySeatData) {
+                //将所有需要前注的面板放入到targets中
+                var targets = [];
+                for (var i = 0; i < this.videoControl.seatNumber; i++) {
+                    ///站起、但下了bet
+                    var nullPanel = this.getPanelByIndex(i);
+                    if (nullPanel.betImage.visible) {
+                        targets.push(nullPanel);
+                    }
+                }
+                return targets;
+            };
+            VideoView.prototype.clearPanelStatus = function (panels) {
+                if (!panels) {
+                    panels = this.panels;
+                }
+                if (panels) {
+                    for (var i = 0; i < panels.length; i++) {
+                        var panel = panels[i];
+                        var seatData = this.getSeatBySitId(panel.serverPos);
+                        if (panel &&
+                            (seatData && seatData.actionState !== 2 /* ALLIN_STATE */
+                                && seatData.actionState !== 1 /* FOLD_STATE */)) {
+                            panel.clearStatus(true);
+                        }
+                    }
+                }
+            };
+            //筹码飞向底池
+            VideoView.prototype.asyncChipToPotGrpAni = function (panels) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var promiseArr, i, seat;
+                    return __generator(this, function (_a) {
+                        promiseArr = [];
+                        for (i = 0; i < panels.length; i++) {
+                            seat = this.getSeatBySitId(panels[i].serverPos);
+                            promiseArr.push(HoldemPoker.UIAnimator.asyncChipToPotAni(panels[i].BetAniAnchor, this.ChipsAniAnchor, this, panels[i].betImage.skin));
+                        }
+                        return [2 /*return*/, Promise.all(promiseArr)];
+                    });
+                });
+            };
+            VideoView.prototype.updateSeatServerPos = function (selfSitId) {
+                var svrpos = selfSitId;
+                var count = this.videoControl.seatNumber;
+                for (var i = 0; i < count; ++i) {
+                    var pos = i; // this.panels[i].serverPos;
+                    pos += svrpos;
+                    if (pos >= count) {
+                        pos -= count;
+                    }
+                    if (this.panels[i]) {
+                        this.panels[i].serverPos = pos;
+                        // this.panels[i].updateBySeat(room.getSeatBySitId(pos));
+                    }
+                }
+                for (var i = 0; i < this.panels.length; i++) {
+                    var panel = this.panels[i];
+                    if (panel) {
+                        var seatData = this.getSeatBySitId(panel.serverPos);
+                        if (seatData) {
+                            panel.updateBySeat(seatData, seatData.isDealer);
+                        }
+                        else {
+                            panel.updateBySeat(seatData);
+                        }
+                    }
+                }
+            };
+            VideoView.prototype.playHoleCardsAni = function (data) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                //设置手牌
+                                _this.updateHoleCards(data);
+                                _this.dismissHole();
+                                if (data && data.length > 0) {
+                                    // this.ani_holeCard.play(0, false);
+                                    if (_this.holePlay()) {
+                                        _this.dragonHole.mArmature.once(Laya.Event.STOPPED, _this, function () {
+                                            console.log("hole动画结束");
+                                            var mySeat = _this.getSeatBySitId(_this.selfSeatId);
+                                            if (mySeat && mySeat.holeCards && mySeat.holeCards.length > 0) {
+                                                _this.dragonHole.visible = false;
+                                                _this.imgHoleCard0.visible = true;
+                                                _this.imgHoleCard1.visible = true;
+                                                _this.btnHoleCard1.visible = true;
+                                                _this.btnHoleCard2.visible = true;
+                                                _this.btnHoleCard1.mouseEnabled = true;
+                                                _this.btnHoleCard2.mouseEnabled = true;
+                                                resolve();
+                                            }
+                                            else {
+                                                _this.imgHoleCard0.visible = false;
+                                                _this.imgHoleCard1.visible = false;
+                                                _this.btnHoleCard1.visible = false;
+                                                _this.btnHoleCard2.visible = false;
+                                                resolve();
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        _this.dragonHole.visible = false;
+                                        console.log("hole动画结束2");
+                                        _this.imgHoleCard0.visible = true;
+                                        _this.imgHoleCard1.visible = true;
+                                        _this.btnHoleCard1.visible = true;
+                                        _this.btnHoleCard2.visible = true;
+                                        _this.btnHoleCard1.mouseEnabled = true;
+                                        _this.btnHoleCard2.mouseEnabled = true;
+                                        resolve();
+                                    }
+                                }
+                                else {
+                                    resolve();
+                                }
+                            })];
+                    });
+                });
+            };
+            VideoView.prototype.updateHoleCards = function (data) {
+                this.holeBgCard0.visible = false;
+                this.holeBgCard1.visible = false;
+                if (data === null || data.length === 0) {
+                    this.dismissHole();
+                    this.foldBoxAni.visible = false;
+                    return;
+                }
+                //每次更新手牌的时候 更新 状态复原
+                this.foldHoleCards();
+                var firstCard = data[0];
+                var firstImgName = HoldemPoker.Utility.getCardName(firstCard.cardNumber, firstCard.cardSuit);
+                this.imgHoleCard0.texture = HoldemPoker.Sys.loader.getRes(firstImgName);
+                this.dragonHole.setSlotSkin("card_left", HoldemPoker.Sys.loader.getRes(firstImgName));
+                var secondCard = data[1];
+                var secondImgName = HoldemPoker.Utility.getCardName(secondCard.cardNumber, secondCard.cardSuit);
+                this.imgHoleCard1.texture = HoldemPoker.Sys.loader.getRes(secondImgName);
+                this.dragonHole.setSlotSkin("card_right", HoldemPoker.Sys.loader.getRes(secondImgName));
+                this.dragonHole.visible = false;
+                console.log("hole动画结束3");
+                this.imgHoleCard0.visible = true;
+                this.imgHoleCard1.visible = true;
+                this.btnHoleCard1.visible = true;
+                this.btnHoleCard2.visible = true;
+                this.btnHoleCard1.mouseEnabled = true;
+                this.btnHoleCard2.mouseEnabled = true;
+                this.foldBoxAni.visible = false;
+                //给弃牌动画的image 赋值
+                this.foldCard0.texture = HoldemPoker.Sys.loader.getRes(firstImgName);
+                this.foldCard1.texture = HoldemPoker.Sys.loader.getRes(secondImgName);
+                if (!this.foldCard0.filters) {
+                    this.foldCard0.filters = [HoldemPoker.Utility.grayFilter()];
+                }
+                if (!this.foldCard1.filters) {
+                    this.foldCard1.filters = [HoldemPoker.Utility.grayFilter()];
+                }
+            };
+            VideoView.prototype.dismissHole = function () {
+                this.imgHoleCard0.visible = false;
+                this.imgHoleCard1.visible = false; //没有数据
+                this.btnHoleCard1.visible = false;
+                this.btnHoleCard2.visible = false;
+                this.tagShow1.visible = false;
+                this.tagShow2.visible = false;
+            };
+            VideoView.prototype.foldHoleCards = function () {
+                var seat = this.getSeatBySitId(this.selfSeatId);
+                if (seat) {
+                    if (seat.actionState === 1 /* FOLD_STATE */) {
+                        this.imgHoleCard0.filters = [HoldemPoker.Utility.grayFilter()];
+                        this.imgHoleCard1.filters = [HoldemPoker.Utility.grayFilter()];
+                        // let big = this.imgHoleCard0.getChildAt(0) as Laya.Image;
+                        // big.skin = "1334/poker/card_shadow.png";
+                        // let big2 = this.imgHoleCard1.getChildAt(0) as Laya.Image;
+                        // big2.skin = "1334/poker/card_shadow.png";
+                    }
+                    // else {
+                    var mcs = seat.holeCards;
+                    if (mcs && mcs.length > 0 && this.videoControl.pubCard) {
+                        var big = this.imgHoleCard0.getChildAt(0);
+                        if (mcs[0].tag === 0) {
+                            big.skin = "1334/poker/card_shadow.png";
+                            this.imgHoleCard0.filters = [HoldemPoker.Utility.grayFilter()];
+                        }
+                        else if (mcs[0].tag === 2) {
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard0.filters = null;
+                            }
+                            big.skin = "1334/poker/pub_card_bg.png";
+                        }
+                        else {
+                            big.skin = "1334/poker/card_shadow.png";
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard0.filters = null;
+                            }
+                        }
+                        ///////////
+                        var big2 = this.imgHoleCard1.getChildAt(0);
+                        if (mcs[1].tag === 0) {
+                            big2.skin = "1334/poker/card_shadow.png";
+                            this.imgHoleCard1.filters = [HoldemPoker.Utility.grayFilter()];
+                        }
+                        else if (mcs[1].tag === 2) {
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard1.filters = null;
+                            }
+                            big2.skin = "1334/poker/pub_card_bg.png";
+                        }
+                        else {
+                            big2.skin = "1334/poker/card_shadow.png";
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard1.filters = null;
+                            }
+                        }
+                    }
+                    else {
+                        var big = this.imgHoleCard0.getChildAt(0);
+                        big.skin = "1334/poker/card_shadow.png";
+                        big = this.imgHoleCard1.getChildAt(0);
+                        big.skin = "1334/poker/card_shadow.png";
+                        if (seat.actionState !== 1 /* FOLD_STATE */) {
+                            this.imgHoleCard0.filters = null;
+                            this.imgHoleCard1.filters = null;
+                        }
+                    }
+                    // }
+                }
+            };
+            VideoView.prototype.updateMadeHands = function () {
+                var meSeat = this.getPanelByServerPos(this.selfSeatId);
+                if (meSeat) {
+                    var selfSeatData = this.getSeatBySitId(this.selfSeatId);
+                    if (selfSeatData) {
+                        if (selfSeatData.holeCards && selfSeatData.holeCards.length > 0) {
+                            if (!selfSeatData.madeHands) {
+                                selfSeatData.madeHands = 1;
+                            }
+                            meSeat.updateSelfCardTypes(selfSeatData.madeHands);
+                        }
+                    }
+                }
+            };
+            VideoView.prototype.showSmallCards = function () {
+                for (var i = 0; i < this.videoControl.seatNumber; i++) {
+                    var seat = this.getSeatByIdx(i);
+                    // if (seat && (seat.state === msg.EPlayerState.gameing || seat.state === msg.EPlayerState.allin) && !Sys.players.self.isSelf(seat.playerId)) {
+                    if (seat && !HoldemPoker.Sys.players.self.isSelf(seat.playerId)) {
+                        var panel = this.getPanelByServerPos(seat.sitId);
+                        panel.imgCards.visible = true;
+                        panel.imgCard0.skin = HoldemPoker.Utility.getCardBackSkin(HoldemPoker.CardSize.SM);
+                        panel.imgCard1.skin = HoldemPoker.Utility.getCardBackSkin(HoldemPoker.CardSize.SM);
+                        panel.imgCard1.visible = true;
+                        panel.imgCard0.visible = true;
+                    }
+                }
+            };
+            //处理摊牌的情况
+            VideoView.prototype.asyncPlayerShowdown = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var promiseAll, i, sd, show, panel, panel;
+                    return __generator(this, function (_a) {
+                        promiseAll = [];
+                        for (i = 0; i < this.videoControl.seatNumber; i++) {
+                            sd = this.getSeatByIdx(i);
+                            if (sd) {
+                                if (this.isGains) {
+                                    if (sd.holeCards && sd.holeCards.length > 0) {
+                                        if (HoldemPoker.Sys.players.self.isSelf(sd.playerId)) {
+                                            show = 0;
+                                            if (this.showSelfCards.length === 2) {
+                                                show = 3;
+                                            }
+                                            if (this.showSelfCards.length === 1) {
+                                                if (this.showSelfCards[0].cardNumber === sd.holeCards[0].cardNumber &&
+                                                    this.showSelfCards[0].cardSuit === sd.holeCards[0].cardSuit) {
+                                                    show = 1;
+                                                }
+                                                else if (this.showSelfCards[0].cardNumber === sd.holeCards[1].cardNumber &&
+                                                    this.showSelfCards[0].cardSuit === sd.holeCards[1].cardSuit) {
+                                                    show = 2;
+                                                }
+                                            }
+                                            this.selfShowCard(show);
+                                        }
+                                        else {
+                                            panel = this.getPanelByServerPos(sd.sitId);
+                                            if (panel) {
+                                                promiseAll.push(panel.asyncPlayerShowCards(sd.holeCards));
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    if (sd.holeCards && sd.holeCards.length > 0 && !HoldemPoker.Sys.players.self.isSelf(sd.playerId)) {
+                                        panel = this.getPanelByServerPos(sd.sitId);
+                                        if (panel) {
+                                            console.log(sd.holeCards);
+                                            promiseAll.push(panel.asyncPlayerShowdown(sd.holeCards, sd.madeHands, true));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return [2 /*return*/, Promise.all(promiseAll)];
+                    });
+                });
+            };
+            VideoView.prototype.removeSidePotGrpChildren = function (val) {
+                this.sidePotGrp.visible = val;
+                this.sidePotGrp.removeChildren();
+            };
+            VideoView.prototype.sidePotsShow = function (sidePots) {
+                this.removeSidePotGrpChildren(true);
+                if (!sidePots || sidePots.length <= 1) {
+                    return;
+                }
+                //重新开始游戏会把sidePotGrp设置为假 这里要设置为真 并且 将边池子节点清空
+                var startPosX = 0;
+                var startPosY = 0;
+                //每行显示3个
+                var repeatX = 3;
+                for (var i = 0; i < sidePots.length; i++) {
+                    var side = new HoldemPoker.SidePotItemUI();
+                    if (i % repeatX === 0) {
+                        startPosX = 0;
+                        startPosY += side.height;
+                    }
+                    side.x = startPosX;
+                    side.y = startPosY;
+                    startPosX += side.width;
+                    side.setupData(sidePots[i]);
+                    this.sidePotGrp.addChild(side);
+                }
+            };
+            VideoView.prototype.selfFoldAni = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                HoldemPoker.Sys.audio.play("player_fold");
+                                if (!HoldemPoker.Sys.isPad) {
+                                    _this.ani_fold.play(0, false);
+                                    _this.ani_fold.once(Laya.Event.COMPLETE, _this, function () {
+                                        resolve();
+                                    });
+                                }
+                                else {
+                                    _this.foldBoxAni.visible = true;
+                                    HoldemPoker.UIAnimator.foldAnim(_this.foldBoxAni, Laya.Handler.create(_this, function () {
+                                        resolve();
+                                    }));
+                                }
+                            })];
+                    });
+                });
+            };
+            VideoView.prototype.selfShowCard = function (cardNo) {
+                switch (cardNo) {
+                    case 1:
+                        this.btnHoleCard1.mouseEnabled = false;
+                        this.tagShow1.visible = false;
+                        this.holeCard0_show.play(0, false);
+                        this.holeCard0_show.interval = this.aniRaio;
+                        break;
+                    case 2:
+                        this.btnHoleCard2.mouseEnabled = false;
+                        this.tagShow2.visible = false;
+                        this.holeCard1_show.play(0, false);
+                        this.holeCard1_show.interval = this.aniRaio;
+                        break;
+                    case 3:
+                        this.btnHoleCard1.mouseEnabled = false;
+                        this.btnHoleCard2.mouseEnabled = false;
+                        this.tagShow1.visible = false;
+                        this.tagShow2.visible = false;
+                        this.holeCard0_show.play(0, false);
+                        this.holeCard1_show.play(0, false);
+                        this.holeCard0_show.interval = this.aniRaio;
+                        this.holeCard1_show.interval = this.aniRaio;
+                        break;
+                }
+            };
+            return VideoView;
+        }(ui.video.VideoViewUI));
+        HoldemPoker.VideoView = VideoView;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=VideoView.js.map

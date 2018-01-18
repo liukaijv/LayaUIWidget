@@ -1,0 +1,1410 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+///<reference path='../model/ItemModel.ts'/>
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        HoldemPoker.EVENT_ITEM_UPDATE = 'EVENT_ITEM_UPDATE';
+        HoldemPoker.EVENT_ITEM_DELETE = 'EVENT_ITEM_DELETE';
+        HoldemPoker.EVENT_ITEM_LIST_CHANGE = 'EVENT_ITEM_LIST_CHANGE';
+        HoldemPoker.EVENT_ITEM_USE_SUCCESS = 'EVENT_ITEM_USE_SUCCESS';
+        HoldemPoker.EVENT_ITEM_USE_FAILED = 'EVENT_ITEM_USE_FAILED';
+        HoldemPoker.EVENT_LUCKY_ITEM__DRESS = 'EVENT_LUCKY_ITEM__DRESS';
+        //虚拟币
+        var ItemRepository = /** @class */ (function (_super) {
+            __extends(ItemRepository, _super);
+            function ItemRepository(net) {
+                var _this = _super.call(this, net) || this;
+                _this.page = 1;
+                _this.pageSize = Number.MAX_VALUE;
+                //最后一次请求列表类型
+                _this.lastItemType = HoldemPoker.ItemType.Ticket;
+                //所有物品
+                _this._items = [];
+                //玩家信息
+                _this.playerInfo = HoldemPoker.Sys.players.self;
+                /**
+                 * 后台道具为0时后台没下发，初始化基本道具
+                 * 如钻石，大师分等
+                 * @type {Array}
+                 */
+                _this.baseItems = [];
+                //服务器发的原始物品模板
+                _this.originTemplates = [];
+                _this.bindResponse();
+                return _this;
+            }
+            /**
+             * 监听socket
+             */
+            ItemRepository.prototype.bindResponse = function () {
+                var _this = this;
+                //道具模板下发
+                this.net.registerNotifyMsg('ItemTemplateNotify', this, function (result) {
+                    if (!HoldemPoker.CommonHelper.isEmptyObject(result.itemTemplates)) {
+                        _this.originTemplates = result.itemTemplates;
+                        /**
+                         * ItemTemplateNotify和PlayerItemNotify的先后顺序不能保证
+                         * 如果先收到道具PlayerItemNotify，需要同步ItemModel没有的数据
+                         */
+                        // if (this._items.length) {
+                        //     this._items.map(item => {
+                        //         let templateData: msg.ItemTemplate = this.findItemTemplateById(item.templateId);
+                        //         if (templateData) {
+                        //             item.name = templateData.name;
+                        //             item.type = templateData.type;
+                        //             item.image = templateData.icon;
+                        //             item.description = templateData.desc;
+                        //             item.canGift = templateData.canGift;
+                        //             item.imageSml = templateData.smallIcon;
+                        //             item.engName = templateData.engName;
+                        //             item.engDesc = templateData.engDesc;
+                        //         }
+                        //         return item;
+                        //     });
+                        // }
+                    }
+                });
+                //玩家道具下发
+                this.net.registerNotifyMsg('PlayerItemNotify', this, function (result) {
+                    if (result.playerItems) {
+                        _this._items = result.playerItems.map(function (item) {
+                            return _this.newModel(item);
+                        });
+                    }
+                });
+                //增加道具通知
+                this.net.registerNotifyMsg('AddPlayerItemNotify', this, function (result) {
+                    if (result.addItems && Array.isArray(result.addItems)) {
+                        for (var _i = 0, _a = result.addItems; _i < _a.length; _i++) {
+                            var addItem = _a[_i];
+                            var item = _this.newModel(addItem);
+                            _this.updateItemAmount(item);
+                        }
+                        _this.event(HoldemPoker.EVENT_ITEM_LIST_CHANGE, [_this.getItems()]);
+                    }
+                });
+                //删除道具通知
+                this.net.registerNotifyMsg('DeletePlayerItemNotify', this, function (result) {
+                    if (result.itemCount && Array.isArray(result.itemCount)) {
+                        var items = [];
+                        for (var _i = 0, _a = result.itemCount; _i < _a.length; _i++) {
+                            var item = _a[_i];
+                            items.push(_this.deleteByIdAndAmount(item.itemId, item.count));
+                        }
+                        // let deletedItem = this.deleteByIdAndAmount(result.itemId, result.count);
+                        _this.event(HoldemPoker.EVENT_ITEM_LIST_CHANGE, [_this.getItems()]);
+                        _this.event(HoldemPoker.EVENT_ITEM_DELETE, [items]);
+                    }
+                });
+                //使用道具响应
+                // this.net.registerNotifyMsg('UseItemResponse', this, (result) => {
+                //
+                // });
+            };
+            /**
+             * 取消监听socket
+             */
+            ItemRepository.prototype.unbindResponse = function () {
+                this.net.unRegisterNotifyMsg('ItemTemplateNotify');
+                this.net.unRegisterNotifyMsg('PlayerItemNotify');
+                this.net.unRegisterNotifyMsg('AddPlayerItemNotify');
+                this.net.unRegisterNotifyMsg('DeletePlayerItemNotify');
+                // this.net.unRegisterNotifyMsg('UseItemResponse');
+            };
+            /**
+             * dispose
+             */
+            ItemRepository.prototype.dispose = function () {
+                this.unbindResponse();
+            };
+            /**
+             * 创建itemModel
+             * @param originItem
+             * @returns {ItemModel}
+             */
+            ItemRepository.prototype.newModel = function (originItem) {
+                var itemModel = new HoldemPoker.ItemModelBase();
+                var templateData = this.findItemTemplateById(originItem.itemTempId);
+                if (templateData) {
+                    itemModel.name = templateData.name;
+                    itemModel.type = templateData.type;
+                    itemModel.image = templateData.icon;
+                    itemModel.description = templateData.desc;
+                    itemModel.canGift = templateData.canGift;
+                    itemModel.imageSml = templateData.smallIcon;
+                    itemModel.engName = templateData.engName;
+                    itemModel.engDesc = templateData.engDesc;
+                }
+                itemModel.id = originItem.itemId;
+                itemModel.amount = originItem.count;
+                itemModel.expireTime = originItem.expireTime;
+                itemModel.templateId = originItem.itemTempId;
+                return itemModel;
+            };
+            /**
+             * 是否存在
+             * @param itemModel
+             * @returns {number}
+             */
+            ItemRepository.prototype.getExistIndex = function (itemModel) {
+                var existIndex = -1;
+                var flag = this._items.some(function (item, index) {
+                    existIndex = index;
+                    return itemModel.id === item.id;
+                });
+                if (!flag) {
+                    return -1;
+                }
+                return existIndex;
+            };
+            /**
+             *
+             * @param itemId
+             * @returns {number}
+             */
+            ItemRepository.prototype.getExistIndexById = function (itemId) {
+                var existIndex = -1;
+                var flag = this._items.some(function (item, index) {
+                    existIndex = index;
+                    return item.id === itemId;
+                });
+                if (!flag) {
+                    return -1;
+                }
+                return existIndex;
+            };
+            /**
+             * create
+             * @param item
+             */
+            ItemRepository.prototype.create = function (item) {
+                this._items.push(item);
+            };
+            /**
+             * update
+             * @param item
+             */
+            ItemRepository.prototype.update = function (item) {
+                var hasIndex = this.getExistIndex(item);
+                if (hasIndex !== -1) {
+                    this._items.splice(hasIndex, 1, item);
+                }
+                else {
+                    this.create(item);
+                }
+            };
+            /**
+             * 删除
+             * @param item
+             */
+            ItemRepository.prototype.delete = function (item) {
+                var hasIndex = this.getExistIndex(item);
+                if (hasIndex !== -1) {
+                    this._items.splice(hasIndex, 1);
+                }
+            };
+            /**
+             *
+             * @param type
+             * @param page
+             * @param pageSize
+             * @returns {ItemModel[]}
+             */
+            ItemRepository.prototype.getItems = function (type, page, pageSize) {
+                if (type === void 0) { type = this.lastItemType; }
+                if (page === void 0) { page = this.page; }
+                if (pageSize === void 0) { pageSize = this.pageSize; }
+                var items;
+                if (type) {
+                    /**
+                     * 分类筛选
+                     * 幸运物和幸运物券作为一个整体
+                     * 除了票和实物都为其它
+                     */
+                    if (type === HoldemPoker.ItemType.LuckyItem || type === HoldemPoker.ItemType.LuckyTicket) {
+                        items = this._items.filter(function (item) {
+                            return ((item.type === HoldemPoker.ItemType.LuckyItem) || (item.type === HoldemPoker.ItemType.LuckyTicket)) && (item.amount > 0);
+                        });
+                    }
+                    else if (type === HoldemPoker.ItemType.Other) {
+                        items = this._items.filter(function (item) {
+                            var otherType = (item.type !== HoldemPoker.ItemType.VirtualCurrency) &&
+                                (item.type !== HoldemPoker.ItemType.Ticket) &&
+                                (item.type !== HoldemPoker.ItemType.LuckyItem) &&
+                                (item.type !== HoldemPoker.ItemType.LuckyTicket);
+                            return otherType && (item.amount > 0);
+                        });
+                    }
+                    else {
+                        items = this._items.filter(function (item) {
+                            return (item.type === type) && (item.amount > 0);
+                        });
+                    }
+                    //分页
+                    // items = items.slice((page * pageSize) - pageSize, page * pageSize);
+                    items = items.slice(0, page * pageSize);
+                    //幸运物排在幸运物券前面
+                    if (type === HoldemPoker.ItemType.LuckyItem || type === HoldemPoker.ItemType.LuckyTicket) {
+                        items.sort(function (a, b) {
+                            return a.type - b.type;
+                        }).sort(function (a, b) {
+                            return a.templateId - b.templateId;
+                        });
+                    }
+                }
+                else {
+                    items = this._items;
+                }
+                //记录下最后拉取的类型，用于列表界面自动更新
+                this.lastItemType = type;
+                return items;
+            };
+            /**
+             * 删除数量
+             * @param itemId
+             * @param amount
+             */
+            ItemRepository.prototype.deleteByIdAndAmount = function (itemId, amount) {
+                var hasIndex = this.getExistIndexById(itemId);
+                if (hasIndex !== -1) {
+                    var item = this._items[hasIndex];
+                    var restAmount = item.amount - parseInt('' + amount);
+                    //数量为0是删除，不为0为更新
+                    if (restAmount <= 0) {
+                        this._items.splice(hasIndex, 1);
+                    }
+                    else {
+                        item.amount = restAmount;
+                        this.update(item);
+                    }
+                    return item;
+                }
+                else {
+                    return null;
+                }
+            };
+            /**
+             * 添加或更新数量
+             * @param itemModel
+             */
+            ItemRepository.prototype.updateItemAmount = function (itemModel) {
+                var hasIndex = this.getExistIndex(itemModel);
+                //存在更新数量，不存在直接添加
+                if (hasIndex !== -1) {
+                    var item = this._items[hasIndex];
+                    //后台约定是数量为0是更新item实体
+                    if (itemModel.amount === 0) {
+                        item = __assign({}, itemModel, { amount: item.amount });
+                    }
+                    else {
+                        item.amount = item.amount + parseInt('' + itemModel.amount);
+                    }
+                    this.update(item);
+                }
+                else {
+                    this.create(itemModel);
+                }
+            };
+            /**
+             * 使用道具
+             * @param itemId
+             * @param amount
+             * @param otherData
+             * @returns {Promise<any>}
+             */
+            ItemRepository.prototype.useItem = function (itemId, amount, otherData) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var postData, result, err_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                postData = {
+                                    itemId: itemId
+                                };
+                                //有amount才发送
+                                if (amount) {
+                                    amount = parseInt('' + amount);
+                                    if (isNaN(amount)) {
+                                        // throw new Error('amount type error');
+                                        console.log('amount type error');
+                                        return [2 /*return*/];
+                                    }
+                                    postData.count = amount;
+                                }
+                                //其它信息
+                                if (otherData) {
+                                    postData = __assign({}, postData, otherData);
+                                }
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, this.resolveRequest('UseItemRequest', postData)];
+                            case 2:
+                                result = _a.sent();
+                                this.event(HoldemPoker.EVENT_ITEM_USE_SUCCESS, [result]);
+                                return [2 /*return*/, result];
+                            case 3:
+                                err_1 = _a.sent();
+                                this.event(HoldemPoker.EVENT_ITEM_USE_FAILED, [err_1]);
+                                if (err_1.codes === HoldemPoker.msg.Codes.ErrItemNotEnough) {
+                                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(err_1.codes));
+                                }
+                                else {
+                                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.serverError));
+                                }
+                                return [2 /*return*/, Promise.reject(err_1)];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            /**
+             * 获取道具模板
+             * @param templateId
+             * @returns {any}
+             */
+            ItemRepository.prototype.findItemTemplateById = function (templateId) {
+                if (!templateId || isNaN(templateId)) {
+                    // throw new Error('没有传入正确的道具模板Id:' + templateId);
+                    console.log('没有传入正确的道具模板Id:' + templateId);
+                    return;
+                }
+                var templateData;
+                if (this.originTemplates.length) {
+                    var templates = this.originTemplates.filter(function (template) {
+                        return templateId === template.itemTempId;
+                    });
+                    templateData = templates.length ? templates[0] : null;
+                }
+                return templateData;
+            };
+            /**
+             *根据模板id找到一个道具就返回
+             * @param templateId
+             * @returns {ItemModel}
+             */
+            ItemRepository.prototype.findOneByTemplateId = function (templateId) {
+                var items = this._items;
+                items = items.sort(this.sortByExpireTime).sort(this.sortByTemplateId).filter(function (item) {
+                    return item.templateId === templateId;
+                });
+                return items.length ? items[0] : null;
+            };
+            /**
+             * 报名费字符串转obj
+             * @param entryStr
+             * @returns {[{id: string, value: string},{id: string, value: string},{id: string, value: string},{id: string, value: string},{id: string, value: string}]}
+             */
+            ItemRepository.prototype.itemsStrToObj = function (entryStr) {
+                if (!entryStr || entryStr.indexOf(':') === -1) {
+                    // throw new Error('道具字符串格式不正确');
+                    //兼容以前的
+                    entryStr = '1:' + entryStr;
+                }
+                var arr = entryStr.split(',');
+                return arr.filter(function (item) { return item !== ''; }).map(function (item) {
+                    var innerArr = item.split(':');
+                    return {
+                        id: innerArr[0],
+                        value: innerArr[1]
+                    };
+                });
+            };
+            /**
+             * 根据道具字符串是否是免费赛
+             * @param entryStr
+             * @returns {boolean}
+             */
+            ItemRepository.prototype.isFreeWithItemsStr = function (entryStr) {
+                var flag = false;
+                var items = this.itemsStrMapToTemplate(entryStr);
+                //如果花费都是0，为免费
+                if (items.every(function (template) {
+                    return template.costAmount === 0;
+                })) {
+                    flag = true;
+                }
+                else {
+                    //存在货币类型中一个为0的，也是免费
+                    if (items.some(function (template) {
+                        return template.costAmount === 0 && template.type === HoldemPoker.ItemType.VirtualCurrency;
+                    })) {
+                        flag = true;
+                    }
+                }
+                return flag;
+            };
+            /**
+             * 报名费字符串对应模板数据
+             * 用于显示报名花费道具,
+             * 根据templateId ASC排序取前两个显示
+             * @param entryStr
+             * @returns {[msg.ItemTemplate,msg.ItemTemplate,msg.ItemTemplate,msg.ItemTemplate,msg.ItemTemplate]}
+             */
+            ItemRepository.prototype.itemsStrMapToTemplate = function (entryStr, truncate, sort) {
+                var _this = this;
+                if (truncate === void 0) { truncate = false; }
+                if (sort === void 0) { sort = true; }
+                var items = this.itemsStrToObj(entryStr);
+                if (sort) {
+                    items.sort(function (a, b) { return parseInt(a.id) - parseInt(b.id); });
+                }
+                var templates = items.map(function (item) {
+                    var template = _this.findItemTemplateById(parseInt(item.id));
+                    if (!template) {
+                        // throw new Error('道具ID:' + item.id + '对应模板不存在');
+                        console.log('道具ID:' + item.id + '对应模板不存在');
+                        return;
+                    }
+                    //添加一个costAmount到template中用于显示数量
+                    return __assign({ costAmount: parseInt(item.value) }, template);
+                });
+                return truncate ? templates.slice(0, 2) : templates;
+            };
+            /**
+             * 道具字符串转为显示字符
+             * @param itemsStr
+             * @param hasAmount
+             * @param separator
+             * @param number
+             */
+            ItemRepository.prototype.itemsStrToDisplayStr = function (itemsStr, hasAmount, separator, count) {
+                if (hasAmount === void 0) { hasAmount = false; }
+                if (separator === void 0) { separator = '+'; }
+                var templates = this.itemsStrMapToTemplate(itemsStr);
+                var tempArr = [];
+                if (count && count > 0) {
+                    templates = templates.slice(0, count - 1);
+                }
+                for (var _i = 0, templates_1 = templates; _i < templates_1.length; _i++) {
+                    var template = templates_1[_i];
+                    if (template.type === HoldemPoker.ItemType.VirtualCurrency) {
+                        tempArr.push("" + template.costAmount + template.name);
+                    }
+                    else {
+                        if (hasAmount) {
+                            tempArr.push(template.name + "*" + template.costAmount);
+                        }
+                        else {
+                            tempArr.push("" + template.name);
+                        }
+                    }
+                }
+                return tempArr.join(separator);
+            };
+            /**
+             * 报名费门票字符串
+             * @param entryStr
+             * @param applyType
+             * @param feePercent
+             * @returns {string}
+             */
+            ItemRepository.prototype.entryFeeDisplayStr = function (entryStr, applyType, feePercent) {
+                var templates = this.itemsStrMapToTemplate(entryStr);
+                var tempArr = [];
+                for (var _i = 0, templates_2 = templates; _i < templates_2.length; _i++) {
+                    var template = templates_2[_i];
+                    if (template.type === HoldemPoker.ItemType.VirtualCurrency) {
+                        var costAmount = template.costAmount + Math.ceil(template.costAmount * feePercent / 100);
+                        tempArr.push("" + costAmount + template.name);
+                    }
+                    else {
+                        tempArr.push(template.name + "*" + template.costAmount);
+                    }
+                }
+                return tempArr.join(HoldemPoker.applyTypeDisplay[applyType]);
+            };
+            /**
+             * 可使用的报名费门票字符串
+             * @param entryStr
+             * @param applyType
+             * @param feePercent
+             * @returns {string}
+             */
+            ItemRepository.prototype.entryFeeResolveDisplayStr = function (entryStr, applyType, feePercent) {
+                var templates = this.resolveEntryFeePostItems(entryStr, applyType, feePercent);
+                var tempArr = [];
+                for (var _i = 0, templates_3 = templates; _i < templates_3.length; _i++) {
+                    var template = templates_3[_i];
+                    if (template.type === HoldemPoker.ItemType.VirtualCurrency) {
+                        var costAmount = template.costAmount + Math.ceil(template.costAmount * feePercent / 100);
+                        tempArr.push(template.name + "x" + costAmount);
+                    }
+                    else {
+                        tempArr.push(template.name + "x" + template.costAmount);
+                    }
+                }
+                return tempArr.join(HoldemPoker.applyTypeDisplay[applyType]);
+            };
+            /**
+             * 验证报名道具
+             * @param entryStr
+             * @param applyType
+             */
+            ItemRepository.prototype.validateEntryFee = function (entryStr, applyType, feePercent) {
+                var _this = this;
+                // 所有对应模板
+                var templates = this.itemsStrMapToTemplate(entryStr).sort(function (a, b) { return a.itemTempId - b.itemTempId; }), findItem, findTemplate, result = {
+                    flag: true
+                };
+                if (!templates.length) {
+                    // throw new Error('报名验证参数有错');
+                    console.log('报名验证参数有错');
+                    return;
+                }
+                //免费
+                if (this.isFreeWithItemsStr(entryStr)) {
+                    return result;
+                }
+                //一个时的处理
+                if (templates.length === 1) {
+                    findItem = this.findOneByTemplateId(templates[0].itemTempId);
+                    //不是的，找不到直接返回错误的
+                    if (!findItem) {
+                        result.flag = false;
+                        result.errorTemplate = templates[0];
+                        //加上服务费
+                        if (result.errorTemplate.type === HoldemPoker.ItemType.VirtualCurrency) {
+                            result.errorTemplate.costAmount += Math.ceil(result.errorTemplate.costAmount * feePercent / 100);
+                        }
+                        return result;
+                    }
+                    else {
+                        var costAmount = templates[0].costAmount;
+                        if (findItem.type === HoldemPoker.ItemType.VirtualCurrency) {
+                            costAmount += Math.ceil(costAmount * feePercent / 100);
+                        }
+                        if (findItem.amount < costAmount) {
+                            result.flag = false;
+                            result.errorTemplate = templates[0];
+                            //加上服务费
+                            if (result.errorTemplate.type === HoldemPoker.ItemType.VirtualCurrency) {
+                                result.errorTemplate.costAmount += Math.ceil(result.errorTemplate.costAmount * feePercent / 100);
+                            }
+                            return result;
+                        }
+                    }
+                }
+                else {
+                    if (applyType === HoldemPoker.ApplyType.Or) {
+                        //无可用报名道具
+                        if (!templates.some(function (item) {
+                            findItem = _this.findOneByTemplateId(item.itemTempId);
+                            if (findItem && findItem.type === HoldemPoker.ItemType.VirtualCurrency) {
+                                var costAmount = item.costAmount + Math.ceil(item.costAmount * feePercent / 100);
+                                return findItem && findItem.amount >= costAmount;
+                            }
+                            return findItem && findItem.amount >= item.costAmount;
+                        })) {
+                            result.flag = false;
+                            //优先提示微赛币不足
+                            if (templates.some(function (item) {
+                                findTemplate = item;
+                                return item.itemTempId === HoldemPoker.VirtualCurrencyType.WesaiCurrency;
+                            })) {
+                                //加上服务费
+                                findTemplate.costAmount += Math.ceil(findTemplate.costAmount * feePercent / 100);
+                                result.errorTemplate = findTemplate;
+                                return result;
+                            }
+                            //提示钻石不足
+                            if (templates.some(function (item) {
+                                findTemplate = item;
+                                return item.itemTempId === HoldemPoker.VirtualCurrencyType.DiamondCurrency;
+                            })) {
+                                result.errorTemplate = findTemplate;
+                                return result;
+                            }
+                            //提示大师分不足
+                            if (templates.some(function (item) {
+                                findTemplate = item;
+                                return item.itemTempId === HoldemPoker.VirtualCurrencyType.MasterCurrency;
+                            })) {
+                                result.errorTemplate = findTemplate;
+                                return result;
+                            }
+                            //门票不足
+                            if (templates.some(function (item) {
+                                findTemplate = item;
+                                return item.type === HoldemPoker.ItemType.Ticket;
+                            })) {
+                                result.errorTemplate = findTemplate;
+                                return result;
+                            }
+                        }
+                    }
+                    else if (applyType === HoldemPoker.ApplyType.And) {
+                        //所需报名道具和本地道具不匹配
+                        if (!templates.every(function (item) {
+                            findItem = _this.findOneByTemplateId(item.itemTempId);
+                            findTemplate = item;
+                            if (findItem && findItem.type === HoldemPoker.ItemType.VirtualCurrency) {
+                                var costAmount = item.costAmount + Math.ceil(item.costAmount * feePercent / 100);
+                                return findItem && findItem.amount >= costAmount;
+                            }
+                            return findItem && findItem.amount >= item.costAmount;
+                        })) {
+                            result.flag = false;
+                            //加上服务费
+                            if (findTemplate.type === HoldemPoker.ItemType.VirtualCurrency) {
+                                findTemplate.costAmount += Math.ceil(findTemplate.costAmount * feePercent / 100);
+                            }
+                            result.errorTemplate = findTemplate;
+                            return result;
+                        }
+                    }
+                }
+                return result;
+            };
+            /**
+             * 处理报名费
+             * 原始数据为=>1:100,2:10
+             * 结果null表示没有，
+             * 0表示后台配置的道具免费
+             * @param entryStr
+             * @returns {{ticketItem: null, entryFee: null, entryFeeDiamond: null, items: {id: string, value: string}[]}}
+             */
+            ItemRepository.prototype.resolveEntryFee = function (entryStr) {
+                var _this = this;
+                var items = this.itemsStrToObj(entryStr);
+                var entryFee = null, entryFeeDiamond = null, entryFeeMaster = null, ticketItem = null;
+                //找出报名道具，用于显示判断，门票|微赛币|钻石
+                items.forEach(function (item) {
+                    if (parseInt(item.id) === HoldemPoker.VirtualCurrencyType.WesaiCurrency) {
+                        entryFee = parseInt(item.value);
+                    }
+                    else if (parseInt(item.id) === HoldemPoker.VirtualCurrencyType.DiamondCurrency) {
+                        entryFeeDiamond = parseInt(item.value);
+                    }
+                    else if (parseInt(item.id) === HoldemPoker.VirtualCurrencyType.MasterCurrency) {
+                        entryFeeMaster = parseInt(item.value);
+                    }
+                    else {
+                        var template = _this.findItemTemplateById(parseInt(item.id));
+                        if (template && template.type === HoldemPoker.ItemType.Ticket) {
+                            ticketItem = parseInt(item.value);
+                        }
+                    }
+                });
+                //返回报名需要道具
+                return {
+                    ticketItem: ticketItem,
+                    entryFee: entryFee,
+                    entryFeeDiamond: entryFeeDiamond,
+                    entryFeeMaster: entryFeeMaster
+                };
+            };
+            /**
+             * 提交报名道具id字符串
+             * @param entryStr
+             * @param applyType
+             * @returns {string}
+             */
+            ItemRepository.prototype.resolveEntryFeePostStr = function (entryStr, applyType, applyFeePercent) {
+                //默认返回空
+                var resolveStr = '';
+                var postItems = this.resolveEntryFeePostItems(entryStr, applyType, applyFeePercent);
+                var idArr = postItems.map(function (item) {
+                    return item.id;
+                });
+                if (idArr.length) {
+                    resolveStr = idArr.join(',');
+                }
+                return resolveStr;
+            };
+            /**
+             * 返回最终报名可使用的道具,
+             * 在ItemModel上加了costAmount方便报名类型不同时验证
+             * @param entryStr
+             * @param applyType
+             * @returns {ItemModel[]}
+             */
+            ItemRepository.prototype.resolveEntryFeePostItems = function (entryStr, applyType, applyFeePercent) {
+                var _this = this;
+                //默认返回空
+                var items = [], findItem, tempArr = [];
+                var fees = this.itemsStrToObj(entryStr);
+                //免费
+                if (this.isFreeWithItemsStr(entryStr)) {
+                    return [];
+                }
+                if (!fees.length || !applyType) {
+                    // throw new Error('报名数据出错');
+                    console.log('报名数据出错');
+                    return;
+                }
+                else if (fees.length === 1) {
+                    // 只配置一种报名道具，直接去找
+                    findItem = this.findOneByTemplateId(parseInt(fees[0].id));
+                    if (findItem) {
+                        var costAmount = parseInt(fees[0].value);
+                        //货币时加服务费
+                        if (findItem.type === HoldemPoker.ItemType.VirtualCurrency) {
+                            costAmount += Math.ceil(costAmount * applyFeePercent / 100);
+                        }
+                        if (findItem.amount >= costAmount) {
+                            findItem.costAmount = parseInt(fees[0].value);
+                            items = [findItem].concat(items);
+                        }
+                    }
+                    else {
+                        // throw new Error('缺少用于报名的道具或者报名道具数量不足');
+                    }
+                }
+                else {
+                    // 优先去找门票，没有门票就任意找一个
+                    if (applyType === HoldemPoker.ApplyType.Or) {
+                        findItem = this.existItemWidthEntryFee(entryStr, HoldemPoker.ItemType.Ticket);
+                        if (findItem) {
+                            items = [findItem].concat(items);
+                        }
+                        else {
+                            //任意找一个
+                            for (var _i = 0, fees_1 = fees; _i < fees_1.length; _i++) {
+                                var fee = fees_1[_i];
+                                findItem = this.findOneByTemplateId(parseInt(fee.id));
+                                if (findItem) {
+                                    var costAmount = parseInt(fee.value);
+                                    //货币时加服务费
+                                    if (findItem.type === HoldemPoker.ItemType.VirtualCurrency) {
+                                        costAmount += Math.ceil(costAmount * applyFeePercent / 100);
+                                    }
+                                    if (findItem.amount >= costAmount) {
+                                        findItem.costAmount = parseInt(fee.value);
+                                        break;
+                                    }
+                                }
+                            }
+                            if (findItem) {
+                                items = [findItem].concat(items);
+                            }
+                            else {
+                                // throw new Error('缺少用于报名的道具或者报名道具数量不足');
+                            }
+                        }
+                    }
+                    else if (applyType === HoldemPoker.ApplyType.And) {
+                        //找到所有的，拼到一起
+                        fees.forEach(function (item) {
+                            findItem = _this.findOneByTemplateId(parseInt(item.id));
+                            if (findItem) {
+                                var costAmount = parseInt(item.value);
+                                //货币时加服务费
+                                if (findItem.type === HoldemPoker.ItemType.VirtualCurrency) {
+                                    costAmount += Math.ceil(costAmount * applyFeePercent / 100);
+                                }
+                                if (findItem.amount >= costAmount) {
+                                    findItem.costAmount = parseInt(item.value);
+                                    tempArr = [findItem].concat(tempArr);
+                                }
+                            }
+                        });
+                        if (fees.length !== tempArr.length) {
+                            // throw new Error('用于报名的道具和本地道具不匹配');
+                        }
+                        items = tempArr.concat(items);
+                    }
+                }
+                // console.log('报名的道具', items);
+                return items;
+            };
+            /**
+             * 报名道具字符串判断是否符合
+             * @param entryStr
+             * @param type
+             * @returns {ItemModel}
+             */
+            ItemRepository.prototype.existItemWidthEntryFee = function (entryStr, type) {
+                var fees = this.itemsStrToObj(entryStr), items = this._items, findItem;
+                //按有效时长排序，兼容时效道具
+                items.sort(this.sortByExpireTime);
+                var _loop_1 = function (fee) {
+                    //找到一个就停止遍历
+                    if (items.some(function (item) {
+                        findItem = item;
+                        findItem.costAmount = parseInt(fee.value);
+                        if (type) {
+                            return item.templateId === parseInt(fee.id) && item.amount >= parseInt(fee.value) && item.type === type;
+                        }
+                        else {
+                            return item.templateId === parseInt(fee.id) && item.amount >= parseInt(fee.value);
+                        }
+                    })) {
+                        return "break";
+                    }
+                    else {
+                        //没有找到设为null
+                        findItem = null;
+                    }
+                };
+                for (var _i = 0, fees_2 = fees; _i < fees_2.length; _i++) {
+                    var fee = fees_2[_i];
+                    var state_1 = _loop_1(fee);
+                    if (state_1 === "break")
+                        break;
+                }
+                return findItem;
+            };
+            /**
+             * 按过期时间排序
+             * @param a
+             * @param b
+             * @returns {number}
+             */
+            ItemRepository.prototype.sortByExpireTime = function (a, b) {
+                return parseInt(a.expireTime) - parseInt(b.expireTime);
+            };
+            /**
+             * 按模板ID ASC排序
+             * @param a
+             * @param b
+             * @returns {number}
+             */
+            ItemRepository.prototype.sortByTemplateId = function (a, b) {
+                return parseInt(a.templateId) - parseInt(b.templateId);
+            };
+            /**
+             * 验证货币是否足够
+             * @param amount
+             * @param type
+             * @returns {boolean}
+             */
+            ItemRepository.prototype.compareEnoughCurrency = function (amount, type) {
+                if (type === void 0) { type = HoldemPoker.VirtualCurrencyType.WesaiCurrency; }
+                if (typeof amount === 'string') {
+                    amount = parseInt(amount);
+                }
+                var total = 0, item;
+                item = this.findOneByTemplateId(type);
+                if (item) {
+                    total = item.amount;
+                }
+                return total >= amount;
+            };
+            /**
+             * 取货币
+             * @param type
+             * @returns {number}
+             */
+            ItemRepository.prototype.getCurrency = function (type) {
+                if (type === void 0) { type = HoldemPoker.VirtualCurrencyType.WesaiCurrency; }
+                var item = this.findOneByTemplateId(type);
+                if (!item) {
+                    return 0;
+                }
+                return item.amount;
+            };
+            /**
+             * 道具对应的icon
+             * @param itemId
+             * @returns {any}
+             */
+            ItemRepository.prototype.getItemIcon = function (itemId) {
+                var icon = HoldemPoker.virtualCurrencyIcon[HoldemPoker.VirtualCurrencyType.DiamondCurrency];
+                var itemTemplate = this.findItemTemplateById(itemId);
+                if (!itemTemplate) {
+                    return '';
+                }
+                if (itemTemplate.type === HoldemPoker.ItemType.VirtualCurrency) {
+                    icon = HoldemPoker.virtualCurrencyIcon[itemTemplate.itemTempId];
+                }
+                else {
+                    icon = HoldemPoker.itemTypeImageDefault[itemTemplate.type];
+                }
+                return icon;
+            };
+            /**
+             * 装配道具
+             * @param itemTemplateId
+             * @returns {Promise<any>}
+             */
+            ItemRepository.prototype.dressUpItem = function (itemTemplateId) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var postData, result, flagObj, e_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                postData = {
+                                    itemTempId: itemTemplateId
+                                };
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, this.resolveRequest('TakeMascotRequest', postData)];
+                            case 2:
+                                result = _a.sent();
+                                if (result.curMascotItemTempId || result.curMascotItemTempId === 0) {
+                                    this.playerInfo.equippedMascot = result.curMascotItemTempId;
+                                    this.event(HoldemPoker.EVENT_ITEM_LIST_CHANGE, [this.getItems()]);
+                                    flagObj = {
+                                        flag: false,
+                                        item: null
+                                    };
+                                    if (result.curMascotItemTempId !== 0) {
+                                        flagObj.item = HoldemPoker.Sys.itemMgr.itemRepository.findOneByTemplateId(result.curMascotItemTempId);
+                                        flagObj.flag = true;
+                                    }
+                                    this.event(HoldemPoker.EVENT_LUCKY_ITEM__DRESS, [flagObj]);
+                                    return [2 /*return*/, flagObj];
+                                }
+                                else {
+                                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.setUpFailure));
+                                    return [2 /*return*/, null];
+                                }
+                                return [3 /*break*/, 4];
+                            case 3:
+                                e_1 = _a.sent();
+                                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.setUpFailure));
+                                return [2 /*return*/, null];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            /**
+             * 赠送道具确认玩家
+             * @param itemTemplateId
+             * @returns {Promise<any>}
+             */
+            ItemRepository.prototype.donateEnsurePlayer = function (playerId) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var postData;
+                    return __generator(this, function (_a) {
+                        postData = {
+                            targetPlayerId: playerId
+                        };
+                        return [2 /*return*/, this.resolveRequest('HandselItemPlayerInfoRequest', postData)];
+                    });
+                });
+            };
+            /**
+             * 赠送道具
+             * @param itemId
+             * @param amount
+             * @param playerId
+             * @returns {Promise<any>}
+             */
+            ItemRepository.prototype.donateItemToPlayer = function (itemId, amount, playerId) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var postData;
+                    return __generator(this, function (_a) {
+                        postData = {
+                            itemId: itemId,
+                            count: amount,
+                            targetPlayerId: playerId
+                        };
+                        return [2 /*return*/, this.resolveRequest('HandselItemRequest', postData)];
+                    });
+                });
+            };
+            /**
+             * 是否已装备吉祥物
+             * @param item
+             * @returns {boolean}
+             */
+            ItemRepository.prototype.isEquippedMascot = function (item) {
+                return this.playerInfo.equippedMascot && (this.playerInfo.equippedMascot === item.templateId);
+            };
+            /**
+             * 手动触发更新
+             */
+            ItemRepository.prototype.triggerListChange = function () {
+                this.event(HoldemPoker.EVENT_ITEM_LIST_CHANGE, [this.getItems()]);
+            };
+            /**
+             * 微赛币|钻石转换
+             * @param {number} amount
+             * @param {boolean} reverse
+             * @returns {number}
+             */
+            ItemRepository.prototype.goldConvertToDiamond = function (amount, reverse) {
+                if (reverse === void 0) { reverse = false; }
+                //逆转
+                if (reverse) {
+                    return amount * this.getGoldToDiamondRatio(amount);
+                }
+                return Math.ceil(amount / this.getGoldToDiamondRatio(amount));
+            };
+            ItemRepository.prototype.getGoldToDiamondRatio = function (amount) {
+                var ratio;
+                // let diamondToMoneyMap: msg.Product[] = ItemConfg.goldToDiamondMap.filter(item => item.itemTempId === 1).sort((a, b) => a.diamondCost - b.diamondCost);
+                // let last = diamondToMoneyMap[diamondToMoneyMap.length - 1];
+                // for (let item of diamondToMoneyMap) {
+                //     if (amount <= item.count) {
+                //         ratio = item.count / item.diamondCost;
+                //         break;
+                //     }
+                // }
+                // if (!ratio) {
+                //     ratio = last.count / last.diamondCost;
+                // }
+                // //如果是除不尽的，丢掉一位，保证要比算出来的小
+                // let ratioStr: string = ratio.toFixed(3);
+                // ratioStr = ratioStr.substring(0, ratioStr.length - 1);
+                // return Number(ratioStr);
+                var diamondToMoneyMap = HoldemPoker.ItemConfg.goldToDiamondMap.filter(function (item) { return item.itemTempId === 1; }).sort(function (a, b) { return a.diamondCost - b.diamondCost; });
+                var ratios = diamondToMoneyMap.map(function (item) { return item.count / item.diamondCost; });
+                var index = 0;
+                for (var i = 0; i < diamondToMoneyMap.length; i++) {
+                    console.log(diamondToMoneyMap[i]);
+                    if (amount < diamondToMoneyMap[i].count) {
+                        index = i;
+                        break;
+                    }
+                }
+                ratio = index === 0 ? ratios[0] : ratios[index - 1];
+                return ratio;
+            };
+            /**
+             * 微赛币|钻石转换的实体
+             * @param goldAmount
+             * @returns {any}
+             */
+            ItemRepository.prototype.goldConvertToDiamondProduct = function (goldAmount) {
+                //真实需要的钻石
+                // let costDiamond: number = Math.ceil(goldAmount / this.getGoldToDiamondRatio(goldAmount));
+                //我的钻石
+                var myDiamond = HoldemPoker.Sys.itemMgr.itemRepository.getCurrency(HoldemPoker.VirtualCurrencyType.DiamondCurrency);
+                //我的钻石够,返回对应的区间值
+                // if (myDiamond >= costDiamond) {
+                var diamondToMoneyMap = HoldemPoker.ItemConfg.goldToDiamondMap.filter(function (item) { return item.itemTempId === 1; }).sort(function (a, b) { return a.diamondCost - b.diamondCost; });
+                for (var _i = 0, diamondToMoneyMap_1 = diamondToMoneyMap; _i < diamondToMoneyMap_1.length; _i++) {
+                    var item = diamondToMoneyMap_1[_i];
+                    // if (costDiamond <= item.diamondCost && item.diamondCost <= myDiamond) {
+                    if (goldAmount <= item.count && item.diamondCost <= myDiamond) {
+                        return item;
+                    }
+                }
+                // }
+                return null;
+            };
+            /**
+             * 金币数量返回金币对应的钻石区间实体
+             * @param goldAmount
+             * @returns {msg.Product}
+             */
+            ItemRepository.prototype.goldToDiamondProduct = function (goldAmount) {
+                var product;
+                var diamondToMoneyMap = HoldemPoker.ItemConfg.goldToDiamondMap.filter(function (item) { return item.itemTempId === 1; }).sort(function (a, b) { return a.diamondCost - b.diamondCost; });
+                for (var _i = 0, diamondToMoneyMap_2 = diamondToMoneyMap; _i < diamondToMoneyMap_2.length; _i++) {
+                    var item = diamondToMoneyMap_2[_i];
+                    if (goldAmount <= item.count) {
+                        product = item;
+                        break;
+                    }
+                }
+                //没符合的就返回最后一个
+                if (!product) {
+                    product = diamondToMoneyMap[diamondToMoneyMap.length - 1];
+                }
+                return product;
+            };
+            /**
+             * 差钻石对应的购买实体
+             * @param diamondAmount
+             * @returns {any}
+             */
+            ItemRepository.prototype.diamondConvertPayment = function (diamondAmount) {
+                //返回对应的区间值
+                var diamondToMoneyMap = HoldemPoker.ItemConfg.diamondToMoneyMap.sort(function (a, b) { return a.diamond - b.diamond; });
+                for (var _i = 0, diamondToMoneyMap_3 = diamondToMoneyMap; _i < diamondToMoneyMap_3.length; _i++) {
+                    var item = diamondToMoneyMap_3[_i];
+                    //找到满足的就返回
+                    if (diamondAmount <= item.diamond) {
+                        return item;
+                    }
+                }
+                //没找到就取最大一个了
+                return diamondToMoneyMap[diamondToMoneyMap.length - 1];
+            };
+            /**
+             * 支付处理
+             * @param {wesai.HoldemPoker.ApplyValidError} applyValidError
+             * @param {(quickPayResult: wesai.HoldemPoker.QuickPayResult) => void} successHandler
+             * @param {(quickPayResult?: wesai.HoldemPoker.QuickPayResult) => void} cancelHandler
+             * @param {number} timeout
+             * @param caller
+             */
+            ItemRepository.prototype.resolveQuickPay = function (applyValidError, successHandler, cancelHandler, timeout, caller) {
+                var _this = this;
+                if (cancelHandler === void 0) { cancelHandler = function () {
+                }; }
+                if (applyValidError.flag === true) {
+                    caller ? cancelHandler.bind(caller)() : cancelHandler();
+                    return;
+                }
+                //清楚计时器
+                var clearTimer = function () {
+                    if (intervalTimer) {
+                        clearInterval(intervalTimer);
+                    }
+                    HoldemPoker.MessagePrompt.cancel(false);
+                };
+                //开始倒计时
+                var intervalTimer;
+                if (timeout && typeof timeout === 'number') {
+                    timeout = Math.ceil(timeout / 1000);
+                    intervalTimer = setInterval(function () {
+                        HoldemPoker.MessagePrompt.setCannelText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cancel) + "(" + timeout + ")");
+                        timeout--;
+                        if (timeout < 0) {
+                            caller ? cancelHandler.bind(caller)() : cancelHandler();
+                            clearTimer();
+                        }
+                    }, 1000);
+                }
+                var errorTemplate = applyValidError.errorTemplate;
+                if (errorTemplate) {
+                    //微赛币不足
+                    if (errorTemplate.itemTempId === HoldemPoker.VirtualCurrencyType.WesaiCurrency) {
+                        //差多少
+                        var lackGold = Math.abs(HoldemPoker.Sys.itemMgr.itemRepository.getCurrency() - errorTemplate.costAmount);
+                        //转化的钻石
+                        var convertProduct_1 = HoldemPoker.Sys.itemMgr.itemRepository.goldConvertToDiamondProduct(lackGold);
+                        //钻石够，请求转换
+                        if (convertProduct_1 !== null) {
+                            //支付结果
+                            var payResult_1 = {
+                                payType: HoldemPoker.QuickPayType.Gold,
+                                amount: convertProduct_1.diamondCost * HoldemPoker.goldToDiamondRatio
+                            };
+                            var content = "\u5FAE\u8D5B\u5E01\u4E0D\u8DB3\uFF0C\u786E\u5B9A\u8981\u8F6C\u5316" + convertProduct_1.diamondCost + "\u94BB\u77F3\u4E3A\u5FAE\u8D5B\u5E01\u5417\uFF1F";
+                            HoldemPoker.MessagePrompt.openPrompt(content, Laya.Handler.create(this, function () {
+                                //钻石转换微赛币
+                                HoldemPoker.Sys.ui.startLoading("", 1);
+                                _this.resolveRequest('MallBuyRequest', { productId: convertProduct_1.id }).then(function (data) {
+                                    console.log('msg.MallBuyResponse', data);
+                                    caller ? successHandler.bind(caller)(payResult_1) : successHandler(payResult_1);
+                                    clearTimer();
+                                }).catch(function (data) {
+                                    console.log('error msg.MallBuyResponse', data);
+                                    if (data && data.codes) {
+                                        HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                                    }
+                                    caller ? cancelHandler.bind(caller)(payResult_1) : cancelHandler(payResult_1);
+                                    clearTimer();
+                                });
+                            }), Laya.Handler.create(this, function () {
+                                caller ? cancelHandler.bind(caller)(payResult_1) : cancelHandler(payResult_1);
+                                clearTimer();
+                            }));
+                        }
+                        else {
+                            //还差多少钻石
+                            var myDiamond = HoldemPoker.Sys.itemMgr.itemRepository.getCurrency(HoldemPoker.VirtualCurrencyType.DiamondCurrency);
+                            // let needDiamond: number = Sys.itemMgr.itemRepository.goldConvertToDiamond(lackGold);
+                            var needDiamond = 0;
+                            var diamondItem = HoldemPoker.Sys.itemMgr.itemRepository.goldToDiamondProduct(lackGold);
+                            if (diamondItem) {
+                                needDiamond = Math.abs(diamondItem.diamondCost - myDiamond);
+                                var convertPayment_1 = HoldemPoker.Sys.itemMgr.itemRepository.diamondConvertPayment(Math.abs(needDiamond));
+                                if (convertPayment_1) {
+                                    //支付结果
+                                    var payResult_2 = {
+                                        payType: HoldemPoker.QuickPayType.DiamondToGold,
+                                        amount: convertPayment_1.diamond * HoldemPoker.goldToDiamondRatio
+                                    };
+                                    var content = "\u60A8\u8FD8\u9700\u8981" + lackGold + "\u5FAE\u8D5B\u5E01,\u786E\u5B9A\u8981\u8D2D\u4E70" + convertPayment_1.diamond + "\u94BB\u77F3\u5417\uFF1F";
+                                    HoldemPoker.MessagePrompt.openPrompt(content, Laya.Handler.create(this, function () {
+                                        //购买钻石
+                                        var data = {
+                                            type: HoldemPoker.msg.PayType.Wechat,
+                                            paymentId: convertPayment_1.id,
+                                            amount: 1,
+                                            gold: 0
+                                        };
+                                        //创建订单并请求微信支付
+                                        HoldemPoker.Sys.ui.startLoading("", 1);
+                                        _this.resolveRequest('MallOrderRequest', data).then(function (data) {
+                                            console.log('msg.MallOrderResponse', data);
+                                            if (data.order.wechatOrder) {
+                                                var orderObj = {
+                                                    partnerid: data.order.wechatOrder.partnerId,
+                                                    prepayid: data.order.wechatOrder.prePayId,
+                                                    package: data.order.wechatOrder.package,
+                                                    noncestr: data.order.wechatOrder.nonceStr,
+                                                    timestamp: data.order.wechatOrder.timeStamp,
+                                                    sign: data.order.wechatOrder.sign
+                                                };
+                                                //发起支付
+                                                _this.wechatPay(orderObj).then(function () {
+                                                    //微信支付收到通知，实际上购买的东西还没返回，延迟500s，看返回了没有
+                                                    // Laya.timer.once(500, this, () => {
+                                                    caller ? successHandler.bind(caller)(payResult_2) : successHandler(payResult_2);
+                                                    // });
+                                                    clearTimer();
+                                                }).catch(function () {
+                                                    caller ? cancelHandler.bind(caller)(payResult_2) : cancelHandler(payResult_2);
+                                                    clearTimer();
+                                                });
+                                            }
+                                        }).catch(function (data) {
+                                            if (data && data.codes) {
+                                                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                                            }
+                                            caller ? successHandler.bind(caller)(payResult_2) : successHandler(payResult_2);
+                                            clearTimer();
+                                        });
+                                    }), Laya.Handler.create(this, function () {
+                                        caller ? cancelHandler.bind(caller)() : cancelHandler();
+                                        clearTimer();
+                                    }));
+                                    // MessagePrompt.setConfText(Sys.localization.get(stringtable.recharge));
+                                }
+                            }
+                        }
+                    }
+                    else if (errorTemplate.itemTempId === HoldemPoker.VirtualCurrencyType.DiamondCurrency) {
+                        //还差多少钻石
+                        var lackDiamond = Math.abs(HoldemPoker.Sys.itemMgr.itemRepository.getCurrency(HoldemPoker.VirtualCurrencyType.DiamondCurrency) - errorTemplate.costAmount);
+                        var convertPayment_2 = HoldemPoker.Sys.itemMgr.itemRepository.diamondConvertPayment(Math.abs(lackDiamond));
+                        if (convertPayment_2) {
+                            //支付结果
+                            var payResult_3 = {
+                                payType: HoldemPoker.QuickPayType.Diamond,
+                                amount: convertPayment_2.diamond
+                            };
+                            var content = "\u94BB\u77F3\u4E0D\u8DB3\uFF0C\u786E\u5B9A\u8981\u8D2D\u4E70" + convertPayment_2.diamond + "\u94BB\u77F3\u5417\uFF1F";
+                            HoldemPoker.MessagePrompt.openPrompt(content, Laya.Handler.create(this, function () {
+                                //购买钻石
+                                var data = {
+                                    type: HoldemPoker.msg.PayType.Wechat,
+                                    paymentId: convertPayment_2.id,
+                                    amount: 1,
+                                    gold: 0
+                                };
+                                //创建订单并请求微信支付
+                                HoldemPoker.Sys.ui.startLoading("", 1);
+                                _this.resolveRequest('MallOrderRequest', data).then(function (data) {
+                                    console.log('msg.MallOrderResponse', data);
+                                    if (data.order.wechatOrder) {
+                                        var orderObj = {
+                                            partnerid: data.order.wechatOrder.partnerId,
+                                            prepayid: data.order.wechatOrder.prePayId,
+                                            package: data.order.wechatOrder.package,
+                                            noncestr: data.order.wechatOrder.nonceStr,
+                                            timestamp: data.order.wechatOrder.timeStamp,
+                                            sign: data.order.wechatOrder.sign
+                                        };
+                                        //发起支付
+                                        _this.wechatPay(orderObj).then(function () {
+                                            //微信支付收到通知，实际上购买的东西还没返回，延迟500s，看返回了没有
+                                            // Laya.timer.once(500, this, () => {
+                                            caller ? successHandler.bind(caller)(payResult_3) : successHandler(payResult_3);
+                                            // });
+                                            clearTimer();
+                                        }).catch(function () {
+                                            caller ? cancelHandler.bind(caller)(payResult_3) : cancelHandler(payResult_3);
+                                            clearTimer();
+                                        });
+                                    }
+                                }).catch(function (data) {
+                                    if (data && data.codes) {
+                                        HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                                    }
+                                    caller ? cancelHandler.bind(caller)(payResult_3) : cancelHandler(payResult_3);
+                                    clearTimer();
+                                });
+                            }), Laya.Handler.create(this, function () {
+                                caller ? cancelHandler.bind(caller)(payResult_3) : cancelHandler(payResult_3);
+                                clearTimer();
+                            }));
+                            // MessagePrompt.setConfText(Sys.localization.get(stringtable.recharge));
+                        }
+                    }
+                }
+            };
+            /**
+             * 微信支付
+             * @param {wesai.HoldemPoker.msg.WechatOrder} orderObj
+             * @returns {Promise<Promise<any> | Promise>}
+             */
+            ItemRepository.prototype.wechatPay = function (orderObj) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        if (!HoldemPoker.Sys.platformRunning) {
+                            return [2 /*return*/, Promise.resolve()];
+                        }
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                //等待微信支付结果
+                                HoldemPoker.Sys.event.once(HoldemPoker.GEvent.WX_PAY_SUCCESS, _this, function () {
+                                    console.log('wechatPay success');
+                                    HoldemPoker.Sys.ui.stopLoading();
+                                    // Sys.inWechatPayProgress = false;
+                                    resolve();
+                                });
+                                HoldemPoker.Sys.event.once(HoldemPoker.GEvent.WX_PAY_CANCEL, _this, function () {
+                                    console.log('wechatPay failed');
+                                    HoldemPoker.Sys.ui.stopLoading();
+                                    // Sys.inWechatPayProgress = false;
+                                    reject();
+                                });
+                                //发起支付
+                                HoldemPoker.Sys.inWechatPayProgress = true;
+                                HoldemPoker.Sys.ui.startLoading("", 1);
+                                console.log('wechatPay start');
+                                HoldemPoker.NativeModule.payWithWeixin(JSON.stringify(orderObj));
+                            })];
+                    });
+                });
+            };
+            return ItemRepository;
+        }(HoldemPoker.Repository));
+        HoldemPoker.ItemRepository = ItemRepository;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=ItemRepository.js.map

@@ -1,0 +1,343 @@
+/*
+ * @Author: devilsome.曾挚
+ * @Date: 2017-02-21 11:08:55
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2017-05-19 12:48:24
+ *
+ * 各种游戏桌的游戏管理器
+ */
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var GameMgr = /** @class */ (function () {
+            function GameMgr() {
+                this.rooms = new Laya.Dictionary;
+                //this.rooms = new Laya.Dictionary;
+            }
+            /**
+             * 获取相对应的房间，需要gameid和roomid
+             * 对于NL和SNG，gameid和roomid只有一个
+             * MMT，一场比赛是一个gameId，每个桌子有一个roomid
+             *
+             * @param {number} gameId
+             * @param {number} roomID
+             * @returns {RoomControl}
+             *
+             * @memberof GameMgr
+             */
+            GameMgr.prototype.getTable = function (gameId, roomID) {
+                var tables = this.rooms.get(roomID);
+                if (tables) {
+                    var game = tables.get(gameId);
+                    if (!game) {
+                        for (var _i = 0, _a = tables.values; _i < _a.length; _i++) {
+                            var t = _a[_i];
+                            if (t) {
+                                game = t;
+                                break;
+                            }
+                        }
+                    }
+                    return game;
+                }
+                return null;
+            };
+            /*
+             public getCurrentRoom(): RoomControl {
+             return this.rooms.get(Sys.players.self.currentRoomId);
+             }
+             */
+            GameMgr.prototype.createRoom = function (roomData, joinGameClubId) {
+                var rc = null;
+                rc = this.getTable(roomData.gameId, roomData.id);
+                if (rc === null || rc === undefined) {
+                    switch (roomData.roomType) {
+                        case 1 /* SNG_ROOM */: {
+                            rc = new HoldemPoker.SNGRoomControl();
+                            break;
+                        }
+                        case 2 /* MTT_ROOM */: {
+                            rc = new HoldemPoker.MTTRoomControl();
+                            break;
+                        }
+                        case 3 /* NL_ROOM */: {
+                            rc = joinGameClubId ? (new HoldemPoker.NLRoomControl(joinGameClubId)) : (new HoldemPoker.NLRoomControl());
+                            break;
+                        }
+                    }
+                }
+                if (rc) {
+                    rc.setData(roomData);
+                    var tables = this.rooms.get(roomData.id);
+                    if (tables === null || tables === undefined) {
+                        tables = new Laya.Dictionary;
+                        this.rooms.set(roomData.id, tables);
+                    }
+                    tables.set(roomData.gameId, rc);
+                }
+                return rc;
+            };
+            GameMgr.prototype.changeTable = function (roomId, oldTableId, newTableId) {
+                // let table = this.getTable(oldTableId, roomId);
+                var tables = this.rooms.get(roomId);
+                var table = tables.get(oldTableId);
+                table.roomData.gameId = newTableId;
+                tables.set(newTableId, table);
+                tables.remove(oldTableId);
+                // this.rooms.set(roomId, tables);
+                // this.removeRoom(oldTableId, roomId);
+            };
+            GameMgr.prototype.removeRoom = function (gameId, roomID) {
+                //移除之前 先清空监听消息
+                var tables = this.rooms.get(roomID);
+                if (tables) {
+                    var roomControl = tables.get(gameId);
+                    if (roomControl !== undefined && roomControl !== null) {
+                        roomControl.Dispose();
+                        tables.remove(gameId);
+                    }
+                    if (tables.values.length === 0) {
+                        this.rooms.set(roomID, null);
+                        this.rooms.remove(roomID);
+                    }
+                }
+            };
+            GameMgr.prototype.Initalize = function () {
+            };
+            /**
+             *  处理可能的下载数据
+             */
+            GameMgr.prototype.LoadFromRes = function () {
+            };
+            /**
+             *  玩家自己创建房间
+             *
+             * @param {msg.CreatePokerRoomRequest} data
+             *
+             * @memberOf GameMgr
+             */
+            GameMgr.prototype.createPokerRoomRequest = function (data) {
+                // 准备登录
+                HoldemPoker.Sys.net.sendMesage("CreatePokerRoomRequest", data, Laya.Handler.create(this, this.onCreateSingleGameResponse), Laya.Handler.create(this, this.onCreateSingleGameError));
+                //加入房间 接受服务器数据
+                HoldemPoker.Sys.ui.startLoading();
+            };
+            GameMgr.prototype.onCreateSingleGameResponse = function (data) {
+                console.debug("[GameMgr]receive data = " + JSON.stringify(data));
+                HoldemPoker.Sys.players.self.currentRoomId = data.roomId;
+                HoldemPoker.Sys.players.self.currentGameId = data.gameId;
+                var roomData = HoldemPoker.RoomDataProvider.getRoomDataByCreatePokerRoomResponse(data);
+                this.createRoom(roomData);
+                HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.InGameState);
+            };
+            GameMgr.prototype.onCreateSingleGameError = function (data) {
+                console.debug("[Error][Game] create single game failed. [err=" + data.codes + ", msg=" + data.msg + "]");
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                //加入房间  停止接收数据界面
+                HoldemPoker.Sys.ui.stopLoading();
+            };
+            GameMgr.prototype.createSNGGame = function (data) {
+                // 准备登录
+                HoldemPoker.Sys.net.sendMesage("CreateSNGPokerRoomRequest", data, Laya.Handler.create(this, this.onCreateSingleGameResponse), Laya.Handler.create(this, this.onCreateSingleGameError));
+                HoldemPoker.Sys.ui.startLoading();
+            };
+            /**
+             * 连接房间服务器ip
+             * @param data
+             * @param caller
+             * @param handler
+             */
+            GameMgr.prototype.connectRoomServer = function (data, caller, handler, notShowLoading, clubId) {
+                if (!notShowLoading) {
+                    HoldemPoker.Sys.ui.startLoading();
+                }
+                HoldemPoker.BenchmarkHelper.timeEnd('enterGameTest', 'StartConnectRoomServerRequest', false);
+                //来自俱乐部
+                this.referClubId = clubId;
+                if (data.invitationCode !== undefined) {
+                    HoldemPoker.Sys.net.sendMesage("ConnectRoomServerRequest", data, Laya.Handler.create(this, this.onConnectRoomServerResponse), Laya.Handler.create(caller, handler));
+                }
+                else {
+                    HoldemPoker.Sys.net.sendMesage("MTTConnectRequest", data, Laya.Handler.create(this, this.onConnectRoomServerResponse), Laya.Handler.create(caller, handler));
+                }
+            };
+            //通过邀请码进入房间 直接创建房间 然后请求进入房间 | 进入详情页
+            GameMgr.prototype.onConnectRoomServerResponse = function (data) {
+                console.debug("[GameMgr]receive data = " + JSON.stringify(data));
+                HoldemPoker.BenchmarkHelper.timeEnd('enterGameTest', 'ConnectRoomServerResponse', false);
+                if (data.startTime) {
+                    // MTT唤起详情
+                    data = data;
+                    if (data.roomId > 0) {
+                        HoldemPoker.Sys.matchList.openMatchDetails(data);
+                    }
+                    else {
+                        HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(HoldemPoker.msg.Codes.ErrRoomNotFound));
+                        HoldemPoker.Sys.ui.stopLoading();
+                    }
+                }
+                else {
+                    data = data;
+                    HoldemPoker.Sys.players.self.currentRoomId = data.roomId;
+                    HoldemPoker.Sys.players.self.currentGameId = data.gameId;
+                    var roomData = HoldemPoker.RoomDataProvider.getRoomDataByConnectRoomServerResponse(data);
+                    //创建房间数据
+                    if (this.referClubId) {
+                        this.createRoom(roomData, this.referClubId);
+                    }
+                    else {
+                        this.createRoom(roomData);
+                    }
+                    HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.InGameState);
+                }
+                // 关闭键盘
+                this.mainUIMgr.closeNumKeyboard();
+            };
+            /**
+             * 请求加入SNG房间  这个是 通过列表进入 牌局内
+             *
+             * @returns
+             *  数据类型
+             *  room.id = data.roomId;
+             * @memberOf GameMgr
+             */
+            GameMgr.prototype.connectRoomRequest = function (roomId, ip, port, gameId, incode, roomType, joinGameClubId) {
+                HoldemPoker.Sys.players.self.currentRoomId = roomId;
+                HoldemPoker.Sys.players.self.currentGameId = gameId;
+                var data = {
+                    roomId: roomId,
+                    ip: ip,
+                    port: port,
+                    gameId: gameId,
+                    invitationCode: incode,
+                    roomType: roomType
+                };
+                var roomData = HoldemPoker.RoomDataProvider.getRoomDataByConnectRoomServerResponse(data);
+                if (joinGameClubId) {
+                    roomData.clubId = joinGameClubId;
+                }
+                this.createRoom(roomData, joinGameClubId);
+                HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.InGameState);
+            };
+            GameMgr.prototype.requestReplayList = function (data, caller, handler) {
+                HoldemPoker.Sys.net.sendMesage("ReplayListRequest", data, Laya.Handler.create(caller, handler), Laya.Handler.create(this, this.onReplayListResponseError));
+            };
+            GameMgr.prototype.requestReplayInfo = function (data) {
+                HoldemPoker.Sys.net.sendMesage("ReplayRequest", data, Laya.Handler.create(this, this.onReplayResponse), Laya.Handler.create(this, this.onReplayResponseError));
+            };
+            GameMgr.prototype.onReplayResponse = function (data) {
+                //hezhenlong  录像做法需要与游戏房间剥离 。需要重做
+                return;
+                //这个可能会有多个StartCommonGameResponse,NotifyNextRoundStartResponse,NotifyFlopRoundResponse,需要对自己进行过滤
+                // let commandArray = [];
+                // console.log(data);
+                // console.log("time:::" + data.startTime);
+                // let timeoff: number = 0;
+                // let lastTimeoff: number = 0;
+                // for (let stage of data.stages) {
+                //     for (let frame of stage.frames) {
+                //         if (timeoff == 0) {
+                //             timeoff = frame.timeOff;
+                //         } else {
+                //             timeoff = frame.timeOff - lastTimeoff;
+                //         }
+                //         lastTimeoff = frame.timeOff;
+                //         if (timeoff == 0) {
+                //             timeoff = 10;
+                //         }
+                //         console.log("off:::" + timeoff);
+                //         if (frame.gameStartResponse && Sys.players.self.isSelf(frame.gameStartResponse.playerId)) {
+                //             let command = StartGameCommand.cmdWithNewRoundMessage(frame.gameStartResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.roundStartResponse && Sys.players.self.isSelf(frame.roundStartResponse.playerId)) {
+                //             let response = frame.roundStartResponse;
+                //             let command = NewRoundCommand.cmdWithNewRoundMessage(response);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.sngStartResponse && Sys.players.self.isSelf(frame.sngStartResponse.playerId)) {
+                //             let response = frame.sngStartResponse;
+                //             let command = StartGameCommand.cmdWithSngRoundMessage(response);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.flopResponse && frame.playerId && Sys.players.self.isSelf(frame.playerId)) {
+                //             let command = FlopRoundCommand.cmdWithFlopRoundMessage(frame.flopResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.gainsResponse) {
+                //             let command = GainsCommand.cmdWithGainsMessage(frame.gainsResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.callResponse) {
+                //             let command = ActionCommand.cmdWithCallMessage(frame.callResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.foldResponse) {
+                //             let command = ActionCommand.cmdWithFoldMessage(frame.foldResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.checkResponse) {
+                //             let command = ActionCommand.cmdWithCheckMessage(frame.checkResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.raiseResponse) {
+                //             let command = ActionCommand.cmdWithRaiseMessage(frame.raiseResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         } else if (frame.allInResponse) {
+                //             let command = ActionCommand.cmdWithAllInMessage(frame.allInResponse);
+                //             command.timeInterval = timeoff;
+                //             commandArray.push(command);
+                //         }
+                //     }
+                // }
+                // if (commandArray.length > 0) {
+                //     let roomControl: RoomControl = this.getRoom(data.roomId);
+                //     roomControl.cmdMgr.pushArray(commandArray);
+                //     roomControl.playMgr.isReplay = true;
+                //     let joinData = {
+                //         roomId: data.roomId,
+                //         invitationCode: data.invitationCode,
+                //         bb: data.bb,
+                //         pot: data.pot,
+                //         playerInfo: data.players,
+                //         createrId: data.creatorId,
+                //         name: data.roomName,
+                //         ante: 0,
+                //         endTime: data.endTime,
+                //         roomType: data.roomType,
+                //         actionTime: 0,//先这么写 改变这条响应
+                //     };
+                //     this.joinRoom(joinData);
+                //     //todo:风险
+                //     Laya.timer.once(1000, this, this.onInitReplayView, [data]);
+                // }
+            };
+            GameMgr.prototype.onInitReplayView = function (data) {
+                /*
+                 let room = Sys.games.getCurrentRoom();
+                 if (room !== null && room.gameUI) {
+                 room.gameUI.addReplayView(data);
+                 }
+                 */
+            };
+            GameMgr.prototype.onReplayResponseError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+            };
+            GameMgr.prototype.onReplayListResponseError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+            };
+            GameMgr.prototype.initialMainUIMgr = function (mainUI) {
+                this.mainUIMgr = new HoldemPoker.MainUIMgr();
+                this.mainUIMgr.mainUI = mainUI;
+                this.mainUIMgr.Initalize();
+            };
+            return GameMgr;
+        }());
+        HoldemPoker.GameMgr = GameMgr;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=GameMgr.js.map

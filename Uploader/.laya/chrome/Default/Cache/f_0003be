@@ -1,0 +1,590 @@
+/*
+ * @Author: devilsome.曾挚
+ * @Date: 2017-02-09 10:04:50
+ * @Last Modified by: wesai.谢久伟
+ * @Last Modified time: 2017-12-23 15:55:33
+ *
+ * 实现UI界面的统一动画
+ */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var TweenWrapper = /** @class */ (function () {
+            function TweenWrapper() {
+            }
+            TweenWrapper.to = function (target, props, duration, ease, complete, delay, coverBefore, autoRecover) {
+                var _this = this;
+                return new Promise(function (resolve, reject) {
+                    Laya.Tween.to(target, props, duration, ease, Laya.Handler.create(_this, function () {
+                        if (complete) {
+                            complete.run();
+                        }
+                        resolve();
+                    }), delay, coverBefore, autoRecover);
+                });
+            };
+            TweenWrapper.from = function (target, props, duration, ease, complete, delay, coverBefore, autoRecover) {
+                var _this = this;
+                return new Promise(function (resolve, reject) {
+                    Laya.Tween.from(target, props, duration, ease, Laya.Handler.create(_this, function () {
+                        if (complete) {
+                            complete.run();
+                        }
+                        resolve();
+                    }), delay, coverBefore, autoRecover);
+                });
+            };
+            return TweenWrapper;
+        }());
+        HoldemPoker.TweenWrapper = TweenWrapper;
+        var UIAnimator = /** @class */ (function () {
+            function UIAnimator() {
+            }
+            UIAnimator.asyncFadeIn = function (target, duration, ease, complete) {
+                if (target && target.hasOwnProperty("alpha")) {
+                    target.alpha = 0;
+                }
+                return TweenWrapper.to(target, { alpha: 1 }, duration, ease, complete);
+            };
+            UIAnimator.asyncFadeOut = function (target, duration, ease, complete) {
+                if (target && target.hasOwnProperty("alpha")) {
+                    target.alpha = 1;
+                }
+                return TweenWrapper.to(target, { alpha: 0 }, duration, ease, complete);
+            };
+            UIAnimator.asyncFadeOut7 = function (target, duration, ease, complete) {
+                if (target && target.hasOwnProperty("alpha")) {
+                    target.alpha = 1;
+                }
+                return TweenWrapper.to(target, { alpha: 0.7 }, duration, ease, complete);
+            };
+            UIAnimator.asyncFloatUp = function (target, duration, ease, complete) {
+                return TweenWrapper.from(target, { y: Laya.stage.height }, duration, ease, complete);
+            };
+            UIAnimator.asyncFloatDown = function (target, duration, ease, complete) {
+                return TweenWrapper.to(target, { y: Laya.stage.height }, duration, ease, complete);
+            };
+            UIAnimator.asyncFloatRight = function (target, duration, ease, complete) {
+                return TweenWrapper.from(target, { x: Laya.stage.width }, duration, ease, complete);
+            };
+            UIAnimator.asyncFloatLeft = function (target, duration, ease, complete) {
+                return TweenWrapper.to(target, { x: Laya.stage.width }, duration, ease, complete);
+            };
+            UIAnimator.asyncGameActionButtonPopup = function (target, duration, sx, sy, ex, ey) {
+                console.log(sx + "----33----" + ex);
+                target.pos(sx, sy);
+                target.alpha = 0.3;
+                // 增加缩放 变化
+                target.scale(0, 0);
+                return TweenWrapper.to(target, { x: ex, y: ey, alpha: 1, scaleX: 1, scaleY: 1 }, duration, Laya.Ease.expoOut);
+            };
+            UIAnimator.asyncBetButttonGrpPopup = function (target, duration, sx, sy, ex, ey) {
+                target.pos(sx, sy);
+                return TweenWrapper.to(target, { x: ex, y: ey, alpha: 1 }, duration, Laya.Ease.expoOut);
+            };
+            UIAnimator.asyncBetActionButtonPopup = function (target, duration) {
+                target.scale(0.01, 0.01);
+                return TweenWrapper.to(target, { scaleX: 1, scaleY: 1 }, duration, Laya.Ease.expoOut, null);
+            };
+            UIAnimator.asyncBetActionButtonGroupPopup = function (targets, duration) {
+                var promiseArr = [];
+                targets.forEach(function (target) {
+                    promiseArr.push(UIAnimator.asyncBetActionButtonPopup(target, duration));
+                });
+                return Promise.all(promiseArr);
+            };
+            UIAnimator.Start = function (type, target, props, complete) {
+                type(target, props.duration, props.ease, complete);
+            };
+            UIAnimator.asyncdealrAni = function (start, end, ingame) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var endpos, delar;
+                    return __generator(this, function (_a) {
+                        endpos = HoldemPoker.Utility.LocalToRef(end.imgDeal, ingame);
+                        delar = Laya.Pool.getItem("delar");
+                        if (delar === null) {
+                            delar = Laya.Pool.getItemByClass("delar", Sprite);
+                        }
+                        if (HoldemPoker.Sys.isSimple) {
+                            delar.texture = HoldemPoker.Sys.loader.getRes("1334/ingame/simple/D.png");
+                        }
+                        else {
+                            delar.texture = HoldemPoker.Sys.loader.getRes("1334/ingame/D.png");
+                        }
+                        delar.x = start.x;
+                        delar.y = start.y;
+                        delar.name = "delar";
+                        delar.visible = true;
+                        ingame.addChild(delar);
+                        return [2 /*return*/, TweenWrapper.to(delar, { x: endpos.x, y: endpos.y }, HoldemPoker.Sys.gameCfg["delarMoveTime"], Laya.Ease.cubicOut, Laya.Handler.create(this, function () {
+                                end.imgDeal.visible = true;
+                                ingame.removeChild(delar);
+                                Laya.Pool.recover("delar", delar);
+                            }))];
+                    });
+                });
+            };
+            /**
+             * 玩家头像移动
+             * 牌局开始时 移动到坐下角
+             * 并且 身上筹码上移
+             * @private end 目标玩家的playerpanelui
+             *
+             * @memberOf UIAnimator
+             */ //
+            UIAnimator.asyncPlayerIconMove = function (panel) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var x, y;
+                    return __generator(this, function (_a) {
+                        x = Math.ceil(panel.x);
+                        y = Math.ceil(panel.y);
+                        console.log("x:" + x + "  -y:" + y);
+                        if ((x === 300 && y === 1147) || (x === 665 && y === 1761)) {
+                            panel.quickChatBox.visible = false;
+                            //玩家state 的位置不需要更改 因为已经更改过了            
+                            return [2 /*return*/, TweenWrapper.to(panel.playerPanel, { x: HoldemPoker.PlayerPanelUI.playerPosition[0][0], y: HoldemPoker.PlayerPanelUI.playerPosition[0][1] }, HoldemPoker.Sys.gameCfg["PlayerIconMove"], Laya.Ease.expoOut, Laya.Handler.create(this, function () {
+                                    // panel.playerPanel.pos(PlayerPanelUI.playerPosition[0][0], PlayerPanelUI.playerPosition[0][1]);
+                                    panel.playerPanel.x = HoldemPoker.PlayerPanelUI.playerPosition[0][0];
+                                    panel.playerPanel.y = HoldemPoker.PlayerPanelUI.playerPosition[0][1];
+                                    panel.quickChatBox.x = HoldemPoker.PlayerPanelUI.playerPosition[0][0];
+                                    panel.quickChatBox.y = HoldemPoker.PlayerPanelUI.playerPosition[0][1];
+                                    panel.voiceImg.x = HoldemPoker.PlayerPanelUI.playerPosition[0][0];
+                                    panel.voiceImg.y = HoldemPoker.PlayerPanelUI.playerPosition[0][1];
+                                }))];
+                        }
+                        else {
+                            return [2 /*return*/, ""];
+                        }
+                        return [2 /*return*/];
+                    });
+                });
+            };
+            /**
+             * 玩家弃牌动画
+             *
+             * @private 弃牌玩家的playerpanelui
+             *
+             * @memberOf UIAnimator
+             */
+            UIAnimator.asyncPlayerFoldAni = function (start, end) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var card, startPoint, targetPoint, bx, by, foldAniTime;
+                    return __generator(this, function (_a) {
+                        card = Laya.Pool.getItem("card");
+                        if (card === null) {
+                            card = Laya.Pool.getItemByClass("card", Sprite);
+                        }
+                        card.texture = HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin(HoldemPoker.CardSize.SM)); //角度问题
+                        startPoint = HoldemPoker.Utility.LocalToRef(start.imgCards, end);
+                        targetPoint = HoldemPoker.Utility.LocalToRef(end.potImage, end);
+                        card.x = startPoint.x - 9;
+                        card.y = startPoint.y - 7;
+                        card.alpha = 1;
+                        card.name = "card";
+                        card.visible = true;
+                        end.addChild(card);
+                        bx = targetPoint.x;
+                        by = targetPoint.y;
+                        HoldemPoker.Sys.audio.play("player_fold");
+                        foldAniTime = HoldemPoker.Sys.gameCfg["PlayerFoldAni"];
+                        Laya.Tween.to(card, { alpha: 0 }, foldAniTime, Laya.Ease.expoIn);
+                        return [2 /*return*/, TweenWrapper.to(card, { x: bx, y: by }, HoldemPoker.Sys.gameCfg["PlayerFoldAni"], null, Laya.Handler.create(this, function () {
+                                end.removeChild(card);
+                                Laya.Pool.recover("card", card);
+                            }))];
+                    });
+                });
+            };
+            /**
+             * 玩家加注等操作筹码动画
+             *
+             * @private 加注的玩家
+             * @private PlayerPanelUI 的筹码图片位置
+             *
+             * @memberOf UIAnimator
+             */
+            UIAnimator.asyncChipPlayAni = function (ingameUI, start, target, betImgUrl, complete) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var chip, sp, tp;
+                    return __generator(this, function (_a) {
+                        chip = Laya.Pool.getItem("chip");
+                        if (chip === null) {
+                            chip = Laya.Pool.getItemByClass("chip", Sprite);
+                        }
+                        if (betImgUrl === null || betImgUrl === "" || betImgUrl === undefined) {
+                            chip.texture = HoldemPoker.Sys.loader.getRes(UIAnimator.CHIP_URL);
+                        }
+                        else {
+                            chip.texture = HoldemPoker.Sys.loader.getRes(betImgUrl);
+                        }
+                        chip.pivot(0, 0);
+                        sp = HoldemPoker.Utility.LocalToRef(start, ingameUI);
+                        tp = HoldemPoker.Utility.LocalToRef(target, ingameUI);
+                        chip.alpha = 0.5;
+                        //chip.name = "chip";
+                        chip.visible = true;
+                        ingameUI.addChild(chip);
+                        chip.x = sp.x;
+                        chip.y = sp.y;
+                        HoldemPoker.Sys.audio.play("chips_to_table");
+                        return [2 /*return*/, TweenWrapper.to(chip, { x: tp.x, y: tp.y, alpha: 1 }, HoldemPoker.Sys.gameCfg["ChipPlayAni"], Laya.Ease.linearOut, Laya.Handler.create(this, function () {
+                                ingameUI.removeChild(chip);
+                                Laya.Pool.recover("chip", chip);
+                                if (complete) {
+                                    complete.run();
+                                }
+                            }))];
+                    });
+                });
+            };
+            /**
+            * 结算时添加筹码动画 由底池飞向玩家
+            *
+            * @private 目标玩家的playerpanelui
+            *
+            * @memberOf UIAnimator
+            */
+            UIAnimator.asyncResultsGainsChipAni = function (target, start) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var chip, startPoint, targetPoint;
+                    return __generator(this, function (_a) {
+                        chip = Laya.Pool.getItem("chip");
+                        if (chip === null) {
+                            chip = Laya.Pool.getItemByClass("chip", Sprite);
+                        }
+                        chip.texture = HoldemPoker.Sys.loader.getRes(UIAnimator.CHIP_URL);
+                        chip.pivot(0, 0);
+                        startPoint = HoldemPoker.Utility.LocalToRef(start.ChipsAniAnchor, start);
+                        targetPoint = HoldemPoker.Utility.LocalToRef(target.PlayerAniAnchor, start);
+                        chip.alpha = 1;
+                        //chip.name = "chip";
+                        chip.visible = true;
+                        start.addChild(chip);
+                        chip.x = startPoint.x;
+                        chip.y = startPoint.y;
+                        //Sys.audio.play("chips_to_table");
+                        return [2 /*return*/, TweenWrapper.to(chip, { x: targetPoint.x, y: targetPoint.y, alpha: 0.5 }, HoldemPoker.Sys.gameCfg["ResultsGainsChipAni"], Laya.Ease.linearOut, Laya.Handler.create(this, function () {
+                                start.removeChild(chip);
+                                Laya.Pool.recover("chip", chip);
+                                //将边池组最后一个子节点移除
+                                start.sidePotGrp.removeChild(start.sidePotGrp.getChildAt(start.sidePotGrp.numChildren));
+                            }))];
+                    });
+                });
+            };
+            /**
+             * 玩家筹码飞向筹码池
+             *
+             * @private 起始玩家的playerpanelui
+             *
+             * @memberOf UIAnimator
+             */
+            UIAnimator.asyncChipToPotAni = function (from, end, container, betImgUrl) {
+                var chip = Laya.Pool.getItem("chip");
+                if (chip === null) {
+                    chip = Laya.Pool.getItemByClass("chip", Sprite);
+                }
+                if (betImgUrl === null || betImgUrl === "" || betImgUrl === undefined) {
+                    chip.texture = HoldemPoker.Sys.loader.getRes(UIAnimator.CHIP_URL);
+                }
+                else {
+                    chip.texture = HoldemPoker.Sys.loader.getRes(betImgUrl);
+                }
+                chip.pivot(0, 0);
+                //计算全局位置
+                //计算相对start的位置
+                var startPoint = HoldemPoker.Utility.LocalToRef(from, container);
+                var targetPoint = HoldemPoker.Utility.LocalToRef(end, container);
+                chip.alpha = 1;
+                //chip.name = "chip";
+                chip.visible = true;
+                container.addChild(chip);
+                chip.x = startPoint.x;
+                chip.y = startPoint.y;
+                HoldemPoker.Sys.audio.play("chips_to_pot");
+                return TweenWrapper.to(chip, { x: targetPoint.x, y: targetPoint.y, alpha: 1 }, HoldemPoker.Sys.gameCfg["ChipToPotAni"], Laya.Ease.linearOut, Laya.Handler.create(this, function () {
+                    container.removeChild(chip);
+                    Laya.Pool.recover("chip", chip);
+                }));
+            };
+            /**
+            * 结算时添加图片增加的动画 飞到玩家头像上面
+            *
+            * @private 目标玩家的playerpanelui
+            * @private 玩家本轮获取的筹码数量
+            * @memberOf InGameUI
+            */
+            UIAnimator.resultGainNumPictureAin = function (targets, gainNums, isNumShow) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var promiseArr, i, gainNum, target;
+                    return __generator(this, function (_a) {
+                        promiseArr = [];
+                        for (i = 0; i < targets.length; i++) {
+                            gainNum = gainNums[i];
+                            target = targets[i];
+                            if (gainNum === 0 || gainNum === undefined || !target) {
+                                // return;
+                            }
+                            else {
+                                promiseArr.push(this.te(target, gainNum, isNumShow));
+                            }
+                        }
+                        return [2 /*return*/, Promise.all(promiseArr)];
+                    });
+                });
+            };
+            UIAnimator.te = function (target, gainNum, isNumShow) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var str;
+                    return __generator(this, function (_a) {
+                        target.gainsChipsNum.visible = true;
+                        str = "";
+                        if (gainNum > 0) {
+                            str = "+";
+                            target.gainsChipsNum.filters = [HoldemPoker.Utility.getYelloFilter()];
+                        }
+                        else {
+                            str = "-";
+                            target.gainsChipsNum.filters = [HoldemPoker.Utility.getBlueFilter()];
+                        }
+                        target.gainsChipsNum.text = str + HoldemPoker.Utility.toNumberPatternNegative(gainNum);
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                target.ani_PictureNum.play(0, false);
+                                target.ani_PictureNum.on(Laya.Event.COMPLETE, target, function () {
+                                    if (isNumShow) {
+                                        target.gainsChipsNum.alpha = 1;
+                                    }
+                                    target.gainsChipsNum.visible = isNumShow;
+                                    resolve();
+                                });
+                            })];
+                    });
+                });
+            };
+            /**
+             * 由底池分成 分池动画
+             *
+             * @private 所有的边池信息
+             *
+             * @memberOf UIAnimator
+             */
+            UIAnimator.asyncPotToSidePotAin = function (rc) {
+                var _this = this;
+                return new Promise(function (resolve, reject) {
+                    //获取分成边池的个数  不能形成边池退出 
+                    var sidePots = rc.roomData.gameData.sidePots;
+                    if (sidePots.length <= 0) {
+                        resolve();
+                        return;
+                    }
+                    //重新开始游戏会把sidePotGrp设置为假 这里要设置为真 并且 将边池子节点清空
+                    rc.gameUI.removeSidePotGrpChildren(true);
+                    var startPosX = 0;
+                    var startPosY = 0;
+                    //每行显示3个
+                    var repeatX = 3;
+                    for (var i = 0; i < sidePots.length; i++) {
+                        var side = new HoldemPoker.SidePotItemUI();
+                        if (i % repeatX === 0) {
+                            startPosX = 0;
+                            startPosY += side.height;
+                        }
+                        side.x = startPosX;
+                        side.y = startPosY;
+                        startPosX += side.width;
+                        side.setupData(sidePots[i]);
+                        rc.gameUI.sidePotGrp.addChild(side);
+                    }
+                    rc.gameUI.sidePotGrp.scale(0, 0);
+                    rc.gameUI.sidePotGrp.alpha = 0;
+                    Laya.Tween.to(rc.gameUI.sidePotGrp, { scaleX: 1, scaleY: 1, alpha: 1 }, HoldemPoker.Sys.gameCfg["PotToSidePotAni"], Laya.Ease.linearOut, Laya.Handler.create(_this, function () { resolve(); }));
+                });
+            };
+            /**
+           * 由底池分成 分池动画 播放录像中
+           *
+           * @private 所有的边池信息
+           *
+           * @memberOf UIAnimator
+           */
+            UIAnimator.asyncPotToSidePotAinByVideo = function (rc) {
+                var _this = this;
+                return new Promise(function (resolve, reject) {
+                    //获取分成边池的个数  不能形成边池退出 
+                    var sidePots = rc.pots;
+                    if (sidePots.length <= 0) {
+                        resolve();
+                        return;
+                    }
+                    //重新开始游戏会把sidePotGrp设置为假 这里要设置为真 并且 将边池子节点清空
+                    rc.videoUI.removeSidePotGrpChildren(true);
+                    var startPosX = 0;
+                    var startPosY = 0;
+                    //每行显示3个
+                    var repeatX = 3;
+                    for (var i = 0; i < sidePots.length; i++) {
+                        var side = new HoldemPoker.SidePotItemUI();
+                        if (i % repeatX === 0) {
+                            startPosX = 0;
+                            startPosY += side.height;
+                        }
+                        side.x = startPosX;
+                        side.y = startPosY;
+                        startPosX += side.width;
+                        side.setupData(sidePots[i]);
+                        rc.videoUI.sidePotGrp.addChild(side);
+                    }
+                    rc.videoUI.sidePotGrp.scale(0, 0);
+                    rc.videoUI.sidePotGrp.alpha = 0;
+                    Laya.Tween.to(rc.videoUI.sidePotGrp, { scaleX: 1, scaleY: 1, alpha: 1 }, HoldemPoker.Sys.gameCfg["PotToSidePotAni"], Laya.Ease.linearOut, Laya.Handler.create(_this, function () { resolve(); }));
+                });
+            };
+            /**
+             * 升盲提示
+             * @param target
+             * @param complete
+             */
+            UIAnimator.asyncTipDownToUp = function (target, complete) {
+                target.visible = true;
+                var timeLine = new Laya.TimeLine();
+                timeLine.addLabel("down", 0).to(target, { y: 0 }, 500)
+                    .addLabel("up", 0).to(target, { y: -423 }, 500, null, 2500);
+                timeLine.play(0, false);
+                // timeLine.on(Laya.Event.COMPLETE, target, () => {
+                //     target.visible = false;
+                //     complete;
+                // });
+                timeLine.on(Laya.Event.COMPLETE, target, complete);
+            };
+            UIAnimator.avUpdateTable = function (target) {
+                var timeLine = new Laya.TimeLine();
+                var y = target.y;
+                // timeLine.addLabel("down", 0).to(target, { y: y - 20 }, 100)
+                //     .addLabel("up", 0).to(target, { y: y }, 100)
+                //     .addLabel("down1", 0).to(target, { y: y - 20 }, 100, null, 50)
+                //     .addLabel("up1", 0).to(target, { y: y }, 100)
+                //     .addLabel("down2", 0).to(target, { y: y - 20 }, 100, null, 50)
+                //     .addLabel("up2", 0).to(target, { y: y }, 100);
+                // timeLine.play(0, false);
+                TweenWrapper.from(target, { y: y - 50 }, 2000, Laya.Ease.elasticOut, null);
+            };
+            /**
+             * 开赛倒计时
+             * @param target
+             */
+            UIAnimator.cdGo = function (target, complete) {
+                target.scaleX = 1;
+                target.scaleY = 1;
+                target.alpha = 1;
+                Laya.Tween.to(target, { scaleX: 0.7, scaleY: 0.7, alpha: 0.6 }, 980, null, complete);
+            };
+            UIAnimator.showAutoAction = function (target) {
+                if (HoldemPoker.Sys.isPad) {
+                    // target.y = 2041;
+                    // Laya.Tween.to(target, { y: 1400 }, 300, null, Laya.Handler.create(this, () => {
+                    //     // target.visible = false;
+                    // }));
+                    target.y = 1400;
+                }
+                else {
+                    // target.y = 1334;
+                    // Laya.Tween.to(target, { y: 934 }, 300, null, Laya.Handler.create(this, () => {
+                    //     // target.visible = false;
+                    // }));
+                    target.y = 934;
+                }
+            };
+            /**
+         * 增加思考时间
+         * @param target
+         */
+            UIAnimator.addActionTime = function (target, complete) {
+                target.scaleX = 1.5;
+                target.scaleY = 1.5;
+                Laya.Tween.to(target, { scaleX: 1, scaleY: 1 }, 580, null, complete);
+            };
+            /**
+             * 弃牌动画
+             */
+            UIAnimator.foldAnim = function (target, complete) {
+                target.alpha = 1;
+                target.scaleX = 1;
+                target.scaleY = 1;
+                target.visible = true;
+                target.y = 1882;
+                Laya.Tween.to(target, { y: 552, scaleX: 0.4, scaleY: 0.4, alpha: 0 }, 333, null, complete);
+            };
+            UIAnimator.alphaTo0 = function (target, complete) {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        Laya.timer.clear(this, this.setAlpha);
+                        Laya.timer.once(5000, this, this.setAlpha, [target, complete]);
+                        return [2 /*return*/];
+                    });
+                });
+            };
+            UIAnimator.setAlpha = function (target, complete) {
+                if (target.visible) {
+                    Laya.Tween.to(target, { alpha: 0 }, 1000, null, complete);
+                }
+            };
+            UIAnimator.videoTitleShow = function (target) {
+                target.zOrder = 1000;
+                target.visible = true;
+                target.y = -145;
+                Laya.Tween.to(target, { y: 0 }, 300, null, null);
+            };
+            UIAnimator.videoTitleHide = function (target) {
+                target.y = 0;
+                Laya.Tween.to(target, { y: -145 }, 100, null, Laya.Handler.create(this, function () {
+                    target.visible = false;
+                }));
+            };
+            UIAnimator.RaiseBet = function (target, complete) {
+                target.scaleX = 0.8;
+                target.scaleY = 0.8;
+                Laya.Tween.to(target, { scaleX: 1, scaleY: 1 }, 150, null, complete);
+            };
+            UIAnimator.CHIP_URL = HoldemPoker.Utility.bbBetColor[0]; //默认筹码颜色
+            return UIAnimator;
+        }());
+        HoldemPoker.UIAnimator = UIAnimator;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=UIAnimator.js.map

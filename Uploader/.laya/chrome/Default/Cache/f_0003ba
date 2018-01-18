@@ -1,0 +1,1115 @@
+/*
+ * @Author: devilsome.曾挚
+ * @Date: 2017-03-04 18:43:17
+ * @Last Modified by: wesai.谢久伟
+ * @Last Modified time: 2017-12-23 15:32:07
+ */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var WeChatAvatorSize;
+        (function (WeChatAvatorSize) {
+            WeChatAvatorSize[WeChatAvatorSize["Default"] = 0] = "Default";
+            WeChatAvatorSize[WeChatAvatorSize["SM"] = 46] = "SM";
+            WeChatAvatorSize[WeChatAvatorSize["MD"] = 64] = "MD";
+            WeChatAvatorSize[WeChatAvatorSize["LG"] = 96] = "LG";
+            WeChatAvatorSize[WeChatAvatorSize["XLG"] = 132] = "XLG";
+        })(WeChatAvatorSize = HoldemPoker.WeChatAvatorSize || (HoldemPoker.WeChatAvatorSize = {}));
+        var CardSize;
+        (function (CardSize) {
+            CardSize[CardSize["SM"] = 0] = "SM";
+            CardSize[CardSize["LG"] = 1] = "LG";
+        })(CardSize = HoldemPoker.CardSize || (HoldemPoker.CardSize = {}));
+        var Utility = /** @class */ (function () {
+            function Utility() {
+            }
+            /**
+             * 传入数字 10000 15000 18760   150000
+             * CN返回  1万    1.5万 1.87万  15万
+             * EN返回  10k   15k   18.7k   150k
+    
+             * @static
+             * @param {number} num
+             * @returns {string}
+             *
+             * @memberOf Utility
+             */
+            Utility.toNumberPattern = function (num, limit) {
+                if (limit === void 0) { limit = 10000; }
+                if (num === undefined || num === null || isNaN(num)) {
+                    return '';
+                }
+                if (HoldemPoker.Sys.localization) {
+                    if (HoldemPoker.Sys.localization.curNation === HoldemPoker.Nation.CN) {
+                        var unit = limit >= 10000 ? HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.tenThousand) : HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.thousand);
+                        if (num >= limit) {
+                            return "" + Math.round((num / limit) * 100) / 100 + unit;
+                        }
+                    }
+                    else {
+                        if (num >= limit && num < 1000000) {
+                            return Math.round((num / limit) * 100) / 10 + "k";
+                        }
+                        else if (num >= 1000000) {
+                            return Math.round((num / limit) * 100) / 10000 + "m";
+                        }
+                    }
+                }
+                return num.toString();
+            };
+            /**
+             * 可以返还负数
+             * 传入数字 10000 15000 18760   150000
+             * CN返回  1万    1.5万 1.87万  15万
+             * EN返回  10k   15k   18.7k   150k
+    
+             * @static
+             * @param {number} num
+             * @returns {string}
+             *
+             * @memberOf Utility
+             */
+            Utility.toNumberPatternNegative = function (num, limit) {
+                if (limit === void 0) { limit = 10000; }
+                if (num === undefined || num === null || isNaN(num)) {
+                    return '';
+                }
+                // let str;
+                // if (num > 0) {
+                //     str = "+";
+                // } else {
+                //     str = "-";
+                // }
+                num = Math.abs(num);
+                if (HoldemPoker.Sys.localization) {
+                    if (HoldemPoker.Sys.localization.curNation === HoldemPoker.Nation.CN) {
+                        var unit = limit >= 10000 ? HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.tenThousand) : HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.thousand);
+                        if (num >= limit) {
+                            return "" + Math.round((num / limit) * 100) / 100 + unit;
+                        }
+                    }
+                    else {
+                        if (num >= limit && num < 1000000) {
+                            return Math.round((num / limit) * 100) / 10 + "k";
+                        }
+                        else if (num >= 1000000) {
+                            return Math.round((num / limit) * 100) / 10000 + "m";
+                        }
+                    }
+                }
+                return num.toString();
+            };
+            /**
+             * 传入数字 10000 15000 18760   150000
+             * 返回格式化时间字符串
+             * @static
+             * @param {number} num
+             * @returns {string}
+             * 12000s 200m
+             * @memberOf Utility
+             */
+            Utility.toStandardTimePattern = function (num) {
+                if (num >= 0) {
+                    var hour = Math.floor(num / 60 / 60);
+                    var minutes = Math.floor((num / 60) % 60);
+                    minutes = minutes < 0 ? 0 : minutes;
+                    var second = num % 60;
+                    return this.add0(hour) + ":" + this.add0(minutes) + ":" + this.add0(second);
+                }
+                else {
+                    return '';
+                }
+            };
+            /**
+             * 传入数字 10000 15000 18760   150000
+             * 返回格式化时间字符串 minutes:second
+             * @static
+             * @param {number} num
+             * @returns {string} minutes:second 00:00
+             * 12000s 200m  只显示分钟跟秒
+             * @memberOf Utility
+             */
+            Utility.toSimpleTimePattern = function (num) {
+                if (num >= 0) {
+                    var minutes = Math.floor((num / 60) % 60);
+                    minutes = minutes < 0 ? 0 : minutes;
+                    var second = num % 60;
+                    return this.add0(minutes) + ":" + this.add0(Math.round(second));
+                }
+            };
+            /**
+             * 传入数字，每三位加逗号
+             * @param num
+             */
+            Utility.getDotNum = function (num) {
+                return num && (num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            };
+            Utility.toDatePattern = function (num) {
+                var now = new Date().getTime() / 1000;
+                num = now - num;
+                if (num > 0) {
+                    if (num > 86400) {
+                        var day = num / 86400;
+                        var ret = num % 86400;
+                        var minutes = Math.round(num / 60);
+                        var second = Math.round(num % 60);
+                        return Math.floor(day) + "天前";
+                    }
+                    else {
+                        var minutes = Math.round(num / 60);
+                        if (minutes >= 60) {
+                            minutes = minutes % 60;
+                        }
+                        var ret = (num / 60) / 60;
+                        ret = parseInt(ret + '');
+                        var second = Math.round(num % 60);
+                        // return minutes + ":" + second;
+                        if (ret === 0) {
+                            return minutes + '分前';
+                        }
+                        else {
+                            return ret + '小时前';
+                        }
+                        // return ret + '小时' + minutes + '分' + second + '秒前';
+                    }
+                }
+                return '';
+            };
+            // 时间戳转换
+            // type: 0日期 1日期＋时间
+            Utility.toDTimePattern = function (timestamp, type) {
+                //timestamp是整数，否则要parseInt转换,不会出现少个0的情况
+                // console.log('01:' + timestamp);
+                var time = new Date(timestamp * 1000);
+                // console.log('02:' + time);
+                var year = time.getFullYear();
+                var month = time.getMonth() + 1;
+                var date = time.getDate();
+                var hours = time.getHours();
+                var minutes = time.getMinutes();
+                var seconds = time.getSeconds();
+                if (type === 0) {
+                    return year + '-' + this.add0(month) + '-' + this.add0(date);
+                }
+                if (type === 1) {
+                    return year + '-' + this.add0(month) + '-' + this.add0(date) + ' ' + this.add0(hours) + ':' + this.add0(minutes) + ':' + this.add0(seconds);
+                }
+            };
+            Utility.add0 = function (m) {
+                return m < 10 ? '0' + m : m;
+            };
+            /**
+             * 获取字符串
+             * 返回格式化字符串长度（把双字节的替换成两个单字节的然后再获得长度）
+             */
+            Utility.getStrLength = function (str) {
+                if (str === null) {
+                    return 0;
+                }
+                if (typeof str !== "string") {
+                    str += "";
+                }
+                return str.replace(/[^\x00-\xff]/g, "01").length;
+            };
+            /**
+             * 返回文字缩略（传入字符串和超过截取数字-中文计算2个字符）
+             */
+            Utility.abbrString = function (str, num) {
+                var strL = this.getStrLength(str);
+                if (strL > num) {
+                    var re = /[\u4E00-\u9FA5]/g; //测试中文字符的正则
+                    if (re.test(str)) {
+                        num = Math.floor(num / 2);
+                    }
+                    ;
+                    str = str.substring(0, num - 1);
+                    return str + '...';
+                }
+                ;
+                return str;
+            };
+            Utility.applyMixins = function (derivedCtor, baseCtors) {
+                baseCtors.forEach(function (item) {
+                    Object.getOwnPropertyNames(item).forEach(function (name) {
+                        derivedCtor[name] = item[name];
+                    });
+                });
+            };
+            Utility.toMessageWithCode = function (errCode) {
+                //hezhenlong . 接收错误消息 消除菊花图
+                HoldemPoker.Sys.ui.stopLoading();
+                switch (errCode) {
+                    case 1:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.fail);
+                    case 10:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.connectFail);
+                    case 11:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.connectTimeout);
+                    case HoldemPoker.msg.Codes.ErrPlayerNotFound:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.notUser);
+                    case HoldemPoker.msg.Codes.ErrLogin:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.loginFail);
+                    case HoldemPoker.msg.Codes.ErrRelogin:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.relogin);
+                    case HoldemPoker.msg.Codes.ErrPlayerPhoneExists:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.accountExistError);
+                    case HoldemPoker.msg.Codes.ErrRoomNotFound:
+                        HoldemPoker.Sys.ui.hideAlertView();
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.emptyRoom);
+                    case HoldemPoker.msg.Codes.ErrReconnectRoomNotFound:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.emptyRoom);
+                    case HoldemPoker.msg.Codes.ErrInvitationCode:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.inviteCodeFail);
+                    case HoldemPoker.msg.Codes.ErrJoinRoom:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.joinRoomFail);
+                    case HoldemPoker.msg.Codes.ErrCreateRoom:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.createRoomFail);
+                    case HoldemPoker.msg.Codes.ErrConnectRoom:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.connectRoomFail);
+                    case HoldemPoker.msg.Codes.ErrSeatIsOccupied:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.seated);
+                    case HoldemPoker.msg.Codes.ErrPlayerNotInGame:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.emptyPlayer);
+                    case HoldemPoker.msg.Codes.ErrSeatIsUnoccupied:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.emptySeat);
+                    case HoldemPoker.msg.Codes.ErrSeatIsOthers:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.seatBelongOther);
+                    case HoldemPoker.msg.Codes.ErrSitDown:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.seatFail);
+                    case HoldemPoker.msg.Codes.ErrStandUp:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.standUpFail);
+                    case HoldemPoker.msg.Codes.ErrStandUpFirst:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.standUpFirst);
+                    case HoldemPoker.msg.Codes.ErrOutRoom:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.quitRoomFail);
+                    case HoldemPoker.msg.Codes.ErrNotRoomCreator:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.notCreateRoomer);
+                    case HoldemPoker.msg.Codes.ErrRoomState:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.roomStatusFail);
+                    case HoldemPoker.msg.Codes.ErrPlayersNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerNotEnough);
+                    case HoldemPoker.msg.Codes.ErrStartGame:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.startRoundFail);
+                    case HoldemPoker.msg.Codes.ErrGameNotFound:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.emptyRound);
+                    case HoldemPoker.msg.Codes.ErrIllegalAction:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.illegalAction);
+                    case HoldemPoker.msg.Codes.ErrGoldNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.moneyNotEnough);
+                    case HoldemPoker.msg.Codes.ErrPlayerCall:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.callFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerFold:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.foldFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerCheck:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.checkFail);
+                    case HoldemPoker.msg.Codes.ErrIllegalParameter:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.illegalParameter);
+                    case HoldemPoker.msg.Codes.ErrPlayerRaise:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.raiseFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerAllIn:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.allInFail);
+                    case HoldemPoker.msg.Codes.ErrReplayNotFound:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.emptyRecord);
+                    case HoldemPoker.msg.Codes.ErrGetReplayList:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.recordListFail);
+                    case HoldemPoker.msg.Codes.ErrGetReplay:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.recordError);
+                    case HoldemPoker.msg.Codes.ErrClubCreate:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.createClubError);
+                    case HoldemPoker.msg.Codes.ErrPlayerConnect:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.loginFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerTokenRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.loginFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerCaptchaFrequently:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.captchaFreFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerCaptchaRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.captchaFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerPlatformAuth:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.captchaFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerPlatformCaptcha:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.captchaFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerSignUp:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.registerFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerBindPhone:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.bindPhoneFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerChangePassword:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.changePwdFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerForbiddenNickname:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.nicknameError);
+                    case HoldemPoker.msg.Codes.ErrPlayerCaptcha:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.captchaError);
+                    case HoldemPoker.msg.Codes.ErrPlayerIconSave:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerSaveIconError);
+                    case HoldemPoker.msg.Codes.ErrPlayerWechatAccessToken:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.wechatLoginError);
+                    case HoldemPoker.msg.Codes.ErrPlayerPassword:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.inputAccountError);
+                    case HoldemPoker.msg.Codes.ErrPlayerWechatExists:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.wechatExistError);
+                    case HoldemPoker.msg.Codes.ErrPlayerNameInvalidLength:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.nicknameLengthError);
+                    case HoldemPoker.msg.Codes.ErrPlayerNameWithSpaces:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.nicknameSpaceError);
+                    case HoldemPoker.msg.Codes.ErrPlayerEditInfo:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrPlayerEditInfo);
+                    case HoldemPoker.msg.Codes.ErrPlayerLoginRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.loginFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerWechatLogin:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.wechatLoginError);
+                    case HoldemPoker.msg.Codes.ErrPlayerIconNoImageType:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerSaveIconError);
+                    case HoldemPoker.msg.Codes.ErrPlayerInfoRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerInfoFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerRoomsRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.joinRoomFail);
+                    case HoldemPoker.msg.Codes.ErrPlayerLogout:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.logoutFail);
+                    case HoldemPoker.msg.Codes.ErrMallProductNotFound:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.productNotExist);
+                    case HoldemPoker.msg.Codes.ErrMallProductsRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.productListFail);
+                    case HoldemPoker.msg.Codes.ErrMallPaymentsRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.payListFail);
+                    case HoldemPoker.msg.Codes.ErrMallReceiptRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.payFail);
+                    case HoldemPoker.msg.Codes.ErrMallInvalidPaymentId:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.payFail);
+                    case HoldemPoker.msg.Codes.ErrMallOrderRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.createOrderFail);
+                    case HoldemPoker.msg.Codes.ErrMallBuyRequest:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.buyProductFail);
+                    case HoldemPoker.msg.Codes.ErrMallDiamondNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.notEnoughDiaomond);
+                    case HoldemPoker.msg.Codes.ErrPlayerForbiddenSignature:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.forbidSignature);
+                    case HoldemPoker.msg.Codes.ErrRoomForbiddenName:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.forbidRoomName);
+                    case HoldemPoker.msg.Codes.ErrMessageForbiddenWords:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.forbidMessage);
+                    case HoldemPoker.msg.Codes.ErrMTTApplyMax:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTApplyMax);
+                    case HoldemPoker.msg.Codes.ErrMTTAlreadyApply:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTAlreadyApply);
+                    case HoldemPoker.msg.Codes.ErrRoomList:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errRoomList);
+                    case HoldemPoker.msg.Codes.ErrPlayerInvalidPhone:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.invalidatePhone);
+                    case HoldemPoker.msg.Codes.ErrMTTApplyEndBlind:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTApplyEndBlind);
+                    case HoldemPoker.msg.Codes.ErrMTTApplyCostNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTApplyCostNotEnough);
+                    case HoldemPoker.msg.Codes.ErrMTTApplyNotExist:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTApplyNotExist);
+                    case HoldemPoker.msg.Codes.ErrMTTCancelApplyFail:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTCancelApplyFail);
+                    case HoldemPoker.msg.Codes.ErrMTTEntryTimeout:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTEntryTimeout);
+                    case HoldemPoker.msg.Codes.ErrMTTEntryBlindExceed:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTEntryBlindExceed);
+                    case HoldemPoker.msg.Codes.ErrMTTEntryNumExceed:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTEntryNumExceed);
+                    case HoldemPoker.msg.Codes.ErrMTTEntryCostNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTEntryCostNotEnough);
+                    case HoldemPoker.msg.Codes.ErrMTTReBuyChipIllegal:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTReBuyChipIllegal);
+                    case HoldemPoker.msg.Codes.ErrLoginTokenTimeOut:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.tokenExpire);
+                    case HoldemPoker.msg.Codes.ErrPlayerPhoneNotBound:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.bindingPhoneNotFound);
+                    case HoldemPoker.msg.Codes.ErrItemNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errItemNotEnough);
+                    case HoldemPoker.msg.Codes.ErrClubCreate:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubCreate);
+                    case HoldemPoker.msg.Codes.ErrCreateExceedMaxNumber:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCreateExceedMaxNumber);
+                    case HoldemPoker.msg.Codes.ErrClubUpdate:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubUpdate);
+                    case HoldemPoker.msg.Codes.ErrClubSearch:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubSearch);
+                    case HoldemPoker.msg.Codes.ErrAlreadyApply:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAlreadyApply);
+                    case HoldemPoker.msg.Codes.ErrAlreadyJoin:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAlreadyJoin);
+                    case HoldemPoker.msg.Codes.ErrApply:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrApply);
+                    case HoldemPoker.msg.Codes.ErrInsufficientAuthority:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsufficientAuthority);
+                    case HoldemPoker.msg.Codes.ErrAlreadyApprove:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAlreadyApprove);
+                    case HoldemPoker.msg.Codes.ErrClubNotFind:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubNotFind);
+                    case HoldemPoker.msg.Codes.ErrClubPlayerTooMore:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubPlayerTooMore);
+                    case HoldemPoker.msg.Codes.ErrPlayerNotFind:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrPlayerNotFind);
+                    case HoldemPoker.msg.Codes.ErrKickVicePresident:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrKickVicePresident);
+                    case HoldemPoker.msg.Codes.ErrKickOutSelf:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrKickOutSelf);
+                    case HoldemPoker.msg.Codes.ErrHasBecomeVicePresident:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrHasBecomeVicePresident);
+                    case HoldemPoker.msg.Codes.ErrHasBecomeNormalPlayer:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrHasBecomeNormalPlayer);
+                    case HoldemPoker.msg.Codes.ErrMasterScoreNotMore:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrMasterScoreNotMore);
+                    case HoldemPoker.msg.Codes.ErrClubExistOtherPlayer:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubExistOtherPlayer);
+                    case HoldemPoker.msg.Codes.ErrNotMoreJoin:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrNotMoreJoin);
+                    case HoldemPoker.msg.Codes.ErrClubForbidden:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubForbidden);
+                    case HoldemPoker.msg.Codes.ErrJoinOfficialCommonRoom:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrJoinOfficialCommonRoom);
+                    case HoldemPoker.msg.Codes.ErrJoinOfficialCommonRoomErrClubId:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrJoinOfficialCommonRoomErrClubId);
+                    case HoldemPoker.msg.Codes.ErrInsuranceNotBuyPlayerId:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsuranceNotBuyPlayerId);
+                    case HoldemPoker.msg.Codes.ErrInsuranceNotChooseOuts:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsuranceNotChooseOuts);
+                    case HoldemPoker.msg.Codes.ErrInsuranceAmountIllegal:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsuranceAmountIllegal);
+                    case HoldemPoker.msg.Codes.ErrInsuranceTimeout:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsuranceTimeout);
+                    case HoldemPoker.msg.Codes.ErrInsuranceMustBuyRiverCard:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsuranceMustBuyRiverCard);
+                    case HoldemPoker.msg.Codes.ErrInsuranceResetTimeCostNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsuranceResetTimeCostNotEnough);
+                    case HoldemPoker.msg.Codes.ErrInsuranceResetTimeCountMax:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInsuranceResetTimeCountMax);
+                    case HoldemPoker.msg.Codes.ErrCreditScoreNotMore:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCreditScoreNotMore);
+                    case HoldemPoker.msg.Codes.ErrPlayerCreditScoreNotMore:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrPlayerCreditScoreNotMore);
+                    case HoldemPoker.msg.Codes.ErrRepayCreditScoreTooMore:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrRepayCreditScoreTooMore);
+                    case HoldemPoker.msg.Codes.ErrCreditOverAllocateMax:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCreditOverAllocateMax);
+                    case HoldemPoker.msg.Codes.ErrNoRepayment:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrNoRepayment);
+                    case HoldemPoker.msg.Codes.ErrAddThinkTimeNotActionPlayer:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAddThinkTimeNotActionPlayer);
+                    case HoldemPoker.msg.Codes.ErrAddThinkTimeMaxCount:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAddThinkTimeMaxCount);
+                    case HoldemPoker.msg.Codes.ErrAddThinkTimeCostNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAddThinkTimeCostNotEnough);
+                    case HoldemPoker.msg.Codes.ErrPlayerGpsIp:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrPlayerGpsIp);
+                    case HoldemPoker.msg.Codes.ErrSeatIsRebuying:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrSeatIsRebuying);
+                    case HoldemPoker.msg.Codes.ErrDiamondsNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errDiamondsNotEnough);
+                    case HoldemPoker.msg.Codes.ErrReplayNotFound:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrReplayNotFound);
+                    case HoldemPoker.msg.Codes.ErrGetReplayList:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrGetReplayList);
+                    case HoldemPoker.msg.Codes.ErrGetReplay:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrGetReplay);
+                    case HoldemPoker.msg.Codes.ErrorVideoNotCollected:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrorVideoNotCollected);
+                    case HoldemPoker.msg.Codes.ErrorVideoCollected:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrorVideoCollected);
+                    case HoldemPoker.msg.Codes.ErrorVideoCollectedLimit:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrorVideoCollectedLimit);
+                    case HoldemPoker.msg.Codes.ErrNotUpToMinimumTableTime:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrNotUpToMinimumTableTime);
+                    case HoldemPoker.msg.Codes.ErrAdvanceLeaveCannotGoTable:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAdvanceLeaveCannotGoTable);
+                    case HoldemPoker.msg.Codes.ErrCreateRoomCeiling:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCreateRoomCeiling);
+                    case HoldemPoker.msg.Codes.ErrInteractionNoSit:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrInteractionNoSit);
+                    case HoldemPoker.msg.Codes.ErrAdvanceSettle:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAdvanceSettle);
+                    case HoldemPoker.msg.Codes.ErrApproveNotMoreJoin:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrApproveNotMoreJoin);
+                    case HoldemPoker.msg.Codes.ErrPlayerHaveSit:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrPlayerHaveSit);
+                    case HoldemPoker.msg.Codes.ErrCdKeyAlreadyUse:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCdKeyAlreadyUse);
+                    case HoldemPoker.msg.Codes.ErrCdKeyNotFind:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCdKeyNotFind);
+                    case HoldemPoker.msg.Codes.ErrCdKeyOverdue:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCdKeyOverdue);
+                    case HoldemPoker.msg.Codes.ErrFreezeMasterScore:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrFreezeMasterScore);
+                    case HoldemPoker.msg.Codes.ErrAgentClubNotFind:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrAgentClubNotFind);
+                    case HoldemPoker.msg.Codes.ErrClubActivityBelowShow:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubActivityBelowShow);
+                    case HoldemPoker.msg.Codes.ErrClubActivityHandselNotEnough:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrClubActivityHandselNotEnough);
+                }
+            };
+            Utility.base64Decode = function (originString) {
+                var byte = new laya.utils.Byte();
+                var dataBuffer = new Array(4);
+                var outputBuffer = new Array(3);
+                var stringLength = originString.length;
+                for (var i = 0; i < stringLength; i += 4) {
+                    for (var j = 0; j < 4 && i + j < stringLength; j++) {
+                        dataBuffer[j] = this.BASE64_CHARS.indexOf(originString.charAt(i + j));
+                    }
+                    outputBuffer[0] = (dataBuffer[0] << 2) + ((dataBuffer[1] & 0x30) >> 4);
+                    outputBuffer[1] = ((dataBuffer[1] & 0x0f) << 4) + ((dataBuffer[2] & 0x3c) >> 2);
+                    outputBuffer[2] = ((dataBuffer[2] & 0x03) << 6) + dataBuffer[3];
+                    for (var k = 0; k < 3; k++) {
+                        if (dataBuffer[k + 1] === 64) {
+                            break;
+                        }
+                        byte.writeByte(outputBuffer[k]);
+                    }
+                }
+                byte.pos = 0;
+                return byte;
+            };
+            /**
+             * 返回tarObj对象相对refObj的坐标
+             *
+             * @static
+             * @param {Laya.Sprite} tarObj
+             * @param {Laya.Sprite} refObj
+             * @returns {Laya.Point}
+             *
+             * @memberof Utility
+    
+             *
+             */
+            Utility.LocalToRef = function (tarObj, refObj) {
+                var tarPos = new Laya.Point(tarObj.x, tarObj.y);
+                if (tarObj && refObj && tarObj.parent === refObj) {
+                    return tarPos;
+                }
+                tarPos.x = 0;
+                tarPos.y = 0;
+                tarObj.localToGlobal(tarPos);
+                if (refObj) {
+                    return refObj.globalToLocal(tarPos);
+                }
+                return tarPos;
+            };
+            Utility.getCardName = function (cardNum, cardSuit) {
+                var name = (cardNum - 3) * 4;
+                if (cardNum === 2) {
+                    name = 48;
+                }
+                if (cardSuit === "diamond") {
+                }
+                else if (cardSuit === "club") {
+                    name = name + 1;
+                }
+                else if (cardSuit === "heart") {
+                    name = name + 2;
+                }
+                else {
+                    name = name + 3;
+                }
+                return "1334/poker" + HoldemPoker.Sys.players.self.cardStyleString + "/" + name + ".png";
+            };
+            Utility.getSmallCardName = function (cardNum, cardSuit) {
+                var name = (cardNum - 3) * 4;
+                if (cardNum === 2) {
+                    name = 48;
+                }
+                if (cardSuit === "diamond") {
+                }
+                else if (cardSuit === "club") {
+                    name = name + 1;
+                }
+                else if (cardSuit === "heart") {
+                    name = name + 2;
+                }
+                else {
+                    name = name + 3;
+                }
+                return "1334/smallCards" + HoldemPoker.Sys.players.self.cardStyleString + "/" + name + ".png";
+            };
+            /**
+             * 牌背
+             * @param {wesai.HoldemPoker.CardSize} size
+             * @returns {string}
+             */
+            Utility.getCardBackSkin = function (size) {
+                if (size === void 0) { size = CardSize.LG; }
+                if (size === CardSize.SM) {
+                    return "1334/smallCards" + HoldemPoker.Sys.players.self.cardStyleString + "/card_back_sm.png";
+                }
+                else {
+                    return "1334/poker" + HoldemPoker.Sys.players.self.cardStyleString + "/cardbg.png";
+                }
+            };
+            Utility.handPowerToString = function (type) {
+                switch (type) {
+                    case HoldemPoker.msg.HandPowerTypes.HIGH_CARD:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.highCard);
+                    case HoldemPoker.msg.HandPowerTypes.ONE_PAIR:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.onePair);
+                    case HoldemPoker.msg.HandPowerTypes.TWO_PAIR:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.twoPair);
+                    case HoldemPoker.msg.HandPowerTypes.THREE_OF_A_KIND:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.threeOfKind);
+                    case HoldemPoker.msg.HandPowerTypes.STRAIGHT:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.straight);
+                    case HoldemPoker.msg.HandPowerTypes.FLUSH:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.flush);
+                    case HoldemPoker.msg.HandPowerTypes.FULL_HOUSE:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.fullHouse);
+                    case HoldemPoker.msg.HandPowerTypes.FOUR_OF_A_KIND:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.fourOfKind);
+                    case HoldemPoker.msg.HandPowerTypes.STRAIGHT_FLUSH:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.straightKind);
+                    case HoldemPoker.msg.HandPowerTypes.ROYAL_STRAIGHT_FLUSH:
+                        return HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.royalStraightFlush);
+                }
+                console.debug("unknown type:" + type);
+                return "??";
+            };
+            Utility.getCurrentActiveSitId = function (sitInfo) {
+                for (var i = 0; i < sitInfo.length; i++) {
+                    var sit = sitInfo[i];
+                    if (sit.action !== 0
+                        && sit.actionTime > 0) {
+                        return sit.sitId;
+                    }
+                }
+                return -1;
+            };
+            Utility.waitForSeconds = function (ms) {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                setTimeout(function () {
+                                    resolve();
+                                }, ms);
+                            })];
+                    });
+                });
+            };
+            Utility.grayFilter = function () {
+                if (!this.grayscaleFilter) {
+                    var grayscaleMat = [
+                        0.4, 0, 0, 0, 0,
+                        0, 0.4, 0, 0, 0,
+                        0, 0, 0.4, 0, 0,
+                        0, 0, 0, 1, 0,
+                    ];
+                    /*
+                     var grayscaleMat = [
+                     0.299, 0.587, 0.114, 0, 0,
+                     0.299, 0.587, 0.114, 0, 0,
+                     0.299, 0.587, 0.114, 0, 0,
+                     0, 0, 0, 1, 0];
+                     */
+                    this.grayscaleFilter = new Laya.ColorFilter(grayscaleMat);
+                }
+                if (HoldemPoker.Sys.platformRunning) {
+                    return this.grayscaleFilter;
+                }
+                else {
+                    return this.getWebGrayFilter();
+                }
+            };
+            Utility.disableFilter = function () {
+                if (!this.grayscaleFilter) {
+                    var grayscaleMat = [
+                        0.2, 0, 0, 0, 0,
+                        0, 0.2, 0, 0, 0,
+                        0, 0, 0.2, 0, 0,
+                        0, 0, 0, 1, 0,
+                    ];
+                    /*
+                     var grayscaleMat = [
+                     0.299, 0.587, 0.114, 0, 0,
+                     0.299, 0.587, 0.114, 0, 0,
+                     0.299, 0.587, 0.114, 0, 0,
+                     0, 0, 0, 1, 0];
+                     */
+                    this.grayscaleFilter = new Laya.ColorFilter(grayscaleMat);
+                }
+                if (HoldemPoker.Sys.platformRunning) {
+                    return this.grayscaleFilter;
+                }
+                else {
+                    return this.getWebGrayFilter();
+                }
+            };
+            Utility.getYelloFilter = function () {
+                // 255, 196, 111
+                if (!this.gainsYelloFilter) {
+                    var grayscaleMat = [
+                        255 / 255.0, 0, 0, 0, 0,
+                        0, 196 / 255.0, 0, 0, 0,
+                        0, 0, 111 / 255.0, 0, 0,
+                        0, 0, 0, 1, 0,
+                    ];
+                    this.gainsYelloFilter = new Laya.ColorFilter(grayscaleMat);
+                }
+                return this.gainsYelloFilter;
+            };
+            Utility.getBlueFilter = function () {
+                // 103, 168, 211
+                if (!this.gainsBlueFilter) {
+                    var grayscaleMat = [
+                        103 / 255.0, 0, 0, 0, 0,
+                        0, 168 / 255.0, 0, 0, 0,
+                        0, 0, 211 / 255.0, 0, 0,
+                        0, 0, 0, 1, 0,
+                    ];
+                    this.gainsBlueFilter = new Laya.ColorFilter(grayscaleMat);
+                }
+                return this.gainsBlueFilter;
+            };
+            Utility.getRedFilter = function () {
+                // 103, 168, 211
+                if (!this.redFilter) {
+                    var grayscaleMat = [
+                        255 / 255.0, 0, 0, 0, 0,
+                        0, 67 / 255.0, 0, 0, 0,
+                        0, 0, 80 / 255.0, 0, 0,
+                        0, 0, 0, 1, 0,
+                    ];
+                    this.redFilter = new Laya.ColorFilter(grayscaleMat);
+                }
+                return this.redFilter;
+            };
+            Utility.getGreenFilter = function () {
+                // 103, 168, 211
+                if (!this.greenFilter) {
+                    var grayscaleMat = [
+                        21 / 255.0, 0, 0, 0, 0,
+                        0, 255 / 255.0, 0, 0, 0,
+                        0, 0, 170 / 255.0, 0, 0,
+                        0, 0, 0, 1, 0,
+                    ];
+                    this.greenFilter = new Laya.ColorFilter(grayscaleMat);
+                }
+                return this.greenFilter;
+            };
+            Utility.getWebGrayFilter = function () {
+                // 103, 168, 211
+                if (!this.webGrayFilter) {
+                    var grayscaleMat = [
+                        175 / 256, 0, 0, 0, 0,
+                        0, 175 / 256, 0, 0, 0,
+                        0, 0, 175 / 256, 0, 0,
+                        0, 0, 0, 1, 0,
+                    ];
+                    this.webGrayFilter = new Laya.ColorFilter(grayscaleMat);
+                }
+                return this.webGrayFilter;
+            };
+            /**
+             * @param node
+             * @param set
+             * @param textColor 文字颜色
+             */
+            Utility.setGray = function (node, set, textColor) {
+                // let sprite = node as Laya.Sprite;
+                // if (sprite) {
+                //     if (set) {
+                //         sprite.filters = [Utility.grayFilter()];
+                //     } else {
+                //         sprite.filters = null;
+                //     }
+                // }
+                for (var i = 0; i < node.numChildren; i++) {
+                    var sprite = node.getChildAt(i);
+                    if (sprite) {
+                        if (set) {
+                            sprite.filters = [Utility.grayFilter()];
+                        }
+                        else {
+                            sprite.filters = null;
+                        }
+                        Utility.setGray(node.getChildAt(i), set, textColor);
+                    }
+                }
+            };
+            /**
+             * 同步返回带表情的html字符串，by guo
+             * @param value
+             * @param eWidth
+             * @param eHeight
+             * @returns {string}
+             */
+            Utility.emojiHtmlStr = function (value, maxLenth, eWidth, eHeight) {
+                if (eWidth === void 0) { eWidth = 30; }
+                if (eHeight === void 0) { eHeight = eWidth; }
+                var smileReg = HoldemPoker.PlayerNameItem.smileReg;
+                var regEmoji;
+                var tempValue = value;
+                //有匹配就替换
+                while ((regEmoji = smileReg.exec(value)) !== null) {
+                    var imgUrl = "emoji/kb-emoji-0.png";
+                    var emoji = regEmoji[0].toUpperCase();
+                    emoji = emoji.substring(1, emoji.length - 1);
+                    //存在就返回图片
+                    var index = HoldemPoker.EmojiUnified.Ids.indexOf(emoji);
+                    if (index !== -1) {
+                        imgUrl = "emoji/kb-emoji-" + HoldemPoker.EmojiSoftbank.Ids[index] + ".png";
+                    }
+                    //替换emojin字符
+                    var imgStr = "<img src=\"" + imgUrl + "\" style=\"width: " + eWidth + "px; height: " + eHeight + "px\"></img>";
+                    tempValue = tempValue.replace(regEmoji[0], imgStr);
+                }
+                return tempValue;
+            };
+            /**
+             * 同步会导致第一次加载位置图片大小有问题
+             * @param value
+             * @param eWidth
+             * @param eHeight
+             * @returns {string}
+             */
+            Utility.emojiHtmlStrSync = function (value, eWidth, eHeight) {
+                if (eWidth === void 0) { eWidth = 30; }
+                if (eHeight === void 0) { eHeight = eWidth; }
+                return __awaiter(this, void 0, void 0, function () {
+                    var smileReg, regEmoji, tempValue, tempArr, emoji, obj, index, _i, tempArr_1, item, imgStr, imgUrl, e_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                smileReg = HoldemPoker.PlayerNameItem.smileReg;
+                                tempValue = value;
+                                tempArr = [];
+                                //查找匹配
+                                while ((regEmoji = smileReg.exec(value)) !== null) {
+                                    emoji = regEmoji[0].toUpperCase();
+                                    emoji = emoji.substring(1, emoji.length - 1);
+                                    obj = {
+                                        url: "emoji/kb-emoji-0.png",
+                                        val: regEmoji[0]
+                                    };
+                                    index = HoldemPoker.EmojiUnified.Ids.indexOf(emoji);
+                                    if (index !== -1) {
+                                        obj.url = "emoji/kb-emoji-" + HoldemPoker.EmojiSoftbank.Ids[index] + ".png";
+                                    }
+                                    tempArr.push(obj);
+                                }
+                                _i = 0, tempArr_1 = tempArr;
+                                _a.label = 1;
+                            case 1:
+                                if (!(_i < tempArr_1.length)) return [3 /*break*/, 7];
+                                item = tempArr_1[_i];
+                                imgStr = '';
+                                _a.label = 2;
+                            case 2:
+                                _a.trys.push([2, 4, , 5]);
+                                return [4 /*yield*/, this.loadEmoji(item.url)];
+                            case 3:
+                                imgUrl = _a.sent();
+                                imgStr = "<img src=\"" + imgUrl + "\" style=\"width: " + eWidth + "px; height: " + eHeight + "px\"></img>";
+                                return [3 /*break*/, 5];
+                            case 4:
+                                e_1 = _a.sent();
+                                imgStr = "<img src=\"emoji/kb-emoji-0.png\" style=\"width: " + eWidth + "px; height: " + eHeight + "px\"></img>";
+                                return [3 /*break*/, 5];
+                            case 5:
+                                //替换emojin字符
+                                tempValue = tempValue.replace(item.val, imgStr);
+                                _a.label = 6;
+                            case 6:
+                                _i++;
+                                return [3 /*break*/, 1];
+                            case 7: return [2 /*return*/, tempValue];
+                        }
+                    });
+                });
+            };
+            /**
+             * 缓存emoji
+             * @param emojiUrl
+             * @returns {Promise<T>|Promise}
+             */
+            Utility.loadEmoji = function (emojiUrl) {
+                return new Promise(function (resolve, reject) {
+                    var image = new Image();
+                    image.onload = function () {
+                        resolve(emojiUrl);
+                    };
+                    image.onerror = function () {
+                        reject(new Error('Could not load image at ' + emojiUrl));
+                    };
+                    image.src = emojiUrl;
+                });
+            };
+            Utility.getBetImgColor = function (BB, bet) {
+                if (BB !== null || BB !== undefined) {
+                    if (BB * Utility.bbBetAry[0][0] <= bet && BB * Utility.bbBetAry[0][1] > bet) {
+                        return Utility.bbBetColor[0];
+                    }
+                    else if (BB * Utility.bbBetAry[1][0] <= bet && BB * Utility.bbBetAry[1][1] > bet) {
+                        return Utility.bbBetColor[1];
+                    }
+                    else if (BB * Utility.bbBetAry[2][0] <= bet && BB * Utility.bbBetAry[2][1] > bet) {
+                        return Utility.bbBetColor[2];
+                    }
+                    else if (BB * Utility.bbBetAry[3][0] <= bet) {
+                        return Utility.bbBetColor[3];
+                    }
+                }
+                //default
+                return Utility.bbBetColor[0];
+            };
+            Utility.buildVersionJSONString = function () {
+                HoldemPoker.NativeModule.getCurrentVersion(function (versionString) {
+                    Utility.appVer = versionString;
+                });
+            };
+            Utility.getVersionJSONString = function () {
+                var str = "{\"app\":{\"version\": \"" + Utility.appVer + "\"},\"res\":" + HoldemPoker.ReleaseInfo.jsonText + ",\"os\":\"" + HoldemPoker.NativeModule.getOS() + "\"}";
+                return str;
+            };
+            Utility.isShare = function () {
+                if (HoldemPoker.Sys.platformRunning && HoldemPoker.Sys.isWeixinInstalled) {
+                    if (HoldemPoker.NativeModule.isIos()) {
+                        var version = HoldemPoker.Sys.versionString;
+                        //version = version.replace(/\./g, "");
+                        var array = version.split(".");
+                        var mainVersion = "";
+                        for (var i = 0; i < array.length; i++) {
+                            if (i > 2) {
+                                break;
+                            }
+                            mainVersion = mainVersion + array[i];
+                        }
+                        var versioncode = parseInt(mainVersion);
+                        if (versioncode < 102) {
+                            return false;
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    return false;
+                }
+            };
+            Utility.isSupportSize = function () {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (HoldemPoker.NativeModule.isIos()) {
+                        var version = HoldemPoker.Sys.versionString;
+                        console.log("IOS版本号：" + version);
+                        if (version === "1.0.2.20") {
+                            return false;
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    return false;
+                }
+            };
+            Object.defineProperty(Utility, "getImgUrl", {
+                get: function () {
+                    var srv = HoldemPoker.Sys.login.serverURL;
+                    if (srv === null) {
+                        srv = "public";
+                    }
+                    var cfg = HoldemPoker.Sys.loader.getRes(HoldemPoker.Resource.protos.hosts.url);
+                    var connectCfg = cfg[srv];
+                    return connectCfg.img_url;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Utility.loadImg = function (view, localImg, netImg, size) {
+                if (size === void 0) { size = WeChatAvatorSize.MD; }
+                view.skin = localImg;
+                if (netImg) {
+                    //http开头的 | base64的不处理
+                    if (/^http.*/.test(netImg) || /:(.*?);/.test(netImg) || /(^1334\/.*)|(^\/1334\/.*)/.test(netImg)) {
+                        netImg = netImg.replace(/\/0$/, '/' + size);
+                        view.skin = netImg;
+                    }
+                    else {
+                        view.skin = this.getImgUrl + netImg;
+                    }
+                }
+            };
+            Utility.setSimple = function (isSimple, skin) {
+                if (isSimple) {
+                    if (skin.indexOf("simple") === -1) {
+                        var str1 = skin.substring(0, skin.lastIndexOf("/") + 1);
+                        var str2 = skin.substring(skin.lastIndexOf("/") + 1);
+                        return str1 + "simple/" + str2;
+                    }
+                    else {
+                        return skin;
+                    }
+                }
+                else {
+                    if (skin.indexOf("simple") === -1) {
+                        return skin;
+                    }
+                    else {
+                        var str1 = skin.substring(0, skin.lastIndexOf("simple/"));
+                        var str2 = skin.substring(skin.lastIndexOf("/") + 1);
+                        return str1 + str2;
+                    }
+                }
+            };
+            Utility.setInsText = function (t, lines) {
+                if (lines === 1) {
+                    t.y = 20;
+                    t.fontSize = 22;
+                }
+                else {
+                    t.y = 10;
+                    t.fontSize = 20;
+                }
+            };
+            Utility.BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            Utility.bbBetColor = ["1334/ingame/chip_green.png", "1334/ingame/chip_black.png", "1334/ingame/chip_yellow.png", "1334/ingame/chip_red.png"];
+            Utility.bbBetAry = [[0, 3], [3, 10], [10, 30], [30, -1]];
+            Utility.appVer = "0.0.0.0";
+            return Utility;
+        }());
+        HoldemPoker.Utility = Utility;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=utility.js.map

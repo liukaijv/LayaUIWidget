@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="gb2312" />
+<meta name="applicable-device" content="pc">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform" />
+<title>javascript中mouseover、mouseout使用详解_javascript技巧_脚本之家</title>
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+<meta name="keywords" content="javascript,mouseover,mouseout" />
+<meta name="description" content="这篇文章主要介绍了javascript中mouseover、mouseout使用详解的相关资料,需要的朋友可以参考下" />
+<link rel="alternate" media="only screen and(max-width: 640px)" href="http://m.jb51.net/article/69682.htm" />
+<meta http-equiv="mobile-agent" content="format=html5; url=http://m.jb51.net/article/69682.htm" />
+<meta http-equiv="mobile-agent" content="format=xhtml; url=http://m.jb51.net/article/69682.htm" />
+<script type="text/javascript">
+var tougao="hebedich",lmname="网络编程",suoyin="no";
+(function(){var reWriteUrl=function(url){if(url){var Splits=url.split("/"),siteName=window.location.pathname;if(typeof siteName!=="undefined"){return "http://m.jb51.net"+siteName}}};if(/Android|webOS|iPhone|iPad|Windows Phone|iPod|BlackBerry|SymbianOS|Nokia|Mobile/i.test(navigator.userAgent)){var url=window.location.href;var pathname=window.location.pathname;if(url.indexOf("?pc")<0){try{window.location.href=reWriteUrl(url)}catch(e){}}}})();
+</script>
+<link type="text/css" href="/skin/2018/css/base.css" rel="stylesheet" />
+<link type="text/css" href="/skin/2018/css/common.css" rel="stylesheet" />
+<script type="text/javascript" src="//apps.bdimg.com/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+if (!window.jQuery) {
+	var script = document.createElement('script');
+	script.src = "/skin/js/jquery.js";
+	document.body.appendChild(script);}
+</script>
+<script type=text/javascript src="/js/function.js"></script> 
+</head>
+<body>
+<!--topTools Start -->
+<div class="topTools">
+    <div class="wrap clear_fix">
+		<div class="topToolsLeft">
+			<a href="/" target="_blank">脚本之家</a>
+			<a href="http://s.jb51.net" target="_blank" rel="nofollow">服务器常用软件</a>
+		</div>
+		<div class="right">
+			<ul>
+				<li><i class="sprite md left"></i><a target="_blank" href="http://m.jb51.net/" rel="nofollow">手机版</a></li>
+				<li><i class="sprite tg left"></i><a href="http://tougao.jb51.net" rel="nofollow" target="_blank">投稿中心</a></li>
+				<li id="wxHide"><i class="sprite wx left"></i><a href="#" target="_blank">关注微信</a>
+					<div id="wxShow" class="wxHide_box"><img src="/skin/2018/images/erwm.jpg" alt="扫一扫" width="84" hight="84" data-baiduimageplus-ignore></div>
+				</li>
+			</ul>
+			<!--快捷导航 开始 -->
+			<div class="text_d right" id="navHide">
+				<a href="javascript:void(0);">快捷导航<i id="icon" class="sprite arrowRight"></i></a>
+				<div id="navBox" class="webNav">
+					<div class="dealList clear_fix">
+						<h4><a href="/softs/" target="_self" rel="nofollow">软件下载</a></h4>
+						<dl>
+							<dd>
+								<a href="/softs/android.html" target="_blank" rel="nofollow">android软件</a>
+								<a href="/softs/mac.html" target="_blank" rel="nofollow">MAC软件</a>
+								<a href="/fonts/" target="_blank" rel="nofollow">字体下载</a> 
+								<a href="/dll/" target="_blank" rel="nofollow">DLL下载</a>
+								<a href="/zt/php-dev.htm" target="_blank" rel="nofollow">php开发工具</a>
+							</dd>
+						</dl>
+					</div>
+					
+					<div class="dealList clear_fix">
+						<h4><a href="/codes/" target="_blank" rel="nofollow">源码下载</a></h4>
+						<dl>
+							<dd>
+								<a href="/codes/asp.html" target="_blank" rel="nofollow">asp源码</a>
+								<a href="/codes/php.html" target="_blank" rel="nofollow">php源码</a>
+								<a href="/codes/aspnet.html" target="_blank" rel="nofollow">asp.net源码</a>
+								<a href="/codes/jsp.html" target="_blank" rel="nofollow">jsp源码</a>
+								<a href="/codes/editor.html" target="_blank" rel="nofollow">网页编辑器</a>
+								<a href="/codes/list123_1.html" target="_blank" rel="nofollow">数据库管理</a>
+							</dd>
+						</dl>
+					</div>
+					
+					<div class="dealList clear_fix">
+						<h4><a href="http://tools.jb51.net" target="_blank">在线工具</a></h4>
+						<dl>
+							<dd>
+								<a href="/shouce/" target="_blank" rel="nofollow">在线手册</a>
+								<a href="/tools/cssyasuo.shtml" target="_blank" rel="nofollow">CSS格式化</a>
+								<a href="http://tools.jb51.net/tools/js_geshihua.asp" target="_blank" rel="nofollow">JS格式化</a>
+								<a href="/tools/html-js.htm" target="_blank" rel="nofollow">Html转化为Js</a>
+								<a href="http://tools.jb51.net/regex/javascript" target="_blank" rel="nofollow">js正则表达式</a>
+							</dd>
+						</dl>
+					</div>
+					
+				</div>
+			</div>
+			<!--快捷导航 结束 -->
+		</div>
+    </div>
+</div>
+<!--topTools end -->
+
+<div class="header">
+	<!-- Logo start -->
+	<div class="wrap">
+		<div class="mtb10 clearfix">
+		  <div class="logo"><a href="http://www.jb51.net/"><img src="http://www.jb51.net/images/logo.gif" title="脚本之家" alt="脚本之家" /></a></div>
+		  <div class="logom fl"><span id="logo_m" class="jbTestPos"></span></div>
+		  <div class="logor fr"><span id="logo_r" class="jbTestPos"></span></div>
+		</div>
+	</div>
+	<!--Logo end -->
+	
+	<!-- 导航开始 -->
+	<div class="nav_top clearfix">
+		<ul>
+			<li><a href="http://www.jb51.net/">网站首页</a></li>
+			<li><a href="/web/">网页制作</a></li>
+			<li><a href="/list/index_1.htm">网络编程</a></li>
+			<li><a href="/list/index_96.htm">脚本专栏</a></li>
+			<li><a href="/jiaoben/">脚本下载</a></li>
+			<li><a href="/list/index_104.htm">数据库</a></li>
+			<li><a href="/cms/">CMS教程</a></li>
+			<li><a href="/books/">电子书籍</a></li>
+			<li><a href="/pingmian/">平面设计</a></li>
+			<li><a href="/media/">媒体动画</a></li>
+			<li><p><i>其它</i><span>
+				<a href="/os/">操作系统</a>
+				<a href="/yunying/">网站运营</a>
+				<a href="/hack/">网络安全</a>
+				<a href="/shouce/">在线手册</a>
+			</span></p></li>
+		</ul>
+	</div>
+	<!--导航结束-->
+</div>
+
+<!-- 二级菜单开始 -->
+<div class="wrap">
+	<div class="subnav clearfix">
+<ul><li><a href='/list/list_61_1.htm' title="基础知识">基础知识</a></li>
+<li><a href='/list/list_23_1.htm' title="javascript类库">javascript类库</a></li>
+<li><a href='/list/list_22_1.htm' title="表单特效">表单特效</a></li>
+<li><a href='/list/list_18_1.htm' title="广告代码">广告代码</a></li>
+<li><a href='/list/list_43_1.htm' title="网页特效">网页特效</a></li>
+<li><a href='/list/list_26_1.htm' title="黑客性质">黑客性质</a></li>
+<li><a href='/list/list_222_1.htm' title="javascript技巧">javascript技巧</a></li>
+<li><a href='/list/list_232_1.htm' title="DOM">DOM</a></li>
+<li><a href='/list/list_243_1.htm' title="node.js">node.js</a></li>
+<li><a href='/list/list_248_1.htm' title="js其它">js其它</a></li>
+</ul>
+	</div>
+</div>
+<!-- 二级菜单结束 -->	
+
+<div class="main mb10 clearfix">
+	<div class="clearfix"><span id="tonglan1" class="jbTestPos"></span></div>
+</div>
+<div class="main clearfix">
+	<div class="NavBar clearfix ptb10">
+		<div class="fl w690">
+			<div class="box mb15 mt10"><i class="icon"></i>您的位置：<a href='/index.htm'>首页</a> → <a href='/list/index_1.htm'>网络编程</a> → <a href='/list/list_3_1.htm'>JavaScript</a> → <a href='/list/list_222_1.htm'>javascript技巧</a> → javascript中mouseover、mouseout使用详解</div>
+		</div>
+		<div class="fr w300"><div class="search">
+		<form action="http://so.jb51.net/cse/search" target="_blank">
+			<input type="hidden" name="s" value="10520733385329581432">
+			<input type="hidden" name="ie" value="gbk">
+			<input type="text" name="q" class="key_input" placeholder="请输入关键词">
+			<input type="submit" value=" " class="c_btn">
+		</form></div>
+		</div>
+	</div>
+</div>
+<!--content Star -->
+<div id="contents">
+ <!--share start-->
+ <div id="right-share">
+	<div class="right-share jb-share" id="jb-share">
+		<a class="rshare-weixin" title="">微信</a>
+		<a class="rshare-qzone" target="_blank" href="http://tougao.jb51.net/" title="投稿">投稿</a>
+		<a class="rshare-sqq" target="_blank" href="http://shequ.jb51.net/" title="交流社区">交流社区</a>
+		<a class="rshare-tsina" target="_blank" href="http://youhui.jb51.net/" title="领取优惠券">领取优惠券</a>
+	</div>
+	<a class="rshare-top" onClick="javascript:;"></a>
+			
+	<div id="weixin-code" class="hide">
+	<div class="popup_weixin_head"><p>关注微信公众号</p> 
+	<div id="code"><img src="/skin/2018/images/erwm.jpg" alt="扫一扫" width="100" hight="100"></div>
+	</div>
+	</div>	
+ </div>
+<!--share end-->
+
+ <div class="main clearfix bgf">
+      <div class="w750 fl">
+      <div class="article-content border">
+      <div class="title">
+            <h1 class="YaHei">javascript中mouseover、mouseout使用详解</h1>
+            <p><i>转载</i> &nbsp;2015-07-19 &nbsp; 投稿：hebedich  &nbsp; <a href="#comments"> <img src="/skin/2018/images/text-message.png" width="15" height="15" /> 我要评论</a> </p>
+        </div>
+        <div class="art_desc mt10"><div id="art_demo"><div id="art_demo">这篇文章主要介绍了javascript中mouseover、mouseout使用详解的相关资料,需要的朋友可以参考下</div></div></div>
+        <div class="lbd clearfix"><span id="art_up" class="jbTestPos"></span></div>
+        <div id="content">
+            <p>本文并没有像标题说的那样，真正阻止事件元素的子元素冒泡...</p>
+<p>只是在子元素冒泡到事件元素处时进行了一个判断，判断是否要触发事件，哦...不对 应该是是否要运行事件函数中的相关操作...</p>
+<p>首先你可以猛戳这里： <a target="_blank" href="http://www.f2e-test.com/blogs/2015-04-30-mouseoutAndMouseover/%E9%97%AE%E9%A2%98.html">问题的出现</a></p>
+<p>&nbsp;注：jquery中的mouseover/out事件也有此问题</p>
+<p><strong>解决方法一：<br />
+</strong></p>
+<p>在ie下有mouseenter 与 mouseleave事件来替代mouseover 和 mouseout。</p>
+<p>网上很多说法，这两个事件只有ie支持，其他浏览器不支持。</p>
+<p>但是我在最新版本的火狐与谷歌都支持了mouseenter 与 mouseleave！！！！！</p>
+<p>另外ie是的支持范围是：[ie5+ ，所以我们还是别喷ie了...</p>
+<p>其他浏览器测试了下：</p>
+<p>　　　　　　在Firefox/3.6.28是不支持mouseenter 与 mouseleave的，Firefox具体从哪个版本开始支持这两个事件，就不得而知了...</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 在Opera9.50 Alpha 与Opera9.00 Beta都不支持。其实Opera现在完全可以不要测试了，最新版的Opera都是webkit内核...</p>
+<p>　　　　　　谷歌低版本未测试...</p>
+<p>当然这些老版本浏览器基本可以不用管了，所以这应该是最好的解决办法了：用mouseenter 与 mouseleave事件来替代mouseover 和 mouseout。</p>
+<p>此二事件的实例戳这：mouseenter与mouseleave</p>
+<p>&nbsp;注：jquery中也有mouseenter 与 mouseleave事件，兼容所有浏览器。</p>
+<p><strong>解决方法二：<br />
+</strong></p>
+<p>上面那个方法在老版本的火狐与谷歌是不支持的，如果你希望得到最大范围的兼容，那可以继续往下看</p>
+<p>我们利用var reltg = e.relatedTarget &#63; e.relatedTarget : e.type == 'mouseout' &#63; e.toElement : e.fromElement 来获取事件相关元素。再通过这个事件相关元素它跟事件元素的关系（包含的关系），来判断是否做相关事件处理。</p>
+<p>对于mouseout事件来说，reltg就是鼠标指针离开目标时，鼠标指针进入的节点。</p>
+<p>对于mouseover 事件来说，reltg就是鼠标指针移到目标节点上时所离开的那个节点。</p>
+<p>在li的mouseout的事件函数中，如果reltg为li的子元素我们就不要运行相关操作，如果reltg为li的父元素就运行相关操作。</p>
+<p>我们可以通过下面的isMouseLeaveOrEnter函数来判断li与reltg的包含关系：</p>
+<div class="jb51code">
+<pre class="brush:js;">
+//判断事件相关元素与li的关系 如果事件相关元素为li的子元素就返回false 反之返回true
+function isMouseLeaveOrEnter(e, handler) { 
+　　if (e.type != 'mouseout' && e.type != 'mouseover') return false; 
+　　var reltg = e.relatedTarget &#63; e.relatedTarget : e.type == 'mouseout' &#63; e.toElement : e.fromElement;
+　　while (reltg && reltg != handler) reltg = reltg.parentNode;
+　　return (reltg != handler);
+};
+
+Li.onmouseout = function(e) {
+　　e = e||window.event;
+　　if (isMouseLeaveOrEnter(e,this)) {
+　　　　//运行相关操作
+　　};
+}
+
+</pre>
+</div>
+<p>&nbsp;此方法明显的缺点就是isMouseLeaveOrEnter中要遍历所有的父元素了，性能问题</p>
+<p><strong>解决方法三：<br />
+</strong></p>
+<p>此方法与方法二其实思路是一样的，只是我们这里通过compareDocumentPosition/contains来判断li与reltg的包含关系，优化了方法二遍历所有父元素带来的性能问题。</p>
+<p>直接看代码吧：</p>
+<div class="jb51code">
+<pre class="brush:js;">
+//判断node是否为parent的子元素
+//if node == parent 也会返回true
+function contains(parent, node) {
+　　if(parent.compareDocumentPosition){ //ff
+　　　　var _flag = parent.compareDocumentPosition(node); 
+　　　　return (_flag == 20 || _flag == 0)&#63; true : false; 
+　　}else if(parent.contains){ //ie
+　　　　return parent.contains(node);
+　　}
+};
+
+Li.onmouseout = function(e) {
+　　e = e||window.event;
+　　var relatedEle = e.relatedTarget &#63; e.relatedTarget : e.type == 'mouseout' &#63; e.toElement : e.fromElement
+　　if (!contains(this, relatedEle)) {
+　　　　show.innerHTML=show.innerHTML+'0';
+　　}
+
+}
+
+</pre>
+</div>
+<p>compareDocumentPosition() 方法比较两个节点，并返回描述它们在文档中位置的整数。</p>
+<p>返回值可能是：</p>
+<p>1：没有关系，两个节点不属于同一个文档。</p>
+<p>2：第一节点（P1）位于第二个节点后（P2）。</p>
+<p>4：第一节点（P1）定位在第二节点（P2）前。</p>
+<p>8：第一节点（P1）位于第二节点内（P2）。</p>
+<p>16：第二节点（P2）位于第一节点内（P1）。</p>
+<p>32：没有关系，或是两个节点是同一元素的两个属性。</p>
+<p>注释：返回值可以是值的组合。例如，返回 20 意味着在 p2 在 p1 内部（16），并且 p1 在 p2 之前（4）。</p>
+<p>而[ie8- 不支持compareDocumentPosition()方法，需要用contains代替compareDocumentPosition()方法那么强大，它是用来确定 nodeB 是否包含在另一个&nbsp; nodeA 中：nodeA .contains( nodeB )</p>
+<p>以上所述就是本文的全部内容了，希望大家能够喜欢。</p>
+            
+            <div class="art_xg">
+<h4>您可能感兴趣的文章:</h4><ul><li><a href="/article/12754.htm" title="兼容ie和firefox的鼠标经过(onmouseover和onmouseout)实现--简短版" target="_blank">兼容ie和firefox的鼠标经过(onmouseover和onmouseout)实现--简短版</a></li><li><a href="/article/17658.htm" title="javascript mouseover、mouseout停止事件冒泡的解决方案" target="_blank">javascript mouseover、mouseout停止事件冒泡的解决方案</a></li><li><a href="/article/24328.htm" title="js ondocumentready onmouseover onclick onmouseout 样式" target="_blank">js ondocumentready onmouseover onclick onmouseout 样式</a></li><li><a href="/article/33513.htm" title="实现onmouseover和onmouseout应用于RadioButtonList或CheckBoxList控件上" target="_blank">实现onmouseover和onmouseout应用于RadioButtonList或CheckBoxList控件上</a></li><li><a href="/article/40560.htm" title="onmouseover和onmouseout的一些问题思考" target="_blank">onmouseover和onmouseout的一些问题思考</a></li><li><a href="/article/43333.htm" title="基于mouseout和mouseover等类似事件的冒泡问题解决方法" target="_blank">基于mouseout和mouseover等类似事件的冒泡问题解决方法</a></li><li><a href="/article/47451.htm" title="经过绑定元素时会多次触发mouseover和mouseout事件" target="_blank">经过绑定元素时会多次触发mouseover和mouseout事件</a></li></ul>
+</div>
+        </div><!--endmain-->
+<div class="tags clearfix">
+	<i class="icon-tag"></i>
+	<ul class="meta-tags items">
+	  <li class="tag item"><a href="http://common.jb51.net/tag/javascript/1.htm" target="_blank" title="搜索关于javascript的文章" rel="nofollow">javascript</a></li>
+<li class="tag item"><a href="http://common.jb51.net/tag/mouseover/1.htm" target="_blank" title="搜索关于mouseover的文章" rel="nofollow">mouseover</a></li>
+<li class="tag item"><a href="http://common.jb51.net/tag/mouseout/1.htm" target="_blank" title="搜索关于mouseout的文章" rel="nofollow">mouseout</a></li>
+
+	</ul>
+</div>        
+
+<div class="lbd clearfix">
+<span id="art_down" class="jbTestPos"></span>
+</div>
+<div id="shoucang"></div>
+
+<div class="xgcomm clearfix">
+	<h2>相关文章</h2>
+	<ul><li><div class="item-inner"><a href="/article/12928.htm" title="惊云JS随机排序程序随机显示信息-每次新闻显示顺序都不一样" class="img-wrap" target="_blank"> <img alt="惊云JS随机排序程序随机显示信息-每次新闻显示顺序都不一样" src="http://files.jb51.net/images/xgimg/bcimg0.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/12928.htm" title="惊云JS随机排序程序随机显示信息-每次新闻显示顺序都不一样">惊云JS随机排序程序随机显示信息-每次新闻显示顺序都不一样</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/%E9%9A%8F%E6%9C%BA/1.htm" target="_blank" title="搜索关于随机的文章" rel="nofollow">随机</a> <a href="http://common.jb51.net/tag/%E6%98%BE%E7%A4%BA%E4%BF%A1%E6%81%AF/1.htm" target="_blank" title="搜索关于显示信息的文章" rel="nofollow">显示信息</a> <a href="http://common.jb51.net/tag/%E9%A1%BA%E5%BA%8F/1.htm" target="_blank" title="搜索关于顺序的文章" rel="nofollow">顺序</a> <a href="http://common.jb51.net/tag/%E4%B8%8D%E4%B8%80%E6%A0%B7/1.htm" target="_blank" title="搜索关于不一样的文章" rel="nofollow">不一样</a>  </span><span class="lbtn" style="float:right"> 2007-11-11 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/105434.htm" title="JavaScript中从setTimeout与setInterval到AJAX异步" class="img-wrap" target="_blank"> <img alt="JavaScript中从setTimeout与setInterval到AJAX异步" src="http://files.jb51.net/images/xgimg/bcimg1.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/105434.htm" title="JavaScript中从setTimeout与setInterval到AJAX异步">JavaScript中从setTimeout与setInterval到AJAX异步</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/js/1.htm" target="_blank" title="搜索关于js的文章" rel="nofollow">js</a> <a href="http://common.jb51.net/tag/settimeout/1.htm" target="_blank" title="搜索关于settimeout的文章" rel="nofollow">settimeout</a> <a href="http://common.jb51.net/tag/setinterval/1.htm" target="_blank" title="搜索关于setinterval的文章" rel="nofollow">setinterval</a> <a href="http://common.jb51.net/tag/ajax/1.htm" target="_blank" title="搜索关于ajax的文章" rel="nofollow">ajax</a>  </span><span class="lbtn" style="float:right"> 2017-02-02 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/65085.htm" title="chrome不支持form.submit的解决方案" class="img-wrap" target="_blank"> <img alt="chrome不支持form.submit的解决方案" src="http://files.jb51.net/images/xgimg/bcimg2.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/65085.htm" title="chrome不支持form.submit的解决方案">chrome不支持form.submit的解决方案</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/chrome/1.htm" target="_blank" title="搜索关于chrome的文章" rel="nofollow">chrome</a> <a href="http://common.jb51.net/tag/%E4%B8%8D%E6%94%AF%E6%8C%81/1.htm" target="_blank" title="搜索关于不支持的文章" rel="nofollow">不支持</a> <a href="http://common.jb51.net/tag/form%2Esubmit/1.htm" target="_blank" title="搜索关于form.submit的文章" rel="nofollow">form.submit</a>  </span><span class="lbtn" style="float:right"> 2015-04-04 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/129504.htm" title="javascript修改浏览器title方法 JS动态修改浏览器标题" class="img-wrap" target="_blank"> <img alt="javascript修改浏览器title方法 JS动态修改浏览器标题" src="http://files.jb51.net/images/xgimg/bcimg3.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/129504.htm" title="javascript修改浏览器title方法 JS动态修改浏览器标题">javascript修改浏览器title方法 JS动态修改浏览器标题</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/javascript/1.htm" target="_blank" title="搜索关于javascript的文章" rel="nofollow">javascript</a> <a href="http://common.jb51.net/tag/JS/1.htm" target="_blank" title="搜索关于JS的文章" rel="nofollow">JS</a> <a href="http://common.jb51.net/tag/%E6%B5%8F%E8%A7%88%E5%99%A8/1.htm" target="_blank" title="搜索关于浏览器的文章" rel="nofollow">浏览器</a> <a href="http://common.jb51.net/tag/title/1.htm" target="_blank" title="搜索关于title的文章" rel="nofollow">title</a>  </span><span class="lbtn" style="float:right"> 2017-11-11 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/40976.htm" title="JavaScript作用域链使用介绍" class="img-wrap" target="_blank"> <img alt="JavaScript作用域链使用介绍" src="http://files.jb51.net/images/xgimg/bcimg4.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/40976.htm" title="JavaScript作用域链使用介绍">JavaScript作用域链使用介绍</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE/1.htm" target="_blank" title="搜索关于作用域链的文章" rel="nofollow">作用域链</a>  </span><span class="lbtn" style="float:right"> 2013-08-08 </span></div></div></div></div></li><li class="lbd clearfix"><span id="art_xg" class="jbTestPos"></span></li>
+<li><div class="item-inner"><a href="/article/49774.htm" title="使用原生js封装webapp滑动效果(惯性滑动、滑动回弹)" class="img-wrap" target="_blank"> <img alt="使用原生js封装webapp滑动效果(惯性滑动、滑动回弹)" src="http://files.jb51.net/images/xgimg/bcimg5.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/49774.htm" title="使用原生js封装webapp滑动效果(惯性滑动、滑动回弹)">使用原生js封装webapp滑动效果(惯性滑动、滑动回弹)</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/js/1.htm" target="_blank" title="搜索关于js的文章" rel="nofollow">js</a> <a href="http://common.jb51.net/tag/webapp/1.htm" target="_blank" title="搜索关于webapp的文章" rel="nofollow">webapp</a> <a href="http://common.jb51.net/tag/%E6%BB%91%E5%8A%A8/1.htm" target="_blank" title="搜索关于滑动的文章" rel="nofollow">滑动</a> <a href="http://common.jb51.net/tag/%E5%9B%9E%E5%BC%B9/1.htm" target="_blank" title="搜索关于回弹的文章" rel="nofollow">回弹</a>  </span><span class="lbtn" style="float:right"> 2014-05-05 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/6516.htm" title="javascript 中对象的继承〔转贴〕" class="img-wrap" target="_blank"> <img alt="javascript 中对象的继承〔转贴〕" src="http://files.jb51.net/images/xgimg/bcimg6.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/6516.htm" title="javascript 中对象的继承〔转贴〕">javascript 中对象的继承〔转贴〕</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/javascript/1.htm" target="_blank" title="搜索关于javascript的文章" rel="nofollow">javascript</a> <a href="http://common.jb51.net/tag/%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%A7%E6%89%BF%E3%80%94%E8%BD%AC%E8%B4%B4%E3%80%95/1.htm" target="_blank" title="搜索关于中对象的继承〔转贴〕的文章" rel="nofollow">中对象的继承〔转贴〕</a>  </span><span class="lbtn" style="float:right"> 2007-01-01 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/74160.htm" title="js实现点击获取验证码倒计时效果" class="img-wrap" target="_blank"> <img alt="js实现点击获取验证码倒计时效果" src="http://files.jb51.net/images/xgimg/bcimg7.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/74160.htm" title="js实现点击获取验证码倒计时效果">js实现点击获取验证码倒计时效果</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/js/1.htm" target="_blank" title="搜索关于js的文章" rel="nofollow">js</a> <a href="http://common.jb51.net/tag/%E9%AA%8C%E8%AF%81%E7%A0%81/1.htm" target="_blank" title="搜索关于验证码的文章" rel="nofollow">验证码</a> <a href="http://common.jb51.net/tag/%E5%80%92%E8%AE%A1%E6%97%B6/1.htm" target="_blank" title="搜索关于倒计时的文章" rel="nofollow">倒计时</a>  </span><span class="lbtn" style="float:right"> 2015-10-10 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/65973.htm" title="js比较日期大小的方法" class="img-wrap" target="_blank"> <img alt="js比较日期大小的方法" src="http://files.jb51.net/images/xgimg/bcimg8.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/65973.htm" title="js比较日期大小的方法">js比较日期大小的方法</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/js/1.htm" target="_blank" title="搜索关于js的文章" rel="nofollow">js</a> <a href="http://common.jb51.net/tag/%E6%97%A5%E6%9C%9F/1.htm" target="_blank" title="搜索关于日期的文章" rel="nofollow">日期</a>  </span><span class="lbtn" style="float:right"> 2015-05-05 </span></div></div></div></div></li>
+<li><div class="item-inner"><a href="/article/16221.htm" title="新人报道，发个小技巧(js数组重复判断)" class="img-wrap" target="_blank"> <img alt="新人报道，发个小技巧(js数组重复判断)" src="http://files.jb51.net/images/xgimg/bcimg9.png"> </a><div class="rbox"><div class="rbox-inner"><p><a class="link title" target="_blank" href="/article/16221.htm" title="新人报道，发个小技巧(js数组重复判断)">新人报道，发个小技巧(js数组重复判断)</a></p><div class="item-info"><span class="lbtn"> <a href="http://common.jb51.net/tag/js/1.htm" target="_blank" title="搜索关于js的文章" rel="nofollow">js</a> <a href="http://common.jb51.net/tag/%E6%95%B0%E7%BB%84/1.htm" target="_blank" title="搜索关于数组的文章" rel="nofollow">数组</a>  </span><span class="lbtn" style="float:right"> 2008-10-10 </span></div></div></div></div></li>
+</ul>
+</div>
+<div class="lbd clearfix mt5">
+<span id="art_down2" class="jbTestPos"></span>
+</div>
+<a href="#comments"></a>
+<div id="comments">
+<H2>最新评论</H2>
+<div class="pd5"><div id="SOHUCS" sid="art_69682"></div></div>
+</div>
+      </div><!--endborder-->
+      </div><!--end fl-->
+      
+<div class="w350 fr">
+<div class="article-right">
+<div class="r300 clearfix"><span id="side_up" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">大家感兴趣的内容</H4>
+<UL class="newsList newList-in">
+<li><EM class="no1">1</EM><a href="/article/14397.htm" title="js刷新页面方法大全" target="_blank">js刷新页面方法大全</a></li><li><EM class="no2">2</EM><a href="/article/25403.htm" title="js页面跳转常用的几种方式" target="_blank">js页面跳转常用的几种方式</a></li><li><EM class="no3">3</EM><a href="/article/35535.htm" title="JS中setTimeout()的用法详解" target="_blank">JS中setTimeout()的用法详解</a></li><li><EM class="no4">4</EM><a href="/article/42482.htm" title="JS截取字符串常用方法详细整理" target="_blank">JS截取字符串常用方法详细整理</a></li><li><EM class="no5">5</EM><a href="/article/64330.htm" title="JS设置cookie、读取cookie、删除cookie" target="_blank">JS设置cookie、读取cookie、删除</a></li><li><EM class="no6">6</EM><a href="/article/52038.htm" title="js数组与字符串的相互转换方法" target="_blank">js数组与字符串的相互转换方法</a></li><li><EM class="no7">7</EM><a href="/article/35691.htm" title="JS打开新窗口的2种方式" target="_blank">JS打开新窗口的2种方式</a></li><li><EM class="no8">8</EM><a href="/article/43136.htm" title="js 将json字符串转换为json对象的方法解析" target="_blank">js 将json字符串转换为json对象的</a></li><li><EM class="no9">9</EM><a href="/article/24101.htm" title="javascript深入理解js闭包" target="_blank">javascript深入理解js闭包</a></li><li><EM class="no10">10</EM><a href="/article/34502.htm" title="js关闭当前页面(窗口)的几种方式总结" target="_blank">js关闭当前页面(窗口)的几种方式</a></li>
+</UL>
+</DIV>
+</DIV>
+<div class="r300 clearfix mt10"><span id="idctu" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">最近更新的内容</H4>
+<UL class="newsListA">
+<li><a href="/article/62430.htm" title="JavaScript移除数组内重复元素的方法" target="_blank">JavaScript移除数组内重复元素的方法</a></li><li><a href="/article/78668.htm" title="基于canvas实现的钟摆效果完整实例" target="_blank">基于canvas实现的钟摆效果完整实例</a></li><li><a href="/article/77636.htm" title="详解JavaScript UTC时间转换方法" target="_blank">详解JavaScript UTC时间转换方法</a></li><li><a href="/article/68852.htm" title="JavaScript定时器和优化的取消定时器方法" target="_blank">JavaScript定时器和优化的取消定时器方法</a></li><li><a href="/article/81809.htm" title="javascript中错误使用var造成undefined" target="_blank">javascript中错误使用var造成undefined</a></li><li><a href="/article/44405.htm" title="异步动态加载JS并运行(示例代码)" target="_blank">异步动态加载JS并运行(示例代码)</a></li><li><a href="/article/11057.htm" title="推荐发几个常用控件(新加DHTML控件)" target="_blank">推荐发几个常用控件(新加DHTML控件)</a></li><li><a href="/article/75470.htm" title="JS实现密码框根据焦点的获取与失去控制文字的消失与显示效果" target="_blank">JS实现密码框根据焦点的获取与失去控制文</a></li><li><a href="/article/99174.htm" title="JavaScript定时器实现的原理分析" target="_blank">JavaScript定时器实现的原理分析</a></li><li><a href="/article/105662.htm" title="Bootstrap模态框使用详解" target="_blank">Bootstrap模态框使用详解</a></li>
+</UL>
+</DIV>
+</DIV>   
+<div class="r300 clearfix mt10"><span id="idctu1" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">常用在线小工具</H4>
+<ul class="newsListA"><span id="bctools" class="jbTestPos"></span></ul>
+</DIV>
+</DIV>
+<div class="r300 clearfix mt10 mb10" id="idctu2"><span id="idctu2" class="jbTestPos"></span></div> 
+<div class="rFixedBox">
+<span id="r_2" class="jbTestPos"></span>
+</div>
+  </div>   
+      
+      </div><!--end fr-->
+      </div>
+</div><!--end content-->
+<div id="footer">
+<div class="main clearfix">
+<p>
+<a href="http://www.jb51.net/about.htm" target="_blank">关于我们</a> - 
+<a href="http://www.jb51.net/support.htm" target="_blank">广告合作</a> - 
+<a href="http://www.jb51.net/linkus.htm" target="_blank">联系我们</a> -  
+<a href="http://www.jb51.net/sm.htm" target="_blank">免责声明</a> -  
+<a href="http://www.jb51.net/sitemap.htm" target="_blank">网站地图</a> - 
+<a href="tencent://message/?uin=461478385&Site=http://www.jb51.net" target="_blank">投诉建议</a> - 
+<a href="http://www.jb51.net/up.htm" target="_blank">在线投稿</a>
+</p>
+<p><a rel="nofollow" class="ba" target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=32031102000137"><img src="http://www.beian.gov.cn/file/ghs.png"/> 苏公网安备 32031102000137号</a>&nbsp;&nbsp;<a href="http://www.miibeian.gov.cn" class="ba" rel="nofollow" target="_blank">苏ICP备14036222号</a></p>
+<p>&copy;CopyRight 2006-2018 JB51.Net Inc All Rights Reserved. 脚本之家 版权所有</p>
+</div>
+</div><!--end footer-->
+<link type="text/css" rel="stylesheet" href="/jslib/syntaxhighlighter/styles/shCore.css" />
+<link type="text/css" rel="Stylesheet" href="/jslib/syntaxhighlighter/styles/shThemeDefault.css" />
+<script type="text/javascript" src="/jslib/syntaxhighlighter/scripts/shCore.js"></script>
+<script type="text/javascript" src="/jslib/syntaxhighlighter/scripts/shAutoloader.js"></script>
+<script type="text/javascript">
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+/*更多导航*/
+$(".nav_top p").hover(function(){$(this).addClass("hover")},function(){$(this).removeClass("hover")});
+
+if (top.location != self.location)top.location=self.location;
+
+var varwindow=$(window);
+$(function(){
+	$('#content').find('img').each(function(){
+        var img = this;
+        if (img.width >= 650){
+            img.style.width = "650px";
+            img.style.height = "auto";
+            //$(img).removeAttr('height');
+            var aTag = document.createElement('a');
+            aTag.href = img.src;
+			aTag.target="_blank";
+            $(aTag).addClass('bPic')
+            .insertAfter(img).append(img)
+          }
+    });
+	varwindow.scroll(function()
+    {	
+    	//rFixedBox跟随滚动
+    	var h = varwindow.height();
+        var top = varwindow.scrollTop();
+    	var rFixedBox = $('.rFixedBox').prev().offset();
+        var fixedTop = rFixedBox.top;
+		
+        if(top>=fixedTop+344)
+        {
+			var h1 = parseInt($('#content').children('.main').height());
+			if(parseInt(top) + 340 < h1){
+				$('.rFixedBox').css({'position':'fixed','top': 0});
+			}else{
+				$('.rFixedBox').css({'position':'absolute','top': h1-510});
+			}
+        }
+        else
+        {
+            $('.rFixedBox').css({'position':'static', 'top':0});   
+        }	
+       /* return true;*/
+	   
+	   /*右侧快捷菜单*/
+	   sideFixed();
+    });
+	var ww = varwindow.width();
+	
+	function sideFixed(){
+	var scrolltop = document.body.scrollTop || document.documentElement.scrollTop;
+	var a1 = 550;
+	if(ww>440){
+		if(a1<=scrolltop){
+			$('#right-share').slideDown();
+			}
+		else{
+			$('#right-share').slideUp();
+			}
+		}
+	}
+	$('.rshare-weixin').hover(function(){
+			$('#weixin-code').removeClass('hide');
+		},function(){
+			$('#weixin-code').addClass('hide');
+		});
+	/*二维码*/
+	$('#right-share .rshare-top').on('click',function(){
+        $('html,body').animate({'scrollTop':0},500);
+    });
+/*$(document).ready(function() {
+  $("#content img").unveil();
+});	*/
+
+//生成目录索引列表
+        function GenerateContentList() {
+            var jquery_h1_list = $('#content h2');
+            if (jquery_h1_list.length == 0) { return; }
+            if ($('#content').length == 0) { return; }
+
+            var content = '<a name="_labelTop"></a>';
+            content += '<div id="navCategory">';
+            content += '<p style="font-size:18px"><b>目录</b></p>';
+            // 一级目录 start
+            content += '<ul class="first_class_ul">';
+
+            for (var i = 0; i < jquery_h1_list.length; i++) {
+                var go_to_top = '<div style="text-align: right"><a name="_label' + i + '">&nbsp;</a></div>';
+                $(jquery_h1_list[i]).before(go_to_top);
+
+                // 一级目录的一条
+                var li_content = '<li><a href="#_label' + i + '">' + $(jquery_h1_list[i]).text() + '</a></li>';
+
+                var nextH1Index = i + 1;
+                if (nextH1Index == jquery_h1_list.length) { nextH1Index = 0; }
+                var jquery_h2_list = $(jquery_h1_list[i]).nextUntil(jquery_h1_list[nextH1Index], "h3");
+                // 二级目录 start
+                if (jquery_h2_list.length > 0) {
+                    //li_content +='<ul style="list-style-type:none; text-align: left; margin:2px 2px;">';
+                    li_content += '<ul class="second_class_ul">';
+                }
+                for (var j = 0; j < jquery_h2_list.length; j++) {
+                    var go_to_top2 = '<div style="text-align: right"><a name="_lab2_' + i + '_' + j + '">&nbsp;</a></div>';
+                    $(jquery_h2_list[j]).before(go_to_top2);
+                    // 二级目录的一条
+                    li_content += '<li><a href="#_lab2_' + i + '_' + j + '">' + $(jquery_h2_list[j]).text() + '</a></li>';
+
+                    var nextH2Index = j + 1;
+                    var next;
+                    if (nextH2Index == jquery_h2_list.length) {
+                        if (i + 1 == jquery_h1_list.length) {
+                            next = jquery_h1_list[0];
+                        }
+                        else {
+                            next = jquery_h1_list[i + 1];
+                        }
+                    }
+                    else {
+                        next = jquery_h2_list[nextH2Index];
+                    }
+                    var jquery_h3_list = $(jquery_h2_list[j]).nextUntil(next, "h4");
+                    // 三级目录 start
+                    if (jquery_h3_list.length > 0) {
+                        li_content += '<ul class="third_class_ul">';
+                    }
+
+                    for (var k = 0; k < jquery_h3_list.length; k++) {
+                        var go_to_third_Content = '<div style="text-align: right"><a name="_label3_' + i + '_' + j + '_' + k + '">&nbsp;</a></div>';
+                        $(jquery_h3_list[k]).before(go_to_third_Content);
+                        // 三级目录的一条
+                        li_content += '<li><a href="#_label3_' + i + '_' + j + '_' + k + '">' + $(jquery_h3_list[k]).text() + '</a></li>';
+                    }
+
+                    if (jquery_h3_list.length > 0) {
+                        li_content += '</ul>';
+                    }
+                    li_content += '</li>';
+                    // 三级目录 end
+                }
+                if (jquery_h2_list.length > 0) {
+                    li_content += '</ul>';
+                }
+                li_content += '</li>';
+                // 二级目录 end
+
+                content += li_content;
+            }
+            // 一级目录 end
+            content += '</ul>';
+            content += '</div>';
+
+            $($('#content')[0]).prepend(content);
+        }
+
+if(suoyin=="ok"){
+	GenerateContentList();
+}
+
+SyntaxHighlighter.autoloader(
+	'applescript			/jslib/syntaxhighlighter/scripts/shBrushAppleScript.js',
+	'actionscript3 as3		/jslib/syntaxhighlighter/scripts/shBrushAS3.js',
+	'bash shell				/jslib/syntaxhighlighter/scripts/shBrushBash.js',
+	'coldfusion cf			/jslib/syntaxhighlighter/scripts/shBrushColdFusion.js',
+	'cpp c					/jslib/syntaxhighlighter/scripts/shBrushCpp.js',
+	'obj-c objc				/jslib/syntaxhighlighter/scripts/shBrushObjC.js',
+	'c# c-sharp csharp		/jslib/syntaxhighlighter/scripts/shBrushCSharp.js',
+	'css					/jslib/syntaxhighlighter/scripts/shBrushCss.js',
+	'delphi pascal			/jslib/syntaxhighlighter/scripts/shBrushDelphi.js',
+	'diff patch pas			/jslib/syntaxhighlighter/scripts/shBrushDiff.js',
+	'erl erlang				/jslib/syntaxhighlighter/scripts/shBrushErlang.js',
+	'groovy					/jslib/syntaxhighlighter/scripts/shBrushGroovy.js',
+	'haxe hx				/jslib/syntaxhighlighter/scripts/shBrushHaxe.js',
+	'java					/jslib/syntaxhighlighter/scripts/shBrushJava.js',
+	'jfx javafx				/jslib/syntaxhighlighter/scripts/shBrushJavaFX.js',
+	'js jscript javascript	/jslib/syntaxhighlighter/scripts/shBrushJScript.js',
+	'perl pl				/jslib/syntaxhighlighter/scripts/shBrushPerl.js',
+	'php					/jslib/syntaxhighlighter/scripts/shBrushPhp.js',
+	'text plain				/jslib/syntaxhighlighter/scripts/shBrushPlain.js',
+	'py python				/jslib/syntaxhighlighter/scripts/shBrushPython.js',
+	'ruby rails ror rb		/jslib/syntaxhighlighter/scripts/shBrushRuby.js',
+	'scala					/jslib/syntaxhighlighter/scripts/shBrushScala.js',
+	'sql					/jslib/syntaxhighlighter/scripts/shBrushSql.js',
+	'vb vbnet				/jslib/syntaxhighlighter/scripts/shBrushVb.js',
+	'ps powershell			/jslib/syntaxhighlighter/scripts/shBrushPowerShell.js',
+	'xml xhtml xslt html	/jslib/syntaxhighlighter/scripts/shBrushXml.js'
+);
+SyntaxHighlighter.all();
+});
+var ourl="";
+</script>
+<script type="text/javascript" src='http://icws.jb51.net/good/arcts.js'></script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<div id="tongji">
+<script type="text/javascript" src="http://tongji.jbzj.com/tongji/tongji.js"></script>
+<script type="text/javascript">
+//tu+
+var cpro_id = "u1893014";
+document.write('<scri'+'pt src="http://cpro.baidustatic.com/cpro/ui/i.js" type="text/javascript"></s'+'cript>');
+</script>
+<script charset="utf-8" type="text/javascript" src="http://changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+window.changyan.api.config({
+appid: 'cyrHH3dwi',
+conf: 'prod_1dc5dc80970106099d43fe242b7465fc'
+});
+</script>
+</div> 
+<script type="text/javascript" src="http://www.jb51.net/pl.asp?id=69682"></script>
+</body>
+</html>
+<!-- published at 2018/1/16 8:53:09By dxycms qq:461478385  -->

@@ -23,3 +23,25 @@ let slide:SlideWidget = new SlideWidget(images, {
 Laya.stage.addChild(slide);
 ```
 
+## 图片上传
+
+### 演示地址
+
+ [演示地址](http://www.noteliu.com/LayaUIWidget/Uploader/bin/index.html)
+
+### 使用说明
+
+``` typescript
+let images:string[] = [
+            'images/1.jpg',
+            'images/2.jpg',
+            'images/3.jpg',
+            'images/4.jpg',
+        ];
+let slide:SlideWidget = new SlideWidget(images, {
+            width: 750,
+            height: 400
+        });
+Laya.stage.addChild(slide);
+```
+

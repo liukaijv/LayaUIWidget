@@ -1,0 +1,523 @@
+/*
+ * @Author: devilsome.曾挚
+ * @Date: 2017-02-09 17:58:35
+ * @Last Modified by: wesai.谢久伟
+ * @Last Modified time: 2017-10-26 17:53:08
+ */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var BuyViewUI = /** @class */ (function (_super) {
+            __extends(BuyViewUI, _super);
+            function BuyViewUI(rc) {
+                var _this = _super.call(this) || this;
+                //默认刻度为8等分
+                _this.sliderTick = 1;
+                _this.baseGold = 1000;
+                _this.itemTemplateId = 1;
+                _this.noFree = true;
+                _this.feeMoney = 1000;
+                _this.feePercentage = 0;
+                _this.minOnTableTime = 0;
+                _this.rc = rc;
+                _this.onLanguageChanged();
+                return _this;
+            }
+            /**
+             *
+             * 创建界面
+             * 主要是创建对象
+             *
+             * @memberOf LoginUI
+             */
+            BuyViewUI.prototype.Initalize = function () {
+                this.visible = false;
+                HoldemPoker.Sys.ui.push(this);
+                this.RegisterUIEvent();
+                this.Refresh();
+                this.rebuySitID = -1;
+                this.buyView.mouseEnabled = false; //点击 购买区域位置 不隐藏面板
+                if (this.noFree) {
+                    this.feeMoney = 1;
+                    this.feeMount.visible = false;
+                    this.feeMountLabel.visible = false;
+                }
+            };
+            /**
+             * 处理slider刻度
+             */
+            BuyViewUI.prototype.resoleSlider = function () {
+                if (this.minOnTableTime) {
+                    this.minPlayTime.visible = true;
+                    this.minPlayTimeLb.visible = true;
+                    this.minPlayTime.text = this.minOnTableTime + HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.minutes);
+                    this.minPlayTimeLb.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.MinPlayTime);
+                }
+                if (this.feePercentage || this.feeTempCount) {
+                    this.noFree = false;
+                    this.feeMount.visible = true;
+                    this.feeMountLabel.visible = true;
+                }
+                if (this.feePercentage === 0 && this.feeTempCount === 0) {
+                    this.feeTemplateId = this.itemTemplateId;
+                }
+                if (this.feeTemplateId) {
+                    this.myTemplate = HoldemPoker.Sys.itemMgr.itemRepository.findOneByTemplateId(this.feeTemplateId);
+                    this.feeIcon.skin = HoldemPoker.Sys.itemMgr.itemRepository.getItemIcon(this.feeTemplateId);
+                    if (!this.myTemplate) {
+                        this.myTemplate = {
+                            id: this.feeTemplateId + "",
+                            name: "",
+                            description: null,
+                            image: null,
+                            type: null,
+                            amount: 0
+                        };
+                    }
+                }
+                if (this.feeTemplateId === this.itemTemplateId) {
+                    this.isFeeIdEqualMoneyId = true;
+                }
+                if (this.sliderElement) {
+                    this.sliderElement.Dispose();
+                }
+                //倒计时
+                if (this.rebuyData.thinkTime) {
+                    Laya.timer.loop(1000, this, this.countDown);
+                }
+                this.mySeat = this.rc.roomData.getSelfSeat();
+                //盲注
+                // let bb = this.rc.roomData.gameData.blind;
+                //默认最大购买
+                this.maxBuy = this.baseGold * this.sliderTick;
+                this.maxBuy = this.maxBuy - this.playerBankRoll;
+                // if (this.isFeeIdEqualMoneyId) {
+                //     this.maxBuy = Math.min(this.maxBuy, this.rebuyCount - (Math.ceil(this.rebuyCount * this.feePercentage)));
+                // }
+                if (this.myMoney === 0) {
+                    this.myMoney = HoldemPoker.Sys.itemMgr.itemRepository.getCurrency(this.itemTemplateId);
+                }
+                this.rebuyCount = this.myMoney + this.clubCreditScore;
+                var free = 0;
+                if (this.feePercentage) {
+                    free = Math.ceil(this.rebuyCount * this.feePercentage);
+                }
+                else if (this.feeTempCount) {
+                    free = this.feeTempCount;
+                }
+                if (this.noFree) {
+                    free = 0;
+                }
+                if (this.maxBuy > this.rebuyCount - free) {
+                    this.maxBuy = this.rebuyCount;
+                }
+                // 
+                // if (this.mySeat) {
+                // if (this.maxBuy === this.baseGold * this.sliderTick) {
+                //     this.maxBuy = this.maxBuy - this.playerBankRoll;
+                // } else if (this.baseGold * this.sliderTick > this.maxBuy) {
+                //     this.maxBuy = this.baseGold * this.sliderTick - this.playerBankRoll;
+                // }
+                // if (this.maxBuy > this.rebuyCount) {
+                // } else {
+                // }
+                // }
+                //slider刻度最多为8
+                var tick;
+                if (this.isFeeIdEqualMoneyId) {
+                    if (this.feePercentage) {
+                        tick = Math.ceil((this.maxBuy - (Math.ceil(this.maxBuy * this.feePercentage))) / this.baseGold);
+                    }
+                    else if (this.feeTempCount) {
+                        tick = Math.ceil((this.maxBuy - this.feeTempCount) / this.baseGold);
+                    }
+                    else {
+                        tick = Math.ceil((this.maxBuy) / this.baseGold);
+                    }
+                }
+                else {
+                    tick = Math.ceil((this.maxBuy) / this.baseGold);
+                }
+                if (tick > this.sliderTick) {
+                    tick = this.sliderTick;
+                }
+                this.buySlider.setSlider(1, tick, 1);
+                var arr = [];
+                for (var i = 1; i <= tick; i++) {
+                    var kedu = i * this.baseGold;
+                    if (this.isFeeIdEqualMoneyId) {
+                        var fee = 0;
+                        if (this.feePercentage) {
+                            fee = Math.ceil(kedu * this.feePercentage);
+                        }
+                        else if (this.feeTempCount) {
+                            fee = this.feeTempCount;
+                        }
+                        if (kedu + fee <= this.maxBuy) {
+                            arr.push('' + HoldemPoker.Utility.toNumberPattern(kedu));
+                            // if (kedu >= this.maxBuy - fee) {
+                            //     // if (kedu >= this.maxBuy) {
+                            //     if (this.rebuyCount <= this.maxBuy) {
+                            //         this.maxBuy = this.maxBuy - fee;
+                            //         // this.maxBuy = this.maxBuy;
+                            //     }
+                            //     arr.push('' + Utility.toNumberPattern(this.maxBuy));
+                            //     // } 
+                            //     // else {
+                            //     //     arr.push('' + Utility.toNumberPattern(kedu));
+                            //     // }
+                            // } else {
+                            // }
+                        }
+                        else if (this.rebuyCount) {
+                            if (this.feePercentage) {
+                                if (kedu < this.maxBuy) {
+                                    fee = Math.ceil(kedu * this.feePercentage);
+                                }
+                                else {
+                                    var per = (1 + this.feePercentage) * 10;
+                                    fee = Math.ceil(this.maxBuy / (per));
+                                }
+                            }
+                            else if (this.feeTempCount) {
+                                fee = this.feeTempCount;
+                            }
+                            if (this.rebuyCount <= this.maxBuy) {
+                                this.maxBuy = this.maxBuy - fee;
+                            }
+                            if (this.maxBuy + this.playerBankRoll >= this.baseGold) {
+                                arr.push('' + HoldemPoker.Utility.toNumberPattern(this.maxBuy));
+                            }
+                        }
+                    }
+                    else {
+                        if ((kedu >= this.maxBuy)) {
+                            if (this.rebuyCount <= this.maxBuy) {
+                                // this.maxBuy = this.maxBuy - (Math.ceil(this.maxBuy* this.feePercentage));
+                                this.maxBuy = this.maxBuy;
+                            }
+                            if (this.maxBuy + this.playerBankRoll >= this.baseGold) {
+                                arr.push('' + HoldemPoker.Utility.toNumberPattern(this.maxBuy));
+                            }
+                        }
+                        else if (kedu <= this.maxBuy) {
+                            arr.push('' + HoldemPoker.Utility.toNumberPattern(kedu));
+                        }
+                    }
+                }
+                //金币不足
+                // if (arr.length === 0) {
+                //     arr.push('' + this.baseGold);
+                //     arr.push('' + this.baseGold * 8);
+                //     if (this.rebuyCount === 0) {
+                //         if (this.dobuyType === 1) {
+                //             this.rebuyCount = 18000;
+                //         }
+                //     }
+                // }
+                this.maxminTips.text = this.baseGold + "/" + this.baseGold * this.sliderTick;
+                if (this.clubCreditScore !== undefined) {
+                    this.clubMoney.text = this.clubCreditScore + "";
+                }
+                this.sliderElement = new HoldemPoker.ScalePlateUI(arr.length, 560, arr);
+                this.sliderElement.pos(20, 70);
+                this.sliderElement.Initalize();
+                this.sliderElement.changeHandler = new Laya.Handler(this, this.changeValue);
+                this.sliderBox.addChild(this.sliderElement);
+                if (this.feePercentage) {
+                }
+                this.feeMount.text = HoldemPoker.Utility.toNumberPattern(10 * this.blind);
+                if (this.itemTemplateId === 1) {
+                    this.bbIcon.skin = "1334/common/gold_icon.png";
+                }
+                else if (this.itemTemplateId === 3) {
+                    this.bbIcon.skin = "1334/common/master_score_icon_lg.png";
+                }
+            };
+            /**
+             *
+             * 设置玩家最大购买数量
+             *
+             * @memberOf BuyViewUI
+             */
+            BuyViewUI.prototype.setMaxBuyGold = function (maxNum, blind) {
+                // if (maxNum) {
+                // this.blind = this.baseGold;
+                this.maxBuyGoldText.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.maxRebuyGold, HoldemPoker.Utility.toNumberPattern(800 * blind));
+                // //带入量
+                // this.buySliderText.text = Utility.toNumberPattern(this.blind * 100 * this.buySlider.value);
+                // //记录费用
+                // this.feeMount.text = Utility.toNumberPattern(this.buySlider.value * 10 * this.buySlider.value);
+                // //设置可用微赛币
+                // this.totalMoney.text = Utility.toNumberPattern(Sys.players.self.gold);
+                var buy = (this.sliderElement.currendIndex + 1) * this.baseGold;
+                if (buy > this.maxBuy) {
+                    buy = this.maxBuy;
+                }
+                //带入量
+                this.buySliderText.text = HoldemPoker.Utility.toNumberPattern(buy);
+                //带入量
+                // this.buySliderText.text = Utility.toNumberPattern(this.baseGold * (this.sliderElement.currendIndex + 1));
+                var fee = 0;
+                if (this.feePercentage) {
+                    fee = Math.ceil(buy * this.feePercentage);
+                }
+                else if (this.feeTempCount) {
+                    fee = this.feeTempCount;
+                }
+                //记录费用
+                this.feeMount.text = HoldemPoker.Utility.toNumberPattern(fee);
+                if (this.noFree || !this.isFeeIdEqualMoneyId) {
+                    fee = 0;
+                }
+                if (((this.rebuyCount - fee) < this.baseGold && ((this.rebuyCount - fee) + this.playerBankRoll) < this.baseGold)
+                    || this.rebuyCount === 0) {
+                    // if (allFee < this.baseGold && this.dobuyType === 1) {
+                    // if (this.dobuyType === 1) {
+                    // }
+                    // this.myMoney = Sys.itemMgr.itemRepository.getCurrency(this.itemTemplateId);
+                    // let all = this.rebuyCount + this.myMoney;
+                    // let free = Math.ceil(all / 1000);
+                    // if ((all - free) >= this.baseGold) {
+                    //     this.rebuyCount = all;
+                    //     this.buyButton.mouseEnabled = true;
+                    //     this.buyButton.filters = null;
+                    //     this.resoleSlider();
+                    // } else {
+                    this.buyButton.mouseEnabled = false;
+                    this.buyButton.filters = [HoldemPoker.Utility.grayFilter()];
+                    // }
+                }
+                else {
+                    if (this.feeTemplateId) {
+                        if (this.feePercentage) {
+                            fee = Math.ceil(buy * this.feePercentage);
+                        }
+                        else if (this.feeTempCount) {
+                            fee = this.feeTempCount;
+                        }
+                        if ((this.myTemplate && fee > this.myTemplate.amount) || !this.myTemplate) {
+                            this.buyButton.mouseEnabled = false;
+                            this.buyButton.filters = [HoldemPoker.Utility.grayFilter()];
+                            this.feeMount.color = '#ff0008';
+                        }
+                        else {
+                            this.feeMount.color = '#cccccc';
+                            this.buyButton.mouseEnabled = true;
+                            this.buyButton.filters = null;
+                        }
+                    }
+                    else {
+                        this.buyButton.mouseEnabled = true;
+                        this.buyButton.filters = null;
+                    }
+                }
+                //设置可用微赛币
+                this.totalMoney.text = this.myMoney.toString();
+            };
+            BuyViewUI.prototype.RegisterUIEvent = function () {
+                this.buyButton.on(Laya.Event.CLICK, this, this.buyChip);
+                // this.viewBg.on(Laya.Event.CLICK, this, this.closeAction);
+                this.buySlider.changeHandler = Laya.Handler.create(this, this.changeValue, null, false);
+                //取消关闭
+                this.cancel.on(Laya.Event.CLICK, this, this.closeAction);
+                //转跳商城
+                this.shopBtn.on(Laya.Event.CLICK, this, this.jumpToShop);
+                HoldemPoker.Sys.itemMgr.itemRepository.on(HoldemPoker.EVENT_ITEM_LIST_CHANGE, this, this.updateMoney);
+            };
+            BuyViewUI.prototype.buyChip = function () {
+                Laya.timer.clearAll(this);
+                this.countDownLb.text = "";
+                var buy = (this.sliderElement.currendIndex + 1) * this.baseGold;
+                if (buy > this.maxBuy) {
+                    buy = this.maxBuy;
+                }
+                this.event(HoldemPoker.GEvent.INGAME_REBUY_CHIP, buy);
+                // this.event(GEvent.INGAME_REBUY_CHIP, (this.sliderElement.currendIndex + 1) * 100 * this.blind);
+                this.visible = false;
+            };
+            BuyViewUI.prototype.changeValue = function (value) {
+                HoldemPoker.Sys.audio.play("slider");
+                //控制可购买的bb数量 1 - 8 个代入值
+                //以前的
+                // this.coastMoney.text = Utility.toNumberPattern(this.buySlider.value);
+                // //带入量
+                // this.buySliderText.text = Utility.toNumberPattern(this.buySlider.value * 100 * this.blind);
+                // //记录费用
+                // this.feeMount.text = Utility.toNumberPattern(this.buySlider.value * 10 * this.blind);
+                this.coastMoney.text = HoldemPoker.Utility.toNumberPattern(value + 1);
+                var buy = (value + 1) * this.baseGold;
+                if (buy > this.maxBuy) {
+                    buy = this.maxBuy;
+                }
+                //带入量
+                this.buySliderText.text = HoldemPoker.Utility.toNumberPattern(buy);
+                var fee;
+                if (this.feePercentage) {
+                    fee = Math.ceil(buy * this.feePercentage);
+                }
+                else if (this.feeTempCount) {
+                    fee = this.feeTempCount;
+                }
+                //记录费用
+                this.feeMount.text = HoldemPoker.Utility.toNumberPattern(fee);
+                if (this.feeTemplateId) {
+                    if ((this.myTemplate && fee > this.myTemplate.amount) || !this.myTemplate) {
+                        this.buyButton.mouseEnabled = false;
+                        this.buyButton.filters = [HoldemPoker.Utility.grayFilter()];
+                        this.feeMount.color = '#ff0008';
+                    }
+                    else {
+                        this.feeMount.color = '#cccccc';
+                        this.buyButton.mouseEnabled = true;
+                        this.buyButton.filters = null;
+                    }
+                }
+            };
+            BuyViewUI.prototype.UnregisterUIEvent = function () {
+                this.viewBg.off(Laya.Event.CLICK, this, this.closeAction);
+                this.buyButton.offAll();
+                this.buySlider.changeHandler.recover();
+                HoldemPoker.Sys.itemMgr.itemRepository.off(HoldemPoker.EVENT_ITEM_LIST_CHANGE, this, this.updateMoney);
+            };
+            BuyViewUI.prototype.playerMoneyIsNotEnough = function (itemTemplateId) {
+                this.visible = false;
+                var itemTemplate = HoldemPoker.Sys.itemMgr.itemRepository.findItemTemplateById(itemTemplateId);
+                // if (itemTemplate.itemTempId === VirtualCurrencyType.WesaiCurrency) {
+                //     MessagePrompt.openPrompt(itemTemplate.name + "不足", Laya.Handler.create(this, this.onConfirmToShopBuy));
+                // } else {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.notEnough, itemTemplate.name));
+                // }
+            };
+            BuyViewUI.prototype.onConfirmToShopBuy = function () {
+                this.setPanelBySeat();
+                //跳转商城界面
+                this.jumpToShop();
+            };
+            BuyViewUI.prototype.setPanelBySeat = function () {
+                var roomControl = this.rc;
+                if (roomControl === null) {
+                    return;
+                }
+                if (this.mySeat && this.mySeat.bankroll > 0) {
+                    return;
+                }
+                var panel = roomControl.gameUI.getSeatByServerPos(this.rebuySitID);
+                if (panel) {
+                    panel.updateBySeat(null);
+                    this.rebuySitID = -1;
+                }
+            };
+            BuyViewUI.prototype.closeAction = function () {
+                Laya.timer.clearAll(this);
+                this.countDownLb.text = "";
+                var roomControl = this.rc;
+                if (roomControl === null) {
+                    return;
+                }
+                //从菜单打开的直接隐藏，否则保留以前逻辑
+                if (!roomControl.reBuyFromMenu) {
+                    if (this.dobuyType === 2) {
+                        this.visible = false;
+                        return;
+                    }
+                    var sitID = roomControl.roomData.getSitIdByPlayerId(HoldemPoker.Sys.players.self.id);
+                    if (sitID >= 0) {
+                        //发出玩家拒绝rebuy的消息
+                        // if (this.isSitDown) {
+                        //     this.event(GEvent.INGAME_NOT_REBUY_CHIP);
+                        // } else {
+                        this.event(HoldemPoker.GEvent.INGAME_REFUSE_REBUY_CHIP);
+                        // }
+                        this.visible = false;
+                        return;
+                    }
+                    if (this.rebuySitID >= 0) {
+                        this.setPanelBySeat();
+                    }
+                }
+                this.visible = false;
+            };
+            /**
+             * 跳到商城
+             */
+            BuyViewUI.prototype.jumpToShop = function () {
+                //先隐藏掉
+                // this.visible = false;
+                // Sys.games.mainUIMgr.openShopView();
+            };
+            BuyViewUI.prototype.onLanguageChanged = function () {
+                this.buyScoreBoard.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.buyScoreBoard);
+                this.buyButton.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok);
+                this.cancel.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cancel);
+                this.buyMountLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.buyChips);
+                this.feeMountLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.buyChipsFee);
+                this.availableScoreText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.availableScoreText);
+                this.minMaxTakeText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.minMaxTakeText);
+            };
+            /**
+             *
+             * 刷新界面，坐标，长宽和图片啥的
+             * 比如横屏竖屏切换，刷新语言啥的
+             *
+             * @abstract
+             *
+             * @memberOf LoginUI
+             */
+            BuyViewUI.prototype.Refresh = function () {
+            };
+            /**
+             *
+             * 销毁界面
+             *
+             * @memberOf LoginUI
+             */
+            BuyViewUI.prototype.Dispose = function () {
+                this.UnregisterUIEvent();
+                HoldemPoker.Sys.ui.remove(this);
+                this.offAll();
+                this.destroy();
+            };
+            BuyViewUI.prototype.countDown = function () {
+                this.countDownLb.text = this.rebuyData.thinkTime + "s";
+                if (this.rebuyData.thinkTime > 0) {
+                    this.rebuyData.thinkTime--;
+                }
+                else {
+                    Laya.timer.clearAll(this);
+                    this.countDownLb.text = "";
+                }
+            };
+            /**
+             * 更新花费总数
+             */
+            BuyViewUI.prototype.updateMoney = function () {
+                if (this.itemTemplateId === HoldemPoker.VirtualCurrencyType.WesaiCurrency || this.feeTemplateId === HoldemPoker.VirtualCurrencyType.WesaiCurrency) {
+                    if (this.visible === true) {
+                        //只判断了帯入的道具
+                        var costItem = HoldemPoker.Sys.itemMgr.itemRepository.findOneByTemplateId(this.itemTemplateId);
+                        if (costItem) {
+                            this.myMoney = costItem.amount;
+                        }
+                        this.resoleSlider();
+                        this.setMaxBuyGold(0, this.rc.roomData.gameData.blind);
+                    }
+                }
+            };
+            return BuyViewUI;
+        }(ui.BuyUI));
+        HoldemPoker.BuyViewUI = BuyViewUI;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=BuyViewUI.js.map

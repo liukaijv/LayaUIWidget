@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="gb2312" />
+<meta name="applicable-device" content="pc">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform" />
+<title>Ajax发送和接收二进制字节流数据的方法_AJAX相关_脚本之家</title>
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+<meta name="keywords" content="ajax发送二进制流,二进制字节流" />
+<meta name="description" content="这篇文章主要介绍了Ajax发送和接收二进制字节流数据的方法，非常不错，具有参考借鉴价值，感兴趣的朋友一起看看吧" />
+<link rel="alternate" media="only screen and(max-width: 640px)" href="http://m.jb51.net/article/85087.htm" />
+<meta http-equiv="mobile-agent" content="format=html5; url=http://m.jb51.net/article/85087.htm" />
+<meta http-equiv="mobile-agent" content="format=xhtml; url=http://m.jb51.net/article/85087.htm" />
+<script type="text/javascript">
+var tougao="mrr";var lmname="AJAX相关";
+(function(){var reWriteUrl=function(url){if(url){var Splits=url.split("/"),siteName=window.location.pathname;if(typeof siteName!=="undefined"){return "http://m.jb51.net"+siteName}}};if(/Android|webOS|iPhone|iPad|Windows Phone|iPod|BlackBerry|SymbianOS|Nokia|Mobile/i.test(navigator.userAgent)){var url=window.location.href;var pathname=window.location.pathname;if(url.indexOf("?pc")<0){try{window.location.href=reWriteUrl(url)}catch(e){}}}})();
+</script>
+<link type="text/css" href="/skin/2016/base.css" rel="stylesheet" />
+<link type="text/css" href="/skin/2016/common.css" rel="stylesheet" />
+<script type="text/javascript" src="//apps.bdimg.com/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+if (!window.jQuery) {
+	var script = document.createElement('script');
+	script.src = "/skin/js/jquery.js";
+	document.body.appendChild(script);}
+</script>
+<script type=text/javascript src="/js/function.js"></script> 
+</head>
+<body>
+<!--head Star -->
+<div id="head">
+  <div class="toolBar">
+  <div class="main">
+    <!--topNav Star -->
+    <div class="topNav clearfix">
+      <ul class="navList fl">
+        <li>
+          <div class="one"><a href="http://www.jb51.net" target="_blank">脚本之家</a></div>
+        </li>
+        <li>
+          <div class="one"><a href="http://www.jb51.net/softs/" target="_blank">软件下载<i class="icon"></i></a></div>
+          <div class="two">
+<a href="/softs/android.html" target="_blank">android软件</a> <a href="/softs/mac.html" target="_blank">MAC软件</a> <a href="/qudong/" target="_blank">驱动下载</a> <a href="/fonts/" target="_blank">字体下载</a> <a href="/dll/" target="_blank">DLL下载</a> </div>
+</li>
+        <li>
+          <div class="one"><a href="/codes/" target="_blank">源码下载<i class="icon"></i></a></div>
+          <div class="two"> <a href="/codes/asp.html" target="_blank">asp源码</a> <a href="/codes/php.html" target="_blank">php源码</a> <a href="/codes/aspnet.html" target="_blank">asp.net源码</a> <a href="/codes/jsp.html" target="_blank">jsp源码</a> <a href="/codes/editor.html" target="_blank">网页编辑器</a> <a href="/codes/list123_1.html" target="_blank">数据库管理</a> <a href="/codes/list124_1.html" target="_blank">常用组件</a> <a href="/jiaoben/" target="_blank">脚本下载</a></div>
+        </li>
+        <li>
+          <div class="one"><a href="http://tools.jb51.net" target="_blank">在线工具<i class="icon"></i></a></div>
+          <div class="two"> <a href="/shouce/" target="_blank">在线手册</a> <a href="/tools/cssyasuo.shtml" target="_blank">CSS格式化</a> <a href="http://tools.jb51.net/code/js" target="_blank">JS格式化</a> <a href="/tools/html-js.htm" target="_blank">Html转化为Js</a> <a href="http://tools.jb51.net/regex/javascript" target="_blank">js正则表达式</a>
+</div>
+        </li>
+        <li>
+          <div class="one"><a href="/w3school/" target="_blank">网页教程基础</a></div>
+        </li>
+			<li>
+          <div class="one"><a href="http://s.jb51.net" target="_blank">服务器常用软件</a></div>
+        </li>
+		<li>
+          <div class="one"><a href="http://m.jb51.net" target="_blank">手机版</a></div>
+          <div class="two"><img src="http://files.jb51.net/images/m.jb51.net.png" data-baiduimageplus-ignore /></div>     
+        </li>
+        <li class="watch">
+          <div class="one"><a href="http://www.jb51.net/about.htm" target="_blank" rel="nofollow" ><i class="icon"></i>关注微信</a></div>
+          <div class="two"><img src="http://files.jb51.net/images/weixin_200.gif" data-baiduimageplus-ignore /></div>
+        </li>
+      </ul>
+      <div class="navUser mt5 fr" id="jb51_topbar" >
+
+      </div>
+    </div>
+    <!--topNav End -->
+  </div>
+</div>
+
+  <div class="main clearfix">
+    <div class="mtb10 clearfix">
+      <div class="logo"><a href="http://www.jb51.net/"><img src="http://www.jb51.net/images/logo.gif" title="脚本之家" alt="脚本之家" /></a></div>
+      <div class="logom fl"><span id="logo_m" class="jbTestPos"></span></div>
+      <div class="logor fr"><span id="logo_r" class="jbTestPos"></span></div>
+    </div>
+<!-- 导航-->
+<DIV class="nav_top clearfix">
+<UL>
+<li><a href="http://www.jb51.net/web/">网页制作</a></li>
+<li><a href="http://www.jb51.net/list/index_1.htm">网络编程</a></li>
+<li><a href="http://www.jb51.net/list/index_96.htm">脚本专栏</a></li>
+<li><a href="http://www.jb51.net/jiaoben/">脚本下载</a></li>
+<li><a href="http://www.jb51.net/list/index_104.htm">数据库</a></li>
+<li><a href="http://www.jb51.net/cms/">CMS教程</a></li>
+<li><a href="http://www.jb51.net/books/">电子书籍</a></li>
+<li><a href="http://www.jb51.net/pingmian/">平面设计</a></li>
+<li><a href="http://www.jb51.net/media/">媒体动画</a></li>
+<li><a href="http://www.jb51.net/os/">操作系统</a></li>
+<li><a href="http://www.jb51.net/yunying/">网站运营</a></li>
+<li><a href="http://www.jb51.net/hack/">网络安全</a></li>
+<li class="last"><a href="http://www.jb51.net/shouce/">在线手册</a></li>
+
+</UL>
+</DIV>
+
+<!--导航结束-->
+<div class="subnav clearfix">
+<ul><li><a href='/list/list_3_1.htm' title="JavaScript">JavaScript</a></li>
+<li><a href='/list/list_21_1.htm' title="ASP.NET">ASP.NET</a></li>
+<li><a href='/list/list_15_1.htm' title="PHP编程">PHP编程</a></li>
+<li><a href='/list/list_5_1.htm' title="AJAX相关">AJAX相关</a></li>
+<li><a href='/list/list_6_1.htm' title="正则表达式">正则表达式</a></li>
+<li><a href='/list/list_2_1.htm' title="ASP编程">ASP编程</a></li>
+<li><a href='/list/list_83_1.htm' title="JSP编程">JSP编程</a></li>
+<li><a href='/list/list_123_1.htm' title="编程10000问">编程10000问</a></li>
+<li><a href='/list/list_4_1.htm' title="CSS/HTML">CSS/HTML</a></li>
+<li><a href='/list/list_237_1.htm' title="Flex">Flex</a></li>
+<li><a href='/list/list_60_1.htm' title="脚本加解密">脚本加解密</a></li>
+<li><a href='/list/list_62_1.htm' title="web2.0">web2.0</a></li>
+<li><a href='/list/list_64_1.htm' title="XML/RSS">XML/RSS</a></li>
+<li><a href='/list/list_176_1.htm' title="网页编辑器">网页编辑器</a></li>
+<li><a href='/list/list_177_1.htm' title="相关技巧">相关技巧</a></li>
+<li><a href='/list/list_72_1.htm' title="安全相关">安全相关</a></li>
+<li><a href='/list/list_19_1.htm' title="网页播放器">网页播放器</a></li>
+<li><a href='/list/list_185_1.htm' title="其它综合">其它综合</a></li>
+<li><a href='/list/list_251_1.htm' title="Dart">Dart</a></li>
+</ul>
+</div>
+<div class="NavBar clearfix ptb10">
+<div class="fl w690">
+<div class="box mb15 mt10"><i class="icon"></i>您的位置：<a href='/'>首页</a> → <a href="/list/index_1.htm" title="网络编程">网络编程</a> → <a href="/list/list_5_1.htm" title="AJAX相关">AJAX相关</a> → 正文内容 ajax 发送和接收二进制流</div>
+</div>
+<div class="fr w300"><div class="search">
+<form action="http://so.jb51.net/cse/search" target="_blank">
+    <input type="hidden" name="s" value="10520733385329581432">
+    <input type="hidden" name="ie" value="gbk">
+    <input type="text" name="q" class="key_input" placeholder="请输入关键词">
+    <input type="submit" value="搜索" class="c_btn">
+</form></div></div>
+  </div>
+</div>
+<!--head End -->
+<div class="main mb10 clearfix">
+<div class="clearfix"><span id="tonglan1" class="jbTestPos"></span></div>
+</div>
+
+<!--content Star -->
+<div id="contents">
+ <div class="main clearfix">
+      <div class="w690 fl">
+      <div class="article-content border">
+      <div class="title">
+            <h1 class="YaHei">Ajax发送和接收二进制字节流数据的方法</h1>
+            <p>作者：IamOkay  字体：[<a href="javascript:turnbig()">增加</a> <a href="javascript:turnsmall()">减小</a>] 类型：转载 时间：2016-05-25<a href="#comments"> 我要评论</a></p>
+        </div>
+        <div class="art_desc mt10"><div id="art_demo">这篇文章主要介绍了Ajax发送和接收二进制字节流数据的方法，非常不错，具有参考借鉴价值，感兴趣的朋友一起看看吧</div></div>
+        <div class="lbd clearfix"><span id="art_up" class="jbTestPos"></span></div>
+        <div id="content">
+<p>HTML5 Ajax 2.0标准中，增强了Ajax的许多功能，包括发送FormData数据，上传数据进度条等诸多功能。但实际上，Ajax可以字节发送二进制数据。</p>
+<p><span style="color: #0000ff"><strong>发送二进制数据</strong></span></p>
+<div class="jb51code">
+<pre class="brush:js;">
+var oReq = new XMLHttpRequest();
+oReq.open("POST", url, true);
+oReq.onload = function (oEvent) {
+// Uploaded.
+};
+var blob = new Blob(['abc123'], {type: 'text/plain'});
+oReq.send(blob);</pre>
+</div>
+<p>或者</p>
+<div class="jb51code">
+<pre class="brush:js;">
+var myArray = new ArrayBuffer(512);
+var longInt8View = new Uint8Array(myArray);
+for (var i=0; i&lt; longInt8View.length; i++) {
+longInt8View[i] = i % 255;
+}
+var xhr = new XMLHttpRequest;
+xhr.open("POST", url, false);
+xhr.send(myArray);</pre>
+</div>
+<p><span style="color: #0000ff"><strong>接收二进制数据</strong></span></p>
+<div class="jb51code">
+<pre class="brush:js;">
+var oReq = new XMLHttpRequest();
+oReq.open("GET", "/myfile.png", true);
+oReq.responseType = "arraybuffer";
+oReq.onload = function (oEvent) {
+var arrayBuffer = oReq.response; // Note: not oReq.responseText
+if (arrayBuffer) {
+var byteArray = new Uint8Array(arrayBuffer);
+for (var i = 0; i &lt; byteArray.byteLength; i++) {
+}
+}
+};
+oReq.send(null);</pre>
+</div>
+<p>当然，如上设置只能是文本类型，如果是Blob类型，那么如下即可</p>
+<div class="jb51code">
+<pre class="brush:js;">
+var oReq = new XMLHttpRequest();
+oReq.open("GET", "/myfile.png", true);
+oReq.responseType = "arraybuffer";
+oReq.onload = function(oEvent) {
+var blob = new Blob([oReq.response], {type: "image/png"});
+// ...
+};
+oReq.send();</pre>
+</div>
+<p>或者</p>
+<div class="jb51code">
+<pre class="brush:js;">
+var oReq = new XMLHttpRequest();
+oReq.open("GET", "/myfile.png", true);
+oReq.responseType = "blob";
+oReq.onload = function(oEvent) {
+var blob = oReq.response;
+// ...
+};
+oReq.send();</pre>
+</div>
+<p>如果你使用的是旧版本的浏览器，那么加载二进制可以如下</p>
+<div class="jb51code">
+<pre class="brush:js;">
+function load_binary_resource(url) {
+var req = new XMLHttpRequest();
+req.open('GET', url, false);
+//XHR binary charset opt by Marcus Granado 2006 [http://mgran.blogspot.com]
+req.overrideMimeType('text\/plain; charset=x-user-defined');
+req.send(null);
+if (req.status != 200) return '';
+return req.responseText;
+}</pre>
+</div>
+<p>注意:x-user-defined告诉浏览器不要解析数据</p>
+<p>以上所述是小编给大家介绍的Win7任务栏Ajax发送和接收二进制字节流数据的方法的相关知识，希望对大家有所帮助，如果大家有任何疑问请给我留言，小编会及时回复大家的。在此也非常感谢大家对脚本之家网站的支持！</p>
+
+</div><!--endmain-->
+<div class="art_xg">
+<h4>您可能感兴趣的文章:</h4><ul><li><a href="/article/99639.htm" title="jQuery Ajax请求后台数据并在前台接收" target="_blank">jQuery Ajax请求后台数据并在前台接收</a></li><li><a href="/article/58690.htm" title="ThinkPHP中使用ajax接收json数据的方法" target="_blank">ThinkPHP中使用ajax接收json数据的方法</a></li><li><a href="/article/51122.htm" title="jquery的ajax异步请求接收返回json数据实例" target="_blank">jquery的ajax异步请求接收返回json数据实例</a></li><li><a href="/article/50214.htm" title="ajax接收Date类型的数据时会把数据转换为时间戳" target="_blank">ajax接收Date类型的数据时会把数据转换为时间戳</a></li><li><a href="/article/40535.htm" title="AJAX如何接收JSON数据示例介绍" target="_blank">AJAX如何接收JSON数据示例介绍</a></li><li><a href="/article/21920.htm" title="编码为GB2312网站让AJAX接收的数据显示支持中文" target="_blank">编码为GB2312网站让AJAX接收的数据显示支持中文</a></li><li><a href="/article/106079.htm" title="ajax接收后台数据在html页面显示" target="_blank">ajax接收后台数据在html页面显示</a></li></ul>
+</div>
+<div class="lbd clearfix">
+<span id="art_down" class="jbTestPos"></span>
+</div>
+<div id="shoucang"></div>
+<div class="tags mt10">
+<strong>Tags：</strong><a href="http://common.jb51.net/tag/ajax/1.htm" target="_blank" title="搜索关于ajax的文章">ajax</a> <a href="http://common.jb51.net/tag/%E4%BA%8C%E8%BF%9B%E5%88%B6/1.htm" target="_blank" title="搜索关于二进制的文章">二进制</a> <a href="http://common.jb51.net/tag/%E5%AD%97%E8%8A%82%E6%B5%81/1.htm" target="_blank" title="搜索关于字节流的文章">字节流</a> 
+</div>
+<DIV class="relatedarticle clearfix mt5">
+<H2>相关文章</H2>
+<ul><li><span>2013-05-05</span><a href="/article/37165.htm" title="AJAX获取服务器当前时间及时间格式输出处理" target="_blank">AJAX获取服务器当前时间及时间格式输出处理</a></li><li><span>2016-05-05</span><a href="/article/84173.htm" title="ajax传递多个参数的实现代码" target="_blank">ajax传递多个参数的实现代码</a></li><li><span>2009-07-07</span><a href="/article/19218.htm" title="自己动手封装的 ajax" target="_blank">自己动手封装的 ajax</a></li><li><span>2016-11-11</span><a href="/article/97145.htm" title="深入理解ajax系列第一篇之XHR对象" target="_blank">深入理解ajax系列第一篇之XHR对象</a></li><li><span>2007-12-12</span><a href="/article/12990.htm" title="PJBLOG中用到的ajaxjs.几个简单的函数" target="_blank">PJBLOG中用到的ajaxjs.几个简单的函数</a></li><li><span>2016-06-06</span><a href="/article/86024.htm" title="ajax内部值外部调用不了的原因及解决方法" target="_blank">ajax内部值外部调用不了的原因及解决方法</a></li><li><span>2016-06-06</span><a href="/article/86339.htm" title="分页技术原理与实现之无刷新的Ajax分页技术(三)" target="_blank">分页技术原理与实现之无刷新的Ajax分页技术(三)</a></li><li><span>2014-01-01</span><a href="/article/45543.htm" title="Ajax四种元素的关系介绍" target="_blank">Ajax四种元素的关系介绍</a></li><li><span>2015-11-11</span><a href="/article/74264.htm" title="基于HTML5 Ajax文件上传进度条如何实现（jquery版本）" target="_blank">基于HTML5 Ajax文件上传进度条如何实现（jquery版本）</a></li><li><span>2007-01-01</span><a href="/article/6582.htm" title="AJAX根据城市名，自动完成相应的城市信息" target="_blank">AJAX根据城市名，自动完成相应的城市信息</a></li></ul>
+</DIV>
+<div class="lbd clearfix mt5">
+<span id="art_down2" class="jbTestPos"></span>
+</div>
+<a href="#comments"></a>
+<div id="comments">
+<H2>最新评论</H2>
+<div class="pd5"><div id="SOHUCS" sid="art_85087"></div></div>
+</div>
+      </div><!--endborder-->
+      </div><!--end fl-->
+      
+<div class="w300 fr">
+<div class="r300 clearfix"><span id="side_up" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">大家感兴趣的内容</H4>
+<UL class="newsList newList-in">
+<li><EM class="no1">1</EM><a href="/article/40131.htm" title="jquery ajax 向后台传递数组参数示例" target="_blank">jquery ajax 向后台传递数组参数</a></li><li><EM class="no2">2</EM><a href="/article/16966.htm" title="ajax readyState的五种状态详解" target="_blank">ajax readyState的五种状态详解</a></li><li><EM class="no3">3</EM><a href="/article/37169.htm" title="ajax传递多个参数具体实现" target="_blank">ajax传递多个参数具体实现</a></li><li><EM class="no4">4</EM><a href="/article/73936.htm" title="ajax中的async属性值之同步和异步及同步和异步区别" target="_blank">ajax中的async属性值之同步和异步</a></li><li><EM class="no5">5</EM><a href="/article/42091.htm" title="jQuery ajax中使用serialize()方法提交表单数据示例" target="_blank">jQuery ajax中使用serialize()方</a></li><li><EM class="no6">6</EM><a href="/article/12431.htm" title="AJAX 缓存问题的两种解决方法(IE)" target="_blank">AJAX 缓存问题的两种解决方法(IE</a></li><li><EM class="no7">7</EM><a href="/article/72597.htm" title="jQuery实现AJAX定时刷新局部页面实例" target="_blank">jQuery实现AJAX定时刷新局部页面</a></li><li><EM class="no8">8</EM><a href="/article/22924.htm" title="ajax 技术和原理分析" target="_blank">ajax 技术和原理分析</a></li><li><EM class="no9">9</EM><a href="/article/51678.htm" title="自己动手打造ajax图片上传(网上没有的)" target="_blank">自己动手打造ajax图片上传(网上没</a></li><li><EM class="no10">10</EM><a href="/article/30097.htm" title="Ajax请求中的异步与同步，需要注意的地方说明" target="_blank">Ajax请求中的异步与同步，需要注</a></li>
+</UL>
+</DIV>
+</DIV>
+<div class="r300 clearfix mt10"><span id="idctu" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">最近更新的内容</H4>
+<UL class="newsListA">
+<ul><li><a href="/article/57632.htm" title="js与jQuery实现的兼容多浏览器Ajax请求实例" target="_blank">js与jQuery实现的兼容多浏览器Ajax请求实</a></li><li><a href="/article/50071.htm" title="Ajax 给 XMLHttpReq.onreadystatechange传递参数" target="_blank">Ajax 给 XMLHttpReq.onreadystatechange传</a></li><li><a href="/article/105061.htm" title="使用ajax实现分页技术" target="_blank">使用ajax实现分页技术</a></li><li><a href="/article/6706.htm" title="ajax 自动完成下拉框 自动提示位置问题" target="_blank">ajax 自动完成下拉框 自动提示位置问题</a></li><li><a href="/article/83241.htm" title="如何使用ajax读取Json中的数据" target="_blank">如何使用ajax读取Json中的数据</a></li><li><a href="/article/51429.htm" title="ajax实现点击不同的链接让返回的内容显示在特定div里" target="_blank">ajax实现点击不同的链接让返回的内容显示</a></li><li><a href="/article/73152.htm" title="初步了解JavaScript，Ajax，jQuery，并比较三者关系" target="_blank">初步了解JavaScript，Ajax，jQuery，并比</a></li><li><a href="/article/37169.htm" title="ajax传递多个参数具体实现" target="_blank">ajax传递多个参数具体实现</a></li><li><a href="/article/86179.htm" title="基于HTML5的可预览多图片Ajax上传" target="_blank">基于HTML5的可预览多图片Ajax上传</a></li><li><a href="/article/39676.htm" title="用juery的ajax方法调用aspx.cs页面中的webmethod方法示例" target="_blank">用juery的ajax方法调用aspx.cs页面中的we</a></li></ul>
+</UL>
+</DIV>
+</DIV>   
+<div class="r300 clearfix mt10"><span id="idctu1" class="jbTestPos"></span></div>
+<DIV class="tabTitleBar mt10 bgf borderTblue">
+<DIV class="borderTnone pb10 YaHei">
+<H4 class="blue">常用在线小工具</H4>
+<ul class="newsListA"><span id="bctools" class="jbTestPos"></span></ul>
+</DIV>
+</DIV>
+<div class="r300 clearfix mt10" id="idctu2"><span id="idctu2" class="jbTestPos"></span></div>
+<div class="mt10 rFixedBox">
+<span id="r_2" class="jbTestPos"></span>
+</div>
+      
+      
+      </div><!--end fr-->
+      </div>
+</div><!--end content-->
+<div id="footer">
+<div class="main clearfix">
+<p>
+<a href="http://www.jb51.net/about.htm" target="_blank">关于我们</a> - 
+<a href="http://www.jb51.net/support.htm" target="_blank">广告合作</a> - 
+<a href="http://www.jb51.net/linkus.htm" target="_blank">联系我们</a> -  
+<a href="http://www.jb51.net/sm.htm" target="_blank">免责声明</a> -  
+<a href="http://www.jb51.net/sitemap.htm" target="_blank">网站地图</a> - 
+<a href="tencent://message/?uin=461478385&Site=http://www.jb51.net" target="_blank">投诉建议</a> - 
+<a href="http://www.jb51.net/up.htm" target="_blank">在线投稿</a>
+</p>
+<p>&copy;CopyRight 2006-2017 JB51.Net Inc All Rights Reserved. 脚本之家 版权所有</p>
+</div>
+</div><!--end footer-->
+<link type="text/css" rel="stylesheet" href="/jslib/syntaxhighlighter/styles/shCore.css" />
+<link type="text/css" rel="Stylesheet" href="/jslib/syntaxhighlighter/styles/shThemeDefault.css" />
+<script type="text/javascript" src="/jslib/syntaxhighlighter/scripts/shCore.js"></script>
+<script type="text/javascript" src="/jslib/syntaxhighlighter/scripts/shAutoloader.js"></script>
+<script type="text/javascript">
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+if (top.location != self.location)top.location=self.location;
+$(function(){
+	$('#content').find('img').each(function(){
+        var img = this;
+        if (img.width >= 650){
+            img.style.width = "650px";
+            img.style.height = "auto";
+            //$(img).removeAttr('height');
+            var aTag = document.createElement('a');
+            aTag.href = img.src;
+			aTag.target="_blank";
+            $(aTag).addClass('bPic')
+            .insertAfter(img).append(img)
+          }
+    });
+	$(window).scroll(function()
+    {	
+    	//rFixedBox跟随滚动
+    	var h = $(window).height();
+        var top = $(window).scrollTop();
+    	var rFixedBox = $('.rFixedBox').prev().offset();
+        var fixedTop = rFixedBox.top;
+		
+        if(top>=fixedTop+344)
+        {
+			var h1 = parseInt($('#content').children('.main').height());
+			if(parseInt(top) + 340 < h1){
+				$('.rFixedBox').css({'position':'fixed','top': 0});
+			}else{
+				$('.rFixedBox').css({'position':'absolute','top': h1-510});
+			}
+        }
+        else
+        {
+            $('.rFixedBox').css({'position':'static', 'top':0});   
+        }	
+       /* return true;*/
+    });
+/*$(document).ready(function() {
+  $("#content img").unveil();
+});	*/
+SyntaxHighlighter.autoloader(
+	'applescript			/jslib/syntaxhighlighter/scripts/shBrushAppleScript.js',
+	'actionscript3 as3		/jslib/syntaxhighlighter/scripts/shBrushAS3.js',
+	'bash shell				/jslib/syntaxhighlighter/scripts/shBrushBash.js',
+	'coldfusion cf			/jslib/syntaxhighlighter/scripts/shBrushColdFusion.js',
+	'cpp c					/jslib/syntaxhighlighter/scripts/shBrushCpp.js',
+	'obj-c objc				/jslib/syntaxhighlighter/scripts/shBrushObjC.js',
+	'c# c-sharp csharp		/jslib/syntaxhighlighter/scripts/shBrushCSharp.js',
+	'css					/jslib/syntaxhighlighter/scripts/shBrushCss.js',
+	'delphi pascal			/jslib/syntaxhighlighter/scripts/shBrushDelphi.js',
+	'diff patch pas			/jslib/syntaxhighlighter/scripts/shBrushDiff.js',
+	'erl erlang				/jslib/syntaxhighlighter/scripts/shBrushErlang.js',
+	'groovy					/jslib/syntaxhighlighter/scripts/shBrushGroovy.js',
+	'haxe hx				/jslib/syntaxhighlighter/scripts/shBrushHaxe.js',
+	'java					/jslib/syntaxhighlighter/scripts/shBrushJava.js',
+	'jfx javafx				/jslib/syntaxhighlighter/scripts/shBrushJavaFX.js',
+	'js jscript javascript	/jslib/syntaxhighlighter/scripts/shBrushJScript.js',
+	'perl pl				/jslib/syntaxhighlighter/scripts/shBrushPerl.js',
+	'php					/jslib/syntaxhighlighter/scripts/shBrushPhp.js',
+	'text plain				/jslib/syntaxhighlighter/scripts/shBrushPlain.js',
+	'py python				/jslib/syntaxhighlighter/scripts/shBrushPython.js',
+	'ruby rails ror rb		/jslib/syntaxhighlighter/scripts/shBrushRuby.js',
+	'scala					/jslib/syntaxhighlighter/scripts/shBrushScala.js',
+	'sql					/jslib/syntaxhighlighter/scripts/shBrushSql.js',
+	'vb vbnet				/jslib/syntaxhighlighter/scripts/shBrushVb.js',
+	'ps powershell			/jslib/syntaxhighlighter/scripts/shBrushPowerShell.js',
+	'xml xhtml xslt html	/jslib/syntaxhighlighter/scripts/shBrushXml.js'
+);
+SyntaxHighlighter.all();
+});
+var ourl="";
+</script>
+<script type="text/javascript" src='http://icws.jb51.net/good/arct.js'></script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<script>jbLoader();</script><script class="closetag">jbLoader(true);</script>
+<div id="tongji">
+<script type="text/javascript" src="http://tongji.jbzj.com/tongji/tongji.js"></script>
+<script type="text/javascript">
+//tu+
+var cpro_id = "u1893014";
+document.write('<scri'+'pt src="http://cpro.baidustatic.com/cpro/ui/i.js" type="text/javascript"></s'+'cript>');
+</script>
+<script charset="utf-8" type="text/javascript" src="http://changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+window.changyan.api.config({
+appid: 'cyrHH3dwi',
+conf: 'prod_1dc5dc80970106099d43fe242b7465fc'
+});
+</script>
+</div> 
+<script type="text/javascript" src="http://www.jb51.net/pl.asp?id=85087"></script>
+</body>
+</html>
+<!-- published at 2017/12/15 8:40:32By dxycms qq:461478385  -->

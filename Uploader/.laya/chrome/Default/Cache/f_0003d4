@@ -1,0 +1,319 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        /**
+         * 排名
+         */
+        var MttRankItemUI = /** @class */ (function (_super) {
+            __extends(MttRankItemUI, _super);
+            function MttRankItemUI() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            MttRankItemUI.prototype.renderItemData = function (data, rewardTemplateId, rewardType, totalNum) {
+                var _this = this;
+                //不显示更多奖励
+                this.moreReward.visible = false;
+                var rankOrder = '';
+                if (data.rankStart === data.rankEnd) {
+                    rankOrder = String(data.rankStart);
+                }
+                else {
+                    rankOrder = String(data.rankStart) + '-' + String(data.rankEnd);
+                }
+                this.orderNumber.text = rankOrder;
+                if (data.isSng) {
+                    this.jackpotPercent.visible = false;
+                }
+                var itemRewards = HoldemPoker.Sys.itemMgr.itemRepository.itemsStrMapToTemplate(data.itemsReward, false, false);
+                if (rewardType === HoldemPoker.TableAwardType.FixedAward) {
+                    this.jackpotPercent.visible = false;
+                    // this.bonus.x = 223;
+                }
+                if (rewardType === HoldemPoker.TableAwardType.MixedAward || rewardType === HoldemPoker.TableAwardType.FloatAward) {
+                    // 显示浮动比例
+                    this.jackpotPercent.text = String(data.percent / 100) + '%';
+                    // this.bonus.x = 300;
+                    // this.bonus.width = 260;
+                    // this.bonus.align = 'right';
+                }
+                var tipTextArr = [];
+                for (var _i = 0, itemRewards_1 = itemRewards; _i < itemRewards_1.length; _i++) {
+                    var reward = itemRewards_1[_i];
+                    tipTextArr.push(reward.name + 'x' + reward.costAmount);
+                }
+                //显示第一个
+                if (itemRewards.length) {
+                    this.bonus.text = itemRewards[0].name + 'x' + HoldemPoker.Utility.toNumberPattern(itemRewards[0].costAmount);
+                }
+                //大于1条显示下拉更多奖励
+                if (itemRewards.length > 1 && !this.moreReward.clickHandler) {
+                    this.moreReward.visible = true;
+                    this.moreReward.x = this.bonus.x + this.bonus.width + 5;
+                    this.moreReward.on(Laya.Event.CLICK, this, function (e) {
+                        e.stopPropagation();
+                        HoldemPoker.ToolTipUI.showToolTip(tipTextArr.join('\n'), _this.moreReward, {
+                            color: '#ffffff'
+                        });
+                    });
+                }
+            };
+            return MttRankItemUI;
+        }(ui.mtt.MttRankItemUI));
+        // 位置状态资源
+        var skinMap = {
+            canBuy: '1334/mtt/R.png',
+            canBuyA: '1334/mtt/A.png',
+            currentSlag: '1334/mtt/Path.png',
+            levelEnd: '1334/mtt/disabled.png',
+        };
+        /**
+         * 盲注级别
+         */
+        var MttLevelItemUI = /** @class */ (function (_super) {
+            __extends(MttLevelItemUI, _super);
+            function MttLevelItemUI() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            MttLevelItemUI.prototype.renderItemData = function (data) {
+                //重设图标
+                this.status.skin = '';
+                this.buyStatus.skin = '';
+                this.statusEnd.skin = '';
+                this.status.y = 31;
+                this.statusEnd.y = 31;
+                //重设滤镜
+                // this.orderLabel.filters = [];
+                // this.blindLabel.filters = [];
+                // this.anteLabel.filters = [];
+                // this.buyStatus.filters = [];
+                // this.status.filters = [];
+                // this.statusEnd.filters = [];
+                HoldemPoker.Utility.setGray(this.contentBox, false, '#cccccc');
+                // MttInfoRespository.currentLevel = 5;
+                //小于当前盲注的都变灰
+                if (HoldemPoker.MttInfoRespository.currentLevel > data.blindRank) {
+                    HoldemPoker.Utility.setGray(this.contentBox, true);
+                    // this.orderLabel.filters = [Utility.grayFilter()];
+                    // this.blindLabel.filters = [Utility.grayFilter()];
+                    // this.anteLabel.filters = [Utility.grayFilter()];
+                    // this.buyStatus.filters = [Utility.grayFilter()];
+                    // this.status.filters = [Utility.grayFilter()];
+                    // this.statusEnd.filters = [Utility.grayFilter()];
+                }
+                //当前盲注级别
+                if (HoldemPoker.MttInfoRespository.currentLevel === data.blindRank) {
+                    this.status.skin = skinMap.currentSlag;
+                }
+                //如果是sng的不显示重购，增购
+                if (!data.isSng) {
+                    //当前盲注终止级别
+                    if (HoldemPoker.MttInfoRespository.limitLevel === data.blindRank) {
+                        this.statusEnd.skin = skinMap.levelEnd;
+                    }
+                    //当前盲注级别/终止级别处理
+                    if (HoldemPoker.MttInfoRespository.currentLevel === HoldemPoker.MttInfoRespository.limitLevel) {
+                        this.status.y = 49;
+                        this.statusEnd.y = 13;
+                    }
+                    //重购大于0才显示
+                    if (HoldemPoker.MttInfoRespository.limitLevel >= data.blindRank && HoldemPoker.MttInfoRespository.mttData.reBuyRestNum > 0) {
+                        this.buyStatus.skin = skinMap.canBuy;
+                    }
+                    //增购大于0才显示
+                    if (HoldemPoker.MttInfoRespository.limitLevel + 1 === data.blindRank && HoldemPoker.MttInfoRespository.mttData.addRestNum > 0) {
+                        this.buyStatus.skin = skinMap.canBuyA;
+                    }
+                }
+                //级别
+                this.orderLabel.text = String(data.blindRank);
+                //盲注
+                this.blindLabel.text = HoldemPoker.Utility.toNumberPattern(data.smallBlind) + '/' + HoldemPoker.Utility.toNumberPattern(data.smallBlind * 2);
+                //ante
+                this.anteLabel.text = HoldemPoker.Utility.toNumberPattern(data.ante);
+            };
+            return MttLevelItemUI;
+        }(ui.mtt.MttLevelItemUI));
+        var MttIntroUI = /** @class */ (function (_super) {
+            __extends(MttIntroUI, _super);
+            function MttIntroUI(mttInfoRespository, roomControl) {
+                var _this = _super.call(this) || this;
+                _this.mttInfoRespository = mttInfoRespository;
+                _this.roomControl = roomControl;
+                //排名数据
+                _this.rankListData = [];
+                //等级数据
+                _this.levelListData = [];
+                _this.cacheAs = "normal";
+                _this.initRankList();
+                _this.initLevelList();
+                _this.RegisterUIEvent();
+                _this.onLanguageChanged();
+                return _this;
+            }
+            MttIntroUI.prototype.Initalize = function () {
+                this.refreshRankListData();
+                this.refreshLevelListData();
+            };
+            MttIntroUI.prototype.RegisterUIEvent = function () {
+                var _this = this;
+                //更新通知
+                this.mttInfoRespository.on(HoldemPoker.EVENT_MTT_UPDATE_REAL_TIME_INFO, this, function (data) {
+                    if (_this.displayedInStage && _this.visible) {
+                        _this.rankListData = data.bonusInfo;
+                        _this.rewardTemplateId = data.floatRewardItemId;
+                        _this.rewardType = data.awardType;
+                        _this.totalBonus = data.totalBonus;
+                        _this.refreshRankListData();
+                        //固定奖池不显示表格奖励百分比和将池
+                        if (data.awardType === HoldemPoker.TableAwardType.FixedAward) {
+                            _this.percentageLabelText.visible = false;
+                            // this.awardLabelText.x = 223;
+                        }
+                        else {
+                            _this.percentageLabelText.visible = true;
+                            // this.awardLabelText.x = 476 * Sys.widthRatio;
+                            _this.jackpot.visible = true;
+                            _this.jackpot.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.jackpotText, String(data.totalBonus));
+                            if (data.awardType === HoldemPoker.TableAwardType.MixedAward) {
+                                _this.jackpot.text = '保底奖池';
+                            }
+                        }
+                        //废弃
+                        _this.awardNumber.visible = false;
+                        // this.awardNumber.text = '奖励圈：' + String(data.rewardNum);
+                    }
+                });
+                //更新级别通知
+                this.mttInfoRespository.on(HoldemPoker.EVENT_MTT_UPDATE_LEVEL, this, function (data) {
+                    if (_this.displayedInStage && _this.visible) {
+                        //盲注级别
+                        _this.levelListData = data;
+                        _this.refreshLevelListData();
+                        _this.limitLevel.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.limitLevelText, String(HoldemPoker.MttInfoRespository.limitLevel));
+                    }
+                });
+                //sng详情(牌局内)
+                this.mttInfoRespository.on(HoldemPoker.EVENT_SNG_DATA_UPDATE, this, function (data) {
+                    if (_this.displayedInStage && _this.visible) {
+                        //盲注级别
+                        data.raceBlindTable.map(function (item) {
+                            item.isSng = true;
+                            return item;
+                        });
+                        _this.levelListData = data.raceBlindTable;
+                        _this.refreshLevelListData();
+                        //sng没有盲注限制
+                        _this.blindLImitBox.visible = false;
+                        //固定奖池不显示表格奖励百分比和将池
+                        if (data.bonusType === HoldemPoker.TableAwardType.FixedAward) {
+                            _this.percentageLabelText.visible = false;
+                            // this.awardLabelText.x = 223;
+                        }
+                        else {
+                            _this.percentageLabelText.visible = true;
+                            // this.awardLabelText.x = 476 * Sys.widthRatio;
+                            _this.jackpot.visible = true;
+                            _this.jackpot.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.jackpotText, String(data.allBonus));
+                        }
+                        //废弃
+                        _this.awardNumber.visible = false;
+                        //组装奖励排名数据和mtt一样
+                        data.sngBonusInfo.map(function (item) {
+                            item.isSng = true;
+                            item.rankEnd = item.rankStart;
+                            return item;
+                        });
+                        _this.rankListData = data.sngBonusInfo;
+                        _this.rewardTemplateId = data.floatRewardItemId;
+                        _this.rewardType = data.bonusType;
+                        _this.totalBonus = data.allBonus;
+                        _this.refreshRankListData();
+                    }
+                });
+            };
+            MttIntroUI.prototype.UnregisterUIEvent = function () {
+                this.offAll();
+            };
+            /**
+             * 本地化设置
+             */
+            MttIntroUI.prototype.onLanguageChanged = function () {
+                this.mttDetailTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.btnMttDetailText);
+                this.rankLabelText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.rankLabelText);
+                this.percentageLabelText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.percentageLabelText);
+                this.awardLabelText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.awardLabelText);
+                this.levelLabelText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.levelLabelText);
+                this.blindLabelText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.blindLabelText) + '(' +
+                    Math.ceil(this.roomControl.roomData.gameData.blindGoUpTime / 60) + HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.minutes) + ')';
+                this.anteLabelText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.anteLabelText);
+            };
+            MttIntroUI.prototype.Refresh = function () {
+            };
+            MttIntroUI.prototype.Dispose = function () {
+                this.UnregisterUIEvent();
+                this.removeSelf();
+            };
+            /**
+             * 创建奖励排名
+             */
+            MttIntroUI.prototype.initRankList = function () {
+                this.rankList.itemRender = MttRankItemUI;
+                this.rankList.renderHandler = new Laya.Handler(this, this.updateRankItem);
+            };
+            /**
+             * 更新奖励排名
+             * @param cell
+             * @param index
+             */
+            MttIntroUI.prototype.updateRankItem = function (cell, index) {
+                cell.itemBg.skin = HoldemPoker.mttItemOddEvenBg[index % 2];
+                cell.renderItemData(cell.dataSource, this.rewardTemplateId, this.rewardType, this.totalBonus);
+            };
+            MttIntroUI.prototype.refreshRankListData = function () {
+                this.rankList.array = this.rankListData;
+                //第二次打开不显示问题
+                this.rankList.scrollTo(0);
+                //this.rankList.refresh();
+            };
+            /**
+             * 创建盲注级别
+             */
+            MttIntroUI.prototype.initLevelList = function () {
+                this.levelList.itemRender = MttLevelItemUI;
+                this.levelList.renderHandler = new Laya.Handler(this, this.updateLevelItem);
+                if (this.roomControl.roomData.roomType === 1 /* SNG_ROOM */) {
+                    this.levelList.height = 688;
+                }
+            };
+            /**
+             * 更新盲注级别
+             * @param cell
+             * @param index
+             */
+            MttIntroUI.prototype.updateLevelItem = function (cell, index) {
+                cell.itemBg.skin = HoldemPoker.mttItemOddEvenBg[index % 2];
+                cell.renderItemData(cell.dataSource);
+            };
+            MttIntroUI.prototype.refreshLevelListData = function () {
+                this.levelList.array = this.levelListData;
+                this.levelList.refresh();
+                //第二次打开不显示问题
+                this.levelList.scrollTo(0);
+            };
+            return MttIntroUI;
+        }(ui.mtt.MttIntroViewUI));
+        HoldemPoker.MttIntroUI = MttIntroUI;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=MttIntroUI.js.map

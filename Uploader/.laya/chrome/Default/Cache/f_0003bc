@@ -1,0 +1,729 @@
+/*
+ * @Author: riven
+ * @Date: 2017-04-04 18:43:17
+ * @Last Modified by: wesai.谢久伟
+ * @Last Modified time: 2017-11-28 17:47:04
+ */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var NativeModule = /** @class */ (function () {
+            function NativeModule() {
+            }
+            /**
+             * 判断当前原生客户端是否是iOS平台
+             *
+             * @static
+             * @returns {boolean}
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.isIos = function () {
+                if (Laya.Browser.onIOS) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            };
+            /**
+             * 让设备震动
+             *
+             * @static
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.shakeDevice = function () {
+                if (HoldemPoker.Sys.platformRunning) {
+                    var clsName = null;
+                    if (NativeModule.isIos()) {
+                        clsName = "NativeModule";
+                    }
+                    else {
+                        clsName = "com.wesai.poker.NativeModule";
+                    }
+                    var nativeClass = Laya.PlatformClass.createClass(clsName);
+                    nativeClass.call("shakeDevice");
+                }
+            };
+            /**
+             * 获取剪贴板内容
+             *
+             * @static
+             * @param {Function} callback
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.getPasteContent = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "getPasteContent");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "getClipBoardContent");
+                    }
+                }
+            };
+            /**
+             * 获取当前时间
+             *
+             * @static
+             * @param {Function} callback
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.getCurrentTimeString = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentTimeString");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentTimeString");
+                    }
+                }
+            };
+            /**
+             * 获取当前网络类型
+             *
+             * @static
+             * @param {Function} callback
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.getCurrentNetworkType = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentNetworkType");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentNetworkType");
+                    }
+                }
+            };
+            NativeModule.getCurrentVersion = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentVersion");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentVersion");
+                    }
+                }
+                else {
+                    var versionString = "web";
+                    callback(versionString);
+                }
+            };
+            NativeModule.getOS = function () {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        return "iOS";
+                    }
+                    else {
+                        return "Android";
+                    }
+                }
+                else {
+                    return "web";
+                }
+            };
+            /**
+             * 当前电量
+             *
+             * @static
+             * @param {Function} callback
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.getCurrentBatteryPercent = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentBatteryPercent");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentBatteryPercent");
+                    }
+                }
+            };
+            /**
+             * 显示相册或者拍照
+             *
+             * @static
+             * @param {Function} callback
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.showPhotoPicker = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "showPhotoPicker");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "showPhotoPicker");
+                    }
+                }
+            };
+            /**
+             * 显示相册或者拍照
+             *
+             * @static
+             * @param {Function} callback
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.showPhotoPickerWithSize = function (callback, w, h) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "showPhotoPickerWithSize:", w + "," + h);
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "showPhotoPickerWithSize", w + "," + h);
+                    }
+                }
+            };
+            /**
+             * 用微信登录
+             *
+             * @static
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.loginWithWeixin = function () {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.call("loginWithWeixin");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(function (code) {
+                            if (code === "-4") {
+                                NativeModule.loginWithWeixinCallback("", HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.refuseAuthorization));
+                            }
+                            else if (code === "-2") {
+                                NativeModule.loginWithWeixinCallback("", HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cancelAuthorization));
+                            }
+                            else {
+                                NativeModule.loginWithWeixinCallback(code, "");
+                            }
+                        }, "loginWithWeixin");
+                    }
+                }
+            };
+            /**
+             * 是否安装了微信
+             *
+             * @static
+             * @param {any} callback
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.isWexinInstalled = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "isWexinInstalled");
+                    }
+                    else {
+                        callback(true);
+                    }
+                }
+                else {
+                    callback(false);
+                }
+            };
+            /**
+             * 分享屏幕截图
+             *
+             * @static
+             * @param {number} scene
+             * WXSceneSession  = 0,  聊天界面
+             * WXSceneTimeline = 1,  朋友圈
+             * WXSceneFavorite = 2,  收藏
+             * @memberof NativeModule
+             */
+            NativeModule.shareCutScreen = function (scene) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.call("shareCutScreen:", scene);
+                    }
+                    else {
+                    }
+                }
+            };
+            NativeModule.shareImgToWx = function (shareData) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (!NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        console.log("shareWithWeixin");
+                        var jsonStr = JSON.stringify(shareData);
+                        nativeClass.call("shareWithWeixin", jsonStr);
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        var jsonString = JSON.stringify(shareData);
+                        nativeClass.call("shareWithWeixin:", jsonString);
+                    }
+                }
+            };
+            /**
+             * IAP支付
+             *
+             * @static
+             * @param {string} json
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.payWithApple = function (json) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    // JavaScript中 调用充值函数
+                    Laya.Browser.window.conchMarket.recharge(json, function (jsonString) {
+                        var pJson = JSON.parse(jsonString);
+                        if (pJson.code === "-1") {
+                            HoldemPoker.Sys.ui.stopLoading();
+                            HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.rechargeFail));
+                        }
+                        console.log("code:" + pJson.code);
+                        console.log("product_id:" + pJson.product_id);
+                        console.log("amount:" + pJson.amount);
+                        console.log("order_id:" + pJson.order_id);
+                        console.log("desc:" + pJson.desc);
+                    });
+                }
+            };
+            /**
+             * 微信支付
+             *
+             * @static
+             * @param {string} json
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.payWithWeixin = function (json) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    this.hasWXpayResult = false;
+                    HoldemPoker.Sys.ui.startLoading();
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.call("payWithWeixin:", json);
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        // nativeClass.call("payWithWeixin", json);
+                        nativeClass.callWithBack(function (code) {
+                            HoldemPoker.Sys.ui.stopLoading();
+                            if (code === '0') {
+                                HoldemPoker.Sys.event.event(HoldemPoker.GEvent.WX_PAY_SUCCESS);
+                                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.rechargeSuccess));
+                            }
+                            else if (code === '-2') {
+                                HoldemPoker.Sys.event.event(HoldemPoker.GEvent.WX_PAY_CANCEL);
+                                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.payCanceled));
+                            }
+                            else {
+                                HoldemPoker.Sys.event.event(HoldemPoker.GEvent.WX_PAY_CANCEL);
+                                HoldemPoker.MessageDialog.showWithText(code);
+                            }
+                        }, "payWithWeixin", json);
+                    }
+                }
+            };
+            /**
+             * 微信支付回调
+             *
+             * @static
+             * @param {string} code
+             * @param {string} error
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.payWithWeixinCallback = function (code, error) {
+                HoldemPoker.Sys.ui.stopLoading();
+                this.hasWXpayResult = true;
+                if (code === '0') {
+                    HoldemPoker.Sys.event.event(HoldemPoker.GEvent.WX_PAY_SUCCESS);
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.rechargeSuccess));
+                }
+                else {
+                    HoldemPoker.Sys.event.event(HoldemPoker.GEvent.WX_PAY_CANCEL);
+                    HoldemPoker.MessageDialog.showWithText(error);
+                }
+            };
+            /**
+             * 微信登录回调
+             *
+             * @static
+             * @param {string} code
+             * @param {string} error
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.loginWithWeixinCallback = function (code, error) {
+                if (error.length === 0) {
+                    console.debug("[Wechatlogin] code  = " + code);
+                    HoldemPoker.Sys.login.sendWechatCode(code);
+                }
+                else {
+                    HoldemPoker.Sys.ui.stopLoading();
+                    HoldemPoker.MessageDialog.showWithText(error);
+                }
+                if (!code) {
+                    HoldemPoker.Sys.ui.stopLoading();
+                }
+            };
+            /**
+             * 分享回调
+             *
+             * @static
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.shareCallback = function () {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.shareFail));
+            };
+            ////////////////////////////////////////////////////////////////
+            //GVoice
+            //////////////////////////////////////////////////////////////
+            /**
+             * 录音完成并上传，准备上传我们的服务器
+             *
+             * @static
+             * @param {string} fileId
+             * @returns
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.recordVoiceComplete = function (fileId) {
+                var roomControl = HoldemPoker.Sys.games.getTable(HoldemPoker.Sys.players.self.currentGameId, HoldemPoker.Sys.players.self.currentRoomId);
+                if (roomControl === null) {
+                    return;
+                }
+                roomControl.recordVoiceMgr.recordVoiceComplete(fileId);
+            };
+            /**
+             * 录音或者上传出错
+             *
+             * @static
+             * @returns
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.recordVoiceError = function () {
+                var roomControl = HoldemPoker.Sys.games.getTable(HoldemPoker.Sys.players.self.currentGameId, HoldemPoker.Sys.players.self.currentRoomId);
+                if (roomControl === null) {
+                    return;
+                }
+                roomControl.recordVoiceMgr.recordVoiceError();
+            };
+            /**
+             * 下载语音完成
+             *
+             * @static
+             * @returns
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.downloadVoiceComplete = function () {
+                var roomControl = HoldemPoker.Sys.games.getTable(HoldemPoker.Sys.players.self.currentGameId, HoldemPoker.Sys.players.self.currentRoomId);
+                if (roomControl === null) {
+                    return;
+                }
+                roomControl.recordVoiceMgr.downloadVoiceSuccess();
+            };
+            /**
+             * 下载语音出错
+             *
+             * @static
+             * @returns
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.downloadVoiceError = function () {
+                var roomControl = HoldemPoker.Sys.games.getTable(HoldemPoker.Sys.players.self.currentGameId, HoldemPoker.Sys.players.self.currentRoomId);
+                if (roomControl === null) {
+                    return;
+                }
+                roomControl.recordVoiceMgr.downloadVoiceError();
+            };
+            /**
+             * 播放语音完成
+             *
+             * @static
+             * @returns
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.playVoiceComplete = function () {
+                var roomControl = HoldemPoker.Sys.games.getTable(HoldemPoker.Sys.players.self.currentGameId, HoldemPoker.Sys.players.self.currentRoomId);
+                if (roomControl === null) {
+                    return;
+                }
+                roomControl.recordVoiceMgr.playVoiceComplete();
+            };
+            /**
+             * 播放语音错误
+             *
+             * @static
+             * @returns
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.playVoiceError = function () {
+                var roomControl = HoldemPoker.Sys.games.getTable(HoldemPoker.Sys.players.self.currentGameId, HoldemPoker.Sys.players.self.currentRoomId);
+                if (roomControl === null) {
+                    return;
+                }
+                roomControl.recordVoiceMgr.playVoiceError();
+            };
+            NativeModule.onAppResume = function () {
+                // console.log("------onAppResume!!!!");if (Sys.fsm.currentState() === GameState.BindPhoneState ||
+                if (HoldemPoker.Sys.fsm.currentState() === HoldemPoker.GameState.LoadingState || HoldemPoker.Sys.fsm.currentState() === HoldemPoker.GameState.BindPhoneState ||
+                    HoldemPoker.Sys.fsm.currentState() === HoldemPoker.GameState.RegisterState || HoldemPoker.Sys.fsm.currentState() === HoldemPoker.GameState.ChangePwdState || HoldemPoker.Sys.inWechatPayProgress === true) {
+                    //在登录界面、注册界面、修改密码界面、绑定手机界面不作处理
+                    if (HoldemPoker.Sys.inWechatPayProgress) {
+                        this.putWXpayCancel();
+                    }
+                    HoldemPoker.Sys.inWechatPayProgress = false;
+                    return;
+                }
+                HoldemPoker.Sys.event.event(HoldemPoker.GEvent.ON_APP_RESUME);
+                // let nowDate: Date = new Date();
+                // if ((nowDate.getTime() - Sys.suspendTime) >= 8000) {
+                //     Sys.event.event(GEvent.ON_APP_RESUME);
+                // }
+            };
+            NativeModule.putWXpayCancel = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (this.hasWXpayResult) {
+                                    return [2 /*return*/];
+                                }
+                                return [4 /*yield*/, HoldemPoker.Utility.waitForSeconds(2000)];
+                            case 1:
+                                _a.sent();
+                                HoldemPoker.Sys.event.event(HoldemPoker.GEvent.WX_PAY_CANCEL);
+                                HoldemPoker.MessageDialog.showWithText("取消支付");
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            NativeModule.onAppSuspend = function () {
+                // console.log("------onAppResume!!!!");
+                //Sys.net.event(GEvent.ON_APP_RESUME);
+                var nowDate = new Date();
+                HoldemPoker.Sys.suspendTime = nowDate.getTime();
+                HoldemPoker.Sys.event.event(HoldemPoker.GEvent.ON_APP_SUSPEND);
+            };
+            /**
+             * 告诉原生 游戏以加载
+             */
+            NativeModule.onGameLoaded = function () {
+                if (HoldemPoker.Sys.platformRunning) {
+                    var clsName = null;
+                    if (NativeModule.isIos()) {
+                        clsName = "NativeModule";
+                        var nativeClass = Laya.PlatformClass.createClass(clsName);
+                        nativeClass.call("onGameLoaded");
+                    }
+                    else {
+                        clsName = "com.wesai.poker.NativeModule";
+                        var nativeClass = Laya.PlatformClass.createClass(clsName);
+                        nativeClass.call("onGameLoaded");
+                    }
+                }
+            };
+            /**
+             *
+             * @param shareNum
+             */
+            NativeModule.setShareRoomNum = function (shareNum) {
+                console.log("1234收到分享码：" + shareNum);
+                HoldemPoker.Sys.shareRoomNum = shareNum;
+                var joinData = { invitationCode: HoldemPoker.Sys.shareRoomNum };
+                HoldemPoker.Sys.games.connectRoomServer(joinData, this, null, true);
+                HoldemPoker.Sys.shareRoomNum = null;
+            };
+            NativeModule.openWebview = function (url) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.call("openWebview:", url);
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.call("openWebview", url);
+                    }
+                }
+                else {
+                    window.open("http://www.baidu.com");
+                }
+            };
+            NativeModule.isIpad = function (callback) {
+                if (NativeModule.isIos()) {
+                    var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                    nativeClass.callWithBack(callback, "isIpad");
+                }
+                else {
+                    callback(false);
+                }
+            };
+            NativeModule.saveLog = function (log) {
+                var isSave = Laya.LocalStorage.getItem("saveLog");
+                if (isSave !== "1") {
+                    return;
+                }
+                var d = new Date();
+                var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+                log = time + " - " + log + "<br>";
+                if (HoldemPoker.Sys.platformRunning) {
+                    var clsName = null;
+                    if (NativeModule.isIos()) {
+                        clsName = "NativeModule";
+                        var nativeClass = Laya.PlatformClass.createClass(clsName);
+                        nativeClass.call("saveLog:", decodeURI(log));
+                    }
+                    else {
+                        clsName = "com.wesai.poker.utility.CacheLog";
+                        var nativeClass = Laya.PlatformClass.createClass(clsName);
+                        nativeClass.call("saveLog", decodeURI(log));
+                    }
+                }
+            };
+            NativeModule.parseMLink = function (queryString) {
+                var array = queryString.split("&");
+                for (var _i = 0, array_1 = array; _i < array_1.length; _i++) {
+                    var item = array_1[_i];
+                    var tempArray = item.split("=");
+                    if (tempArray.length > 1) {
+                        var key = tempArray[0];
+                        if (key === "sharenum") {
+                            this.setShareRoomNum(tempArray[1]);
+                            return;
+                        }
+                    }
+                }
+            };
+            /**
+             * 地理位置回调
+             *
+             * @static
+             * @param {string} location
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.getLocationCallback = function (location) {
+                HoldemPoker.Sys.locationStr = location;
+            };
+            /**
+             * 范围内弃牌
+             *
+             * @static
+             * @param {string} location
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.getAutoFold = function (foldCfgs) {
+                if (HoldemPoker.Sys.foldCfg === undefined || !HoldemPoker.Sys.foldCfg || HoldemPoker.Sys.foldCfg.length > 5) {
+                    HoldemPoker.Sys.foldCfg = [];
+                }
+                HoldemPoker.Sys.foldCfg.push(JSON.parse(foldCfgs));
+            };
+            /**
+             * 获取系统语言回调
+             *
+             * @static
+             * @param {string} location
+             *
+             * @memberof NativeModule
+             */
+            NativeModule.getLanguageCallback = function (callback) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    if (NativeModule.isIos()) {
+                        var nativeClass = Laya.PlatformClass.createClass("NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentLanguage");
+                    }
+                    else {
+                        var nativeClass = Laya.PlatformClass.createClass("com.wesai.poker.NativeModule");
+                        nativeClass.callWithBack(callback, "getCurrentLanguage");
+                    }
+                }
+            };
+            NativeModule.registerNotification = function (userId) {
+                if (HoldemPoker.Sys.platformRunning) {
+                    var clsName = null;
+                    if (NativeModule.isIos()) {
+                        clsName = "NativeModule";
+                        var nativeClass = Laya.PlatformClass.createClass(clsName);
+                        nativeClass.call("registerNotification:", userId + "");
+                    }
+                    else {
+                        clsName = "com.wesai.poker.NativeModule";
+                        var nativeClass = Laya.PlatformClass.createClass(clsName);
+                        nativeClass.call("onGameLoaded");
+                    }
+                }
+            };
+            NativeModule.receiveNotification = function (jsonString) {
+                console.log("notificaiton===", jsonString);
+            };
+            NativeModule.hasWXpayResult = false;
+            return NativeModule;
+        }());
+        HoldemPoker.NativeModule = NativeModule;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=NativeModule.js.map

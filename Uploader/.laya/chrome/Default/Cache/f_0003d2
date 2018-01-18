@@ -1,0 +1,468 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        /**
+         * 旋转木马组件
+         * by guo
+         */
+        /**
+         * 滑动方向
+         */
+        var CarouselDirection;
+        (function (CarouselDirection) {
+            CarouselDirection[CarouselDirection["left"] = 0] = "left";
+            CarouselDirection[CarouselDirection["right"] = 1] = "right";
+        })(CarouselDirection || (CarouselDirection = {}));
+        var CarouselWidget = /** @class */ (function (_super) {
+            __extends(CarouselWidget, _super);
+            function CarouselWidget(option) {
+                var _this = _super.call(this) || this;
+                _this.slidesSkins = [];
+                // slides
+                _this.slides = [];
+                _this.defaultImgUrl = '1334/mainGame/banner.png';
+                //动画中
+                _this.isAnimate = false;
+                if (option) {
+                    _this.option = __assign({}, CarouselWidget.DEFAULTS_OPTIONS, option);
+                }
+                else {
+                    _this.option = CarouselWidget.DEFAULTS_OPTIONS;
+                }
+                _this.init();
+                _this.defaultImg = _this.setDefaultImg();
+                return _this;
+            }
+            Object.defineProperty(CarouselWidget.prototype, "array", {
+                //数据更新
+                set: function (data) {
+                    if (Array.isArray(data) === false && data.length < 1) {
+                        return;
+                    }
+                    this._array = data;
+                    this._array.sort(this.sortBy);
+                    for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
+                        var item = data_1[_i];
+                        this.slidesSkins.push(decodeURIComponent(item.imageURL));
+                    }
+                    Laya.loader.load(this.slidesSkins, Laya.Handler.create(this, this.onUIAssetsLoaded));
+                    // Laya.loader.on(Laya.Event.ERROR, this, this.onUIAssetsLoadedError);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            /**
+             * 设置默认图片
+             * @returns {Laya.Image}
+             */
+            CarouselWidget.prototype.setDefaultImg = function () {
+                var defaultImg = new Laya.Image(this.defaultImgUrl);
+                defaultImg.pos((Laya.stage.width - this.option.slideWidth) / 2, 0);
+                this.carouselWrap.addChild(defaultImg);
+                return defaultImg;
+            };
+            /**
+             * 根据imagePostion
+             * @param a
+             * @param b
+             * @returns {number}
+             */
+            CarouselWidget.prototype.sortBy = function (a, b) {
+                return parseInt(b.imagePostion) - parseInt(a.imagePostion);
+            };
+            /**
+             * error handler
+             */
+            CarouselWidget.prototype.onUIAssetsLoadedError = function () {
+                if (!this.defaultImg) {
+                    this.defaultImg = this.setDefaultImg();
+                }
+            };
+            /**
+             * init
+             */
+            CarouselWidget.prototype.init = function () {
+                this.size(this.option.containerWidth, this.option.containerHeight);
+                this.carouselWrap = new Laya.Panel();
+                this.carouselWrap.size(this.option.containerWidth, this.option.containerHeight);
+                this.addChild(this.carouselWrap);
+            };
+            /**
+             * 资源加载完成
+             */
+            CarouselWidget.prototype.onUIAssetsLoaded = function () {
+                var _this = this;
+                var loaded = true;
+                //laya loader没接口？，用这种方式判断图片是否加载
+                for (var _i = 0, _a = this.slidesSkins; _i < _a.length; _i++) {
+                    var skin = _a[_i];
+                    if (Laya.loader.getRes(skin) === undefined) {
+                        loaded = false;
+                        break;
+                    }
+                }
+                if (!loaded) {
+                    return;
+                }
+                //清空所有子元素
+                this.carouselWrap.removeChildren();
+                var img, len = this.slidesSkins.length;
+                this.slidesSkins.forEach(function (item, i) {
+                    // img = new Laya.Image(item);
+                    // // 取下标会出错，用名字标识
+                    // img.name = 'item' + i;
+                    img = _this.createSlideImage(item, i);
+                    _this.carouselWrap.addChild(img);
+                });
+                //如果是偶数就多插入一项
+                if (len % 2 === 0) {
+                    // let lastSlide = new Laya.Image(this.slidesSkins[0]);
+                    // // 取下标会出错，用名字标识
+                    // lastSlide.name = 'item' + this.slidesSkins.length;
+                    var lastSlide = this.createSlideImage(this.slidesSkins[0], this.slidesSkins.length);
+                    this.carouselWrap.addChild(lastSlide);
+                }
+                this.firstSlide = this.carouselWrap.getChildAt(0);
+                this.lastSlide = this.carouselWrap.getChildAt(this.carouselWrap.numChildren - 1);
+                for (var i = 0; i < this.carouselWrap.numChildren; i++) {
+                    this.slides.push(this.carouselWrap.getChildAt(i));
+                    //帮在容器上没用，只能绑这上面了
+                    // this.carouselWrap.getChildAt(i).on(Laya.Event.CLICK, this, this.onSlideClick, [i]);
+                    this.carouselWrap.getChildAt(i).on(Laya.Event.MOUSE_DOWN, this, this.onMouseDown);
+                    this.carouselWrap.getChildAt(i).on(Laya.Event.MOUSE_UP, this, this.onMouseUp);
+                    this.carouselWrap.getChildAt(i).on(Laya.Event.MOUSE_MOVE, this, this.onMouseMove);
+                    // this.on(Laya.Event.MOUSE_OUT, this, this.onMouseUp);
+                }
+                //初始化位置
+                this.setSlidesPosition();
+                // this.on(Laya.Event.MOUSE_DOWN, this, this.onMouseDown);
+                // this.on(Laya.Event.MOUSE_UP, this, this.onMouseUp);
+                // this.on(Laya.Event.MOUSE_OUT, this, this.onMouseUp);
+            };
+            /**
+             * 创建图片
+             * @param skin
+             * @param itemIndex
+             * @returns {Laya.Image}
+             */
+            CarouselWidget.prototype.createSlideImage = function (skin, itemIndex) {
+                var img = new Laya.Image(skin);
+                img.name = 'item' + itemIndex;
+                var hitArea = new Laya.HitArea();
+                // hitArea.hit.drawRect(Math.abs(this.slideWidth - this.hitAreaWidth), Math.abs(this.slideHeight - this.hitAreaHeight), this.hitAreaWidth, this.hitAreaHeight, "#000000");
+                hitArea.hit.drawRect(0, 0, this.option.hitAreaWidth, this.option.hitAreaHeight, "#000000");
+                img.hitArea = hitArea;
+                img.mouseEnabled = true;
+                return img;
+            };
+            /**
+             * 点击
+             * @param index
+             */
+            CarouselWidget.prototype.onSlideClick = function (index) {
+                var len = this._array.length;
+                index = index >= len ? 0 : index;
+                // console.log('clicked slide index' + index);
+                var itemData = this._array[index];
+                if (itemData) {
+                    itemData.linkType = parseInt(itemData.linkType);
+                    if (itemData.linkType === 1) {
+                        // Laya.Browser.window.location.href = itemData.url;
+                        console.log('jump url just work in native mode');
+                        if (itemData.url.length > 0) {
+                            HoldemPoker.NativeModule.openWebview(laya.utils.Browser.window.decodeURIComponent(itemData.url));
+                        }
+                    }
+                    else if (itemData.linkType === 2) {
+                        var room = HoldemPoker.RoomRepository.inst.getRoomByRaceId(itemData.raceId);
+                        HoldemPoker.Sys.matchList.joinMatchRoom(room);
+                    }
+                }
+            };
+            /**
+             * 设置位置
+             */
+            CarouselWidget.prototype.setSlidesPosition = function () {
+                var _this = this;
+                //第一项的位置
+                var firstItem = this.firstSlide;
+                firstItem.width = this.option.slideWidth;
+                firstItem.height = this.option.slideHeight;
+                firstItem.x = (this.option.containerWidth - this.option.slideWidth) / 2;
+                firstItem.y = (this.option.containerHeight - this.option.slideHeight) / 2;
+                firstItem.zOrder = Math.floor(this.slides.length / 2);
+                if (this.slides.length <= 1) {
+                    return;
+                }
+                //左右的位置
+                var sliceSlides = this.slides.slice(1), sliceSize = sliceSlides.length / 2, rightSlice = sliceSlides.slice(0, sliceSize), leftSlide = sliceSlides.slice(sliceSize), level = Math.floor(this.slides.length / 2);
+                var rw = this.option.slideWidth, rh = this.option.slideHeight, gap = (this.option.containerWidth - this.option.slideWidth) / 2 / level;
+                var firstX = (this.option.containerWidth - this.option.slideWidth) / 2, fixOffsetLeft = firstX + rw, offsetX = firstX + 50;
+                //右边的
+                rightSlice.forEach(function (item, i) {
+                    level--;
+                    rw = rw * _this.option.scaleRatio;
+                    rh = rh * _this.option.scaleRatio;
+                    var j = i;
+                    var slide = item;
+                    slide.zOrder = level;
+                    slide.width = rw;
+                    slide.height = rh;
+                    slide.alpha = 1 / (++j);
+                    // slide.x = fixOffsetLeft + (++i) * gap - rw;
+                    // slide.x = fixOffsetLeft + (++i) * gap - rw + offsetX;
+                    slide.x = _this.option.containerWidth - slide.width + 40;
+                    slide.y = (_this.option.containerHeight - rh) / 2;
+                });
+                var rLast = rightSlice[rightSlice.length - 1], lw = rLast.width, lh = rLast.height, alphaLoop = Math.floor(this.slides.length / 2);
+                // 左边的
+                leftSlide.forEach(function (item, i) {
+                    var slide = item;
+                    slide.zOrder = i;
+                    slide.width = lw;
+                    slide.height = lh;
+                    slide.alpha = 1 / alphaLoop;
+                    // slide.x = i * gap;
+                    // slide.x = i * gap - offsetX;
+                    slide.x = -40;
+                    slide.y = (_this.option.containerHeight - lh) / 2;
+                    lw = lw / _this.option.scaleRatio;
+                    lh = lh / _this.option.scaleRatio;
+                    alphaLoop--;
+                });
+            };
+            /**
+             * 执行移动
+             * @param dir
+             */
+            CarouselWidget.prototype.move = function (dir) {
+                var _this = this;
+                var zOrderArr = [];
+                //左移动
+                if (dir === CarouselDirection.left) {
+                    this.slides.forEach(function (item, i) {
+                        var me = item;
+                        var prev = _this.getPrevFromIndex(i);
+                        zOrderArr.push(prev.zOrder);
+                        _this.isAnimate = true;
+                        Laya.Tween.to(me, {
+                            width: prev.width,
+                            height: prev.height,
+                            alpha: prev.alpha,
+                            x: prev.x,
+                            y: prev.y,
+                        }, _this.option.moveSpeed, null, Laya.Handler.create(_this, function () {
+                            //动画后清空
+                            _this.isAnimate = false;
+                            _this.touchStartX = null;
+                            _this.touchStartY = null;
+                        }));
+                    });
+                    //调整层级
+                    this.slides.forEach(function (item, i) {
+                        var me = item;
+                        me.zOrder = zOrderArr[i];
+                    });
+                }
+                else if (dir === CarouselDirection.right) {
+                    this.slides.forEach(function (item, i) {
+                        var me = item;
+                        var next = _this.getNextFromIndex(i);
+                        zOrderArr.push(next.zOrder);
+                        _this.isAnimate = true;
+                        Laya.Tween.to(me, {
+                            width: next.width,
+                            height: next.height,
+                            alpha: next.alpha,
+                            x: next.x,
+                            y: next.y,
+                        }, _this.option.moveSpeed, null, Laya.Handler.create(_this, function () {
+                            //动画后清空
+                            _this.isAnimate = false;
+                            _this.touchStartX = null;
+                            _this.touchStartY = null;
+                        }));
+                    });
+                    //调整层级
+                    this.slides.forEach(function (item, i) {
+                        var me = item;
+                        me.zOrder = zOrderArr[i];
+                    });
+                }
+            };
+            /**
+             * 计算上一张
+             * @param index
+             * @returns {any}
+             */
+            CarouselWidget.prototype.getPrevFromIndex = function (index) {
+                var prevIndex = index - 1, len = this.slides.length;
+                prevIndex = prevIndex < 0 ? len - 1 : prevIndex;
+                return this.slides[prevIndex];
+            };
+            /**
+             * 计算下一张
+             * @param index
+             * @returns {any}
+             */
+            CarouselWidget.prototype.getNextFromIndex = function (index) {
+                var nextIndex = index + 1, len = this.slides.length;
+                nextIndex = nextIndex >= len ? 0 : nextIndex;
+                return this.slides[nextIndex];
+            };
+            /**
+             * 绑定按下事件
+             * @param e
+             */
+            CarouselWidget.prototype.onMouseDown = function (e) {
+                e.stopPropagation();
+                if (this.isAnimate) {
+                    return;
+                }
+                var touches = e.touches;
+                if (touches && touches.length) {
+                    this.touchStartX = touches[0].stageX;
+                    this.touchStartY = touches[0].stageY;
+                }
+                else {
+                    this.touchStartX = e.stageX;
+                    this.touchStartY = e.stageY;
+                }
+                // this.on(Laya.Event.MOUSE_MOVE, this, this.onMouseMove);
+            };
+            CarouselWidget.prototype.onMouseMove = function (e) {
+            };
+            /**
+             * onMouseUp
+             * @param e
+             */
+            CarouselWidget.prototype.onMouseUp = function (e) {
+                if (this.touchStartX && this.touchStartY && !this.isAnimate) {
+                    var endx = void 0, endy = void 0;
+                    //native是像素和laya的不同
+                    //使用原生的
+                    // endx = e.nativeEvent.changedTouches[0].pageX;
+                    // endy = e.nativeEvent.changedTouches[0].pageY;
+                    endx = e.stageX;
+                    endy = e.stageY;
+                    // console.log(Math.abs(endx - this.touchStartX), this.touchStartX, endx);
+                    //模拟点击，在4的误差都算点击
+                    if (Math.abs(this.touchStartX - endx) < 4 && Math.abs(this.touchStartY - endy) < 4) {
+                        var currentTarget = e.currentTarget;
+                        //target变了下标一真不变,改用name来取
+                        // let currentIndex = this.carouselWrap.getChildIndex(currentTarget);
+                        var currentIndex = parseInt(currentTarget.name.slice(-1));
+                        // console.log('currentIndex', currentTarget, currentIndex);
+                        this.onSlideClick(currentIndex);
+                        return;
+                    }
+                    //大于最小滑动距离才滚动
+                    if (Math.abs(endx - this.touchStartX) < this.option.swipeThreshold) {
+                        return;
+                    }
+                    var direction = this.getTouchDirection(this.touchStartX, this.touchStartY, endx, endy);
+                    // console.log('direction', direction);
+                    switch (direction) {
+                        case 0:
+                            break;
+                        case 1:
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            //向左
+                            this.move(CarouselDirection.left);
+                            break;
+                        case 4:
+                            //向右
+                            this.move(CarouselDirection.right);
+                            break;
+                        default:
+                    }
+                }
+                // this.off(Laya.Event.MOUSE_MOVE, this, this.onMouseMove);
+            };
+            /**
+             * 滑动方向
+             * @param startx
+             * @param starty
+             * @param endx
+             * @param endy
+             * @returns {number}
+             */
+            CarouselWidget.prototype.getTouchDirection = function (startx, starty, endx, endy) {
+                var angx = endx - startx;
+                var angy = endy - starty;
+                var result = 0;
+                //如果滑动距离太短
+                if (Math.abs(angx) < 2 && Math.abs(angy) < 2) {
+                    return result;
+                }
+                var angle = this.getAngle(angx, angy);
+                if (angle >= -135 && angle <= -45) {
+                    result = 1;
+                }
+                else if (angle > 45 && angle < 135) {
+                    result = 2;
+                }
+                else if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle < -135)) {
+                    result = 3;
+                }
+                else if (angle >= -45 && angle <= 45) {
+                    result = 4;
+                }
+                return result;
+            };
+            /**
+             * 滑动角度
+             * @param angx
+             * @param angy
+             * @returns {number}
+             */
+            CarouselWidget.prototype.getAngle = function (angx, angy) {
+                return Math.atan2(angy, angx) * 180 / Math.PI;
+            };
+            CarouselWidget.DEFAULTS_OPTIONS = {
+                slideWidth: 727,
+                //slide高度
+                slideHeight: 359,
+                //容器宽度
+                containerWidth: 750,
+                //容器高度
+                containerHeight: 359,
+                //点击区域
+                hitAreaWidth: 727,
+                //点击区域
+                hitAreaHeight: 270,
+                //每张缩放比例
+                scaleRatio: 0.86,
+                //动画速度
+                moveSpeed: 300,
+                //最小滑动距离
+                swipeThreshold: 100
+            };
+            return CarouselWidget;
+        }(Laya.Sprite));
+        HoldemPoker.CarouselWidget = CarouselWidget;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=CarouselWidget.js.map

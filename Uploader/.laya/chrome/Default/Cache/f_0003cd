@@ -1,0 +1,378 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var UploaderBannerItem = /** @class */ (function (_super) {
+            __extends(UploaderBannerItem, _super);
+            function UploaderBannerItem() {
+                return _super.call(this) || this;
+            }
+            UploaderBannerItem.prototype.renderData = function (data) {
+                this.bgImage.skin = data.bgUrl;
+                if (data.imageUrl) {
+                    this.bannerImage.skin = HoldemPoker.Utility.getImgUrl + data.imageUrl;
+                }
+                else {
+                    this.bannerImage.skin = '';
+                }
+                this.deleteBtn.visible = !!data.canDelete;
+            };
+            return UploaderBannerItem;
+        }(ui.club.UploadBannerItemUI));
+        HoldemPoker.UploaderBannerItem = UploaderBannerItem;
+        HoldemPoker.DEFAULT_BANNER_IMG = '1334/club/banner_default.png';
+        HoldemPoker.DEFAULT_AVATAR_IMG = '1334/club/club_avatar_default.png';
+        var ClubEditUI = /** @class */ (function (_super) {
+            __extends(ClubEditUI, _super);
+            function ClubEditUI() {
+                var _this = _super.call(this) || this;
+                _this.clubStore = HoldemPoker.Sys.clubStore.self;
+                _this.bannerData = [];
+                _this.initLayout();
+                _this.initBannerList();
+                return _this;
+            }
+            Object.defineProperty(ClubEditUI, "DEFAULT_BANNER_DATA", {
+                //getter方式才能保证初始值
+                get: function () {
+                    return [
+                        {
+                            imageUrl: '',
+                            bgUrl: '1334/club/upload_pre_bg.png',
+                            canDelete: false,
+                        },
+                        {
+                            imageUrl: '',
+                            bgUrl: '1334/club/upload_pre_bg.png',
+                            canDelete: false,
+                        },
+                        {
+                            imageUrl: '',
+                            bgUrl: '1334/club/upload_pre_bg.png',
+                            canDelete: false,
+                        },
+                        {
+                            imageUrl: '',
+                            bgUrl: '1334/club/upload_pre_bg.png',
+                            canDelete: false,
+                        },
+                        {
+                            imageUrl: '',
+                            bgUrl: '1334/club/upload_pre_bg.png',
+                            canDelete: false,
+                        },
+                        {
+                            imageUrl: '',
+                            bgUrl: '1334/club/upload_pre_bg.png',
+                            canDelete: false,
+                        },
+                    ];
+                },
+                enumerable: true,
+                configurable: true
+            });
+            ;
+            ClubEditUI.prototype.Initalize = function () {
+                var _this = this;
+                this.btnUploadBanner.visible = false;
+                this.onLanguageChanged();
+                this.RegisterUIEvent();
+                this.clubStore = HoldemPoker.Sys.clubStore.self;
+                HoldemPoker.Sys.club.getClubById(this.clubStore.currentClubId).then(function (club) {
+                    if (club) {
+                        _this.clubStore.club = club;
+                        _this.setPayloadData(club);
+                    }
+                });
+            };
+            ClubEditUI.prototype.RegisterUIEvent = function () {
+                var _this = this;
+                this.on(Laya.Event.REMOVED, this, function () {
+                    if (_this.avatarUploader) {
+                        _this.avatarUploader.dispose();
+                    }
+                    if (_this.bannerUploader) {
+                        _this.bannerUploader.dispose();
+                    }
+                });
+                //更新上传按钮位置,如果页面动画先完成，input位置有问题，再更新一次
+                this.on(HoldemPoker.TRANSITION_END, this, this.updateUploadBtnPosition);
+                this.avatarUploader = new HoldemPoker.Uploader(this.uploadAvatarBtn);
+                this.avatarUploader.setImgSize(200, 200);
+                this.avatarUploader.on(HoldemPoker.FILE_UPLOADED, this, function (result) {
+                    _this.clubAvatarBox.clubAvatar.skin = HoldemPoker.Utility.getImgUrl + result;
+                });
+                this.bannerUploader = new HoldemPoker.Uploader(this.btnUploadBanner);
+                this.bannerUploader.setImgSize(750, 376);
+                this.bannerUploader.on(HoldemPoker.FILE_UPLOADED, this, this.uploadedBanner);
+                // 返回
+                this.header.backBtn.on(Laya.Event.CLICK, this, function () {
+                    HoldemPoker.Sys.clubFsm.back();
+                });
+                // 地区选择
+                this.zoneInputCtrol.on(Laya.Event.CLICK, this, this.onClubZoneClick);
+                // 创建club
+                this.editClubBtn.on(Laya.Event.CLICK, this, this.onSubmit);
+            };
+            // 输入验证
+            ClubEditUI.prototype.validate = function () {
+                var clubName = this.clubName.text;
+                var clubDescription = this.clubDescription.text;
+                if (clubName === '') {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubNameRequired));
+                    return false;
+                }
+                if (HoldemPoker.CommonHelper.strLen(clubName) > 20) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubNameStandard));
+                    return false;
+                }
+                if (!(/^[\u4e00-\u9fa5a-zA-Z0-9]+$/.test(clubName))) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubNameNotAllowChar));
+                    return false;
+                }
+                if (!this.selectedAreaCode) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubAreaRequired));
+                    return false;
+                }
+                if (HoldemPoker.CommonHelper.strLen(clubDescription) > 200) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubNameCodeLimit));
+                    return false;
+                }
+                return true;
+            };
+            ClubEditUI.prototype.UnregisterUIEvent = function () {
+                this.offAll();
+            };
+            ClubEditUI.prototype.onLanguageChanged = function () {
+                this.editClubBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.modify);
+                this.header.titleLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.editClubInfo);
+                this.addImgLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.addClubImg);
+                this.addIconLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.addClubAvatar);
+                this.clubNameLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.name);
+                this.clubZoneLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.area);
+                this.clubDesLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.introduce);
+                this.clubName.prompt = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubName);
+                this.clubZone.prompt = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubZone);
+                this.clubDescription.prompt = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubIntroduce);
+            };
+            ClubEditUI.prototype.Refresh = function () {
+            };
+            ClubEditUI.prototype.Dispose = function () {
+                if (this.avatarUploader) {
+                    this.avatarUploader.dispose();
+                    this.avatarUploader = null;
+                }
+                if (this.bannerUploader) {
+                    this.bannerUploader.dispose();
+                    this.bannerUploader = null;
+                }
+                this.UnregisterUIEvent();
+            };
+            /**
+             * banner多图
+             */
+            ClubEditUI.prototype.initBannerList = function () {
+                this.bannerList.itemRender = UploaderBannerItem;
+                this.bannerList.selectEnable = true;
+                this.bannerList.renderHandler = new Laya.Handler(this, this.renderItemData);
+            };
+            /**
+             * banner list render
+             * @param cell
+             * @param index
+             */
+            ClubEditUI.prototype.renderItemData = function (cell, index) {
+                if (!cell.deleteBtn.clickHandler) {
+                    cell.deleteBtn.on(Laya.Event.CLICK, this, this.deleteBanner, [index]);
+                }
+                cell.renderData(cell.dataSource);
+            };
+            /**
+             * 更新banner数据
+             */
+            ClubEditUI.prototype.updateBannerData = function () {
+                this.bannerList.array = this.bannerData;
+                this.bannerList.refresh();
+            };
+            /**
+             * 传后更新banner
+             * @param result
+             */
+            ClubEditUI.prototype.uploadedBanner = function (result) {
+                for (var i = 0; i < this.bannerData.length; i++) {
+                    if (this.bannerData[i].imageUrl === '') {
+                        this.bannerData[i].imageUrl = result;
+                        this.bannerData[i].canDelete = true;
+                        break;
+                    }
+                }
+                this.updateBannerData();
+                //更新上传按钮位置
+                this.updateUploadBtnPosition();
+            };
+            /**
+             * 删除一张banner
+             * @param index
+             */
+            ClubEditUI.prototype.deleteBanner = function (index) {
+                this.bannerData[index].imageUrl = '';
+                this.bannerData[index].canDelete = false;
+                this.updateBannerData();
+                //更新上传按钮位置
+                this.updateUploadBtnPosition();
+            };
+            /**
+             * 更新上传按钮位置
+             * @param index
+             */
+            ClubEditUI.prototype.updateUploadBtnPosition = function () {
+                var index;
+                //找到一个空的
+                for (var i = 0; i < this.bannerData.length; i++) {
+                    if (this.bannerData[i].imageUrl === '') {
+                        index = i;
+                        break;
+                    }
+                }
+                //放到没有图片的第一个cell
+                if (index >= 0) {
+                    this.btnUploadBanner.visible = true;
+                    var cell = this.bannerList.getCell(index);
+                    var _a = this.bannerList, x = _a.x, y = _a.y;
+                    this.btnUploadBanner.pos(cell.x + x - 5, cell.y + y + 10);
+                    this.bannerUploader.updateInputPosition(cell, 0, 0);
+                    this.bannerUploader.usable();
+                }
+                else {
+                    this.bannerUploader.unusable();
+                    this.btnUploadBanner.visible = false;
+                }
+                this.avatarUploader.updateInputPosition(this.uploadAvatarBtn, 0, 0);
+            };
+            /**
+             * 设置数据
+             * @param club
+             */
+            ClubEditUI.prototype.setPayloadData = function (club) {
+                this.clubAvatarBox.clubAvatar.skin = ClubEditUI.DEFAULT_AVATAR_IMG;
+                var tempBanners = ClubEditUI.DEFAULT_BANNER_DATA;
+                var banners = club.imageUrl.split(',').filter(function (url) { return url !== ''; }).map(function (url) {
+                    return {
+                        imageUrl: url,
+                        bgUrl: '1334/club/upload_pre_bg.png',
+                        canDelete: true,
+                    };
+                });
+                //如果有数据，填充到默认banner中
+                if (banners.length) {
+                    tempBanners.splice.apply(tempBanners, [0, banners.length].concat(banners));
+                }
+                this.bannerData = tempBanners;
+                this.updateBannerData();
+                //更新上传按钮位置,如果页面动画先完成，input位置有问题
+                this.updateUploadBtnPosition();
+                this.clubName.text = club.name;
+                this.selectedAreaCode = club.region;
+                HoldemPoker.Utility.loadImg(this.clubAvatarBox.clubAvatar, ClubEditUI.DEFAULT_AVATAR_UPLOAD_IMG, club.logoUrl);
+                this.clubZone.text = HoldemPoker.AreaHelper.getAreaNameByCode(club.region, true);
+                this.clubDescription.text = club.describe;
+            };
+            /**
+             * 地区选择
+             */
+            ClubEditUI.prototype.onClubZoneClick = function () {
+                if (!this.areaListUI) {
+                    this.areaListUI = new HoldemPoker.AreaListUI();
+                    this.areaListUI.on(HoldemPoker.GEvent.CLUB_AREA_SELECTED, this, this.onSelectedArea);
+                    this.areaListUI.on(Laya.Event.ADDED, this, this.onAreaListAdd);
+                    this.areaListUI.on(Laya.Event.REMOVED, this, this.onAreaListRemoved);
+                }
+                if (!this.areaListUI.displayedInStage) {
+                    this.addChild(this.areaListUI);
+                }
+                //每次初始化
+                this.areaListUI.refresh();
+            };
+            /**
+             * web上传会在最上层
+             */
+            ClubEditUI.prototype.onAreaListAdd = function () {
+                if (this.avatarUploader) {
+                    this.avatarUploader.unusable();
+                }
+                if (this.bannerUploader) {
+                    this.bannerUploader.unusable();
+                }
+            };
+            /**
+             * web上传会在最上层
+             */
+            ClubEditUI.prototype.onAreaListRemoved = function () {
+                if (this.avatarUploader) {
+                    this.avatarUploader.usable();
+                }
+                if (this.bannerUploader) {
+                    this.bannerUploader.usable();
+                }
+            };
+            /**
+             * 选中地区
+             */
+            ClubEditUI.prototype.onSelectedArea = function (areaData) {
+                if (areaData) {
+                    this.selectedAreaCode = areaData.code;
+                    this.clubZone.text = HoldemPoker.AreaHelper.getAreaNameByCode(areaData.code, true);
+                }
+                else {
+                    this.selectedAreaCode = null;
+                }
+            };
+            /**
+             * 提交请求
+             */
+            ClubEditUI.prototype.onSubmit = function () {
+                if (this.validate()) {
+                    var uploadAvatarUrl = this.clubAvatarBox.clubAvatar.skin;
+                    if (uploadAvatarUrl === ClubEditUI.DEFAULT_AVATAR_UPLOAD_IMG) {
+                        uploadAvatarUrl = '';
+                    }
+                    var bannerImages = this.bannerData.filter(function (item) { return item.imageUrl !== '' || '1334' === item.imageUrl.substr(0, 4); }).map(function (item) { return item.imageUrl.replace(HoldemPoker.Utility.getImgUrl, ''); });
+                    var data = {
+                        clubId: this.clubStore.club.id,
+                        name: this.clubName.text,
+                        region: this.selectedAreaCode,
+                        describe: this.clubDescription.text,
+                        logoUrl: uploadAvatarUrl.replace(HoldemPoker.Utility.getImgUrl, ''),
+                        imageUrl: bannerImages.join(',')
+                    };
+                    // 修改请求
+                    HoldemPoker.Sys.club.updateClub(data);
+                    HoldemPoker.Sys.net.registerNotifyMsg('Club', this, this.onclubOk);
+                }
+            };
+            ClubEditUI.prototype.onclubOk = function (data) {
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.updateSuccess));
+                HoldemPoker.Sys.clubFsm.back();
+            };
+            ClubEditUI.prototype.initLayout = function () {
+                this.size(Laya.stage.width, Laya.stage.height);
+                this.clubDescription.width = Laya.stage.width - 190;
+            };
+            ClubEditUI.DEFAULT_AVATAR_IMG = '1334/club/club_avatar_default.png';
+            ClubEditUI.DEFAULT_AVATAR_UPLOAD_IMG = '1334/club/add.png';
+            return ClubEditUI;
+        }(ui.club.ClubEditViewUI));
+        HoldemPoker.ClubEditUI = ClubEditUI;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=ClubEditUI.js.map

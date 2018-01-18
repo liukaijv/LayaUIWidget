@@ -1,0 +1,676 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var FoundTapType;
+        (function (FoundTapType) {
+            FoundTapType[FoundTapType["Club"] = 0] = "Club";
+            FoundTapType[FoundTapType["SNG"] = 1] = "SNG";
+            FoundTapType[FoundTapType["Official"] = 2] = "Official";
+            FoundTapType[FoundTapType["My"] = 3] = "My";
+        })(FoundTapType = HoldemPoker.FoundTapType || (HoldemPoker.FoundTapType = {}));
+        var MatchUI = /** @class */ (function (_super) {
+            __extends(MatchUI, _super);
+            function MatchUI() {
+                var _this = _super.call(this) || this;
+                _this.listData = [];
+                _this.bannerData = HoldemPoker.Sys.players.self.settingsObject.banners;
+                _this.currentClub = null;
+                _this.bannarOption = {
+                    container: _this.bannerBox,
+                    width: Laya.stage.width,
+                    height: 229 * Laya.stage.width / 750,
+                    x: 0,
+                    y: 0,
+                    defaultImageUrl: '1334/mainGame/banner.png',
+                    autoPlay: true,
+                    showDots: false,
+                    showPager: true,
+                    speed: 300,
+                    delay: 4000,
+                    swipeThreshold: 0.3,
+                    clickHandler: _this.onSlideClick
+                };
+                _this.point = new Laya.Point(0, 0);
+                _this.isPos = false;
+                _this.flag = 0;
+                _this.maxList = [];
+                _this.added = false;
+                /**
+                 * 数据为空UI
+                 */
+                if (_this.emptyUi === undefined) {
+                    _this.emptyUi = Laya.Pool.getItemByClass('EmptyUI', HoldemPoker.Club.Components.EmptyUI);
+                    _this.emptyUi.init('', 0, 100);
+                    _this.addChild(_this.emptyUi);
+                }
+                if (_this.bannerCarousel === undefined) {
+                    //轮播图
+                    var banners = [];
+                    if (_this.bannerData && Array.isArray((_this.bannerData))) {
+                        for (var _i = 0, _a = _this.bannerData; _i < _a.length; _i++) {
+                            var banner = _a[_i];
+                            banners.push(banner.imageURL);
+                        }
+                    }
+                    _this.bannerCarousel = new HoldemPoker.SlideWidget(banners, _this.bannarOption);
+                    if (HoldemPoker.Sys.isPad) {
+                        _this.bannerBox.height = 229 * Laya.stage.width / 750;
+                        _this.tabBox.y = _this.bannerBox.y + _this.bannerBox.height;
+                    }
+                }
+                _this.onLanguageChanged();
+                _this.Initalize();
+                _this.RegisterUIEvent();
+                _this.createList();
+                _this.clubMenu = new HoldemPoker.ClubListMenu();
+                _this.clubMenu.visible = false;
+                Laya.stage.addChild(_this.clubMenu);
+                _this.clubMenu.setOnMenuListClickListener(_this);
+                _this.setListData();
+                return _this;
+            }
+            /**
+             * 点击
+             * @param index
+             */
+            MatchUI.prototype.onSlideClick = function (index) {
+                if (!this.bannerData) {
+                    return;
+                }
+                var len = this.bannerData.length;
+                index = index >= len ? 0 : index;
+                // console.log('clicked slide index' + index);
+                var itemData = this.bannerData[index];
+                if (itemData) {
+                    itemData.linkType = parseInt(itemData.linkType);
+                    if (itemData.linkType === 1) {
+                        // Laya.Browser.window.location.href = itemData.url;
+                        console.log('jump url just work in native mode');
+                        if (itemData.url.length > 0) {
+                            HoldemPoker.NativeModule.openWebview(laya.utils.Browser.window.decodeURIComponent(itemData.url));
+                        }
+                    }
+                    else if (itemData.linkType === 2) {
+                        var room = HoldemPoker.RoomRepository.inst.getRoomByRaceId(itemData.raceId);
+                        HoldemPoker.Sys.matchList.joinMatchRoom(room);
+                    }
+                }
+            };
+            /**
+             *初始化值
+             * @type {string}
+             */
+            MatchUI.prototype.Initalize = function () {
+                this.initClubTab();
+                this.matchLIstTab.selectedIndex = 0;
+                this.topTab.selectedIndex = 0;
+                this.onTabSelect(this.matchLIstTab.selectedIndex);
+                this.currentTab = FoundTapType.Club;
+                this.tabBox.left = 0;
+                this.tabBox.right = 0;
+                this.tabBox.width = HoldemPoker.Sys.width;
+                this.matchLIstTab.left = 0;
+                this.matchLIstTab.right = 0;
+                this.matchLIstTab.width = HoldemPoker.Sys.width;
+                this.clubBtn.width = HoldemPoker.Sys.width / 4;
+                this.officialBtn.width = HoldemPoker.Sys.width / 4;
+                this.MTTBtn.width = HoldemPoker.Sys.width / 4;
+                this.myBtn.width = HoldemPoker.Sys.width / 4;
+            };
+            MatchUI.prototype.initClubTab = function () {
+                this.lastClub = Laya.LocalStorage.getJSON("matchUIClub");
+                if (HoldemPoker.Sys.players.self.clubData && HoldemPoker.Sys.players.self.clubData.length > 0) {
+                    if (this.lastClub) {
+                        for (var _i = 0, _a = HoldemPoker.Sys.players.self.clubData; _i < _a.length; _i++) {
+                            var club = _a[_i];
+                            var id = parseInt(club.id);
+                            if (id === this.lastClub.id) {
+                                this.titleText.label = HoldemPoker.Utility.abbrString(club.name, 12);
+                                this.currentClub = this.lastClub;
+                                Laya.LocalStorage.setJSON("matchUIClub", this.currentClub);
+                                return;
+                            }
+                        }
+                        this.titleText.label = HoldemPoker.Utility.abbrString(HoldemPoker.Sys.players.self.clubData[0].name, 12);
+                        this.currentClub = HoldemPoker.Sys.players.self.clubData[0];
+                        Laya.LocalStorage.setJSON("matchUIClub", this.currentClub);
+                    }
+                    else {
+                        this.titleText.label = HoldemPoker.Utility.abbrString(HoldemPoker.Sys.players.self.clubData[0].name, 12);
+                        this.currentClub = HoldemPoker.Sys.players.self.clubData[0];
+                        Laya.LocalStorage.setJSON("matchUIClub", this.currentClub);
+                    }
+                }
+                else {
+                    this.titleText.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.officialgamelistText);
+                    this.currentClub = null;
+                }
+            };
+            MatchUI.prototype.RegisterUIEvent = function () {
+                var _this = this;
+                HoldemPoker.Sys.localization.event.on(HoldemPoker.GEvent.LANGUAGE_CHANGED, this, this.onLanguageChanged);
+                // 断线重连成功后拉取数据
+                HoldemPoker.Sys.login.on(HoldemPoker.GEvent.LOGIN_SUCCESS, this, function () {
+                    if (_this.currentClub) {
+                        HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: HoldemPoker.RoomRepository.roomListTabIndex,
+                            clubId: _this.currentClub.id
+                        }, true);
+                    }
+                    else {
+                        HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: HoldemPoker.RoomRepository.roomListTabIndex
+                        }, true);
+                    }
+                });
+                /**
+                 * 接收数据更新通知
+                 */
+                HoldemPoker.RoomRepository.inst.on(HoldemPoker.EVENT_ROOM_UPDATE, this, this.onRoomListUpdate);
+                /**
+                 * 接收数据列表通知
+                 */
+                HoldemPoker.RoomRepository.inst.on(HoldemPoker.EVENT_ROOM_LIST, this, this.onRoomListResponse);
+                this.mScrollView.vScrollBar.changeHandler = new Laya.Handler(this, this.scroll);
+                this.mScrollView.vScrollBarSkin = "";
+                this.titleText.on(Laya.Event.CLICK, this, this.onClubClick);
+                HoldemPoker.ClubScene.inst.on(HoldemPoker.EVENT_CLUB_DESTROY, this, this.updateClubMenuList);
+                HoldemPoker.ClubScene.inst.on(HoldemPoker.EVENT_CLUB_DEACTIVATE, this, this.leaveClub);
+                HoldemPoker.Sys.net.registerNotifyMsg('ClubKickOutNotify', this, this.onKickOut);
+                HoldemPoker.Sys.net.registerNotifyMsg('Club', this, this.updateClubMenuList);
+                this.matchLIstTab.selectHandler = new Laya.Handler(this, this.onTabSelect);
+                this.msgBtn.on(Laya.Event.CLICK, this, this.onMsgOpen);
+                this.ckhiddeTable.on(Laya.Event.CLICK, this, this.onHiddeClick, [this.ckhiddeTable]);
+                this.ckhiddeTable1.on(Laya.Event.CLICK, this, this.onHiddeClick, [this.ckhiddeTable1]);
+            };
+            MatchUI.prototype.onHiddeClick = function (ck) {
+                if (ck.selected) {
+                    this.ckhiddeTable.selected = true;
+                    this.ckhiddeTable1.selected = true;
+                    this.listData = HoldemPoker.RoomRepository.inst.hiddeFullRoomList(this.currentList);
+                    this.setListData();
+                }
+                else {
+                    this.ckhiddeTable.selected = false;
+                    this.ckhiddeTable1.selected = false;
+                    this.listData = this.currentList;
+                    this.setListData();
+                }
+            };
+            MatchUI.prototype.onRoomListResponse = function (rooms) {
+                if (!this.displayedInStage) {
+                    return;
+                }
+                this.added = false;
+                if (this.matchLIstTab.selectedIndex === FoundTapType.Official || this.matchLIstTab.selectedIndex === FoundTapType.SNG) {
+                    rooms = HoldemPoker.RoomRepository.inst.getSortRoomList(rooms, this.matchLIstTab.selectedIndex);
+                }
+                this.currentList = rooms;
+                if (this.ckhiddeTable.selected) {
+                    this.listData = HoldemPoker.RoomRepository.inst.hiddeFullRoomList(this.currentList);
+                }
+                else {
+                    this.listData = this.currentList;
+                }
+                this.emptyUi.visible = this.listData.length === 0;
+                this.setListData();
+            };
+            MatchUI.prototype.onRoomListUpdate = function () {
+                if (HoldemPoker.Sys.fsm.currentState() !== HoldemPoker.GameState.MainState) {
+                    return;
+                }
+                if (!this.displayedInStage) {
+                    return;
+                }
+                var rooms;
+                if (this.matchLIstTab.selectedIndex === FoundTapType.Official || this.matchLIstTab.selectedIndex === FoundTapType.SNG) {
+                    rooms = HoldemPoker.RoomRepository.inst.getRooms(HoldemPoker.msg.RoomListType.RoomListOfficial);
+                }
+                else if (this.matchLIstTab.selectedIndex === FoundTapType.Club) {
+                    rooms = HoldemPoker.RoomRepository.inst.getRooms(HoldemPoker.msg.RoomListType.RoomListClub);
+                }
+                else {
+                    rooms = HoldemPoker.RoomRepository.inst.getRooms(HoldemPoker.msg.RoomListType.RoomListPersonal);
+                }
+                if (this.matchLIstTab.selectedIndex === FoundTapType.Official || this.matchLIstTab.selectedIndex === FoundTapType.SNG) {
+                    rooms = HoldemPoker.RoomRepository.inst.getSortRoomList(rooms, this.matchLIstTab.selectedIndex);
+                }
+                this.currentList = rooms;
+                if (this.ckhiddeTable.selected) {
+                    this.listData = HoldemPoker.RoomRepository.inst.hiddeFullRoomList(this.currentList);
+                }
+                else {
+                    this.listData = this.currentList;
+                }
+                this.added = false;
+                this.emptyUi.visible = this.listData.length === 0;
+                this.setListData();
+            };
+            MatchUI.prototype.scroll = function () {
+                this.point.x = this.tabPos.x;
+                this.point.y = this.tabPos.y;
+                this.tabPos.localToGlobal(this.point);
+                var scrollValue = this.mScrollView.vScrollBar.value;
+                if (scrollValue > 225) {
+                    this.tabBox.visible = false;
+                    this.topBox.visible = true;
+                    this.matchLIstTab.selectHandler = null;
+                    this.topTab.selectHandler = new Laya.Handler(this, this.onTabSelect);
+                    if (this.listData.length >= 50) {
+                        this.mScrollView.visible = false;
+                        // this.mScrollView.mouseEnabled = false;
+                        this.listView.visible = true;
+                        this.listView.scrollBar.changeHandler = new Laya.Handler(this, this.listScroll);
+                        this.listView.scrollBar.value = scrollValue - 225;
+                        // this.mScrollView.vScrollBar.mouseEnabled = false;
+                        this.isListScroll = false;
+                    }
+                }
+                else {
+                    if (this.isListScroll) {
+                        this.tabBox.visible = true;
+                        this.topBox.visible = false;
+                        this.isPos = false;
+                        this.matchLIstTab.selectHandler = new Laya.Handler(this, this.onTabSelect);
+                        this.topTab.selectHandler = null;
+                    }
+                }
+                if (this.flag < 1) {
+                    this.flag++;
+                    this.mScrollView.vScrollBar.max = this.mScrollView.vScrollBar.max + 100;
+                }
+                this.scollValue = this.mScrollView.vScrollBar.value;
+            };
+            MatchUI.prototype.UnregisterUIEvent = function () {
+                this.offAll();
+                HoldemPoker.Sys.localization.event.off(HoldemPoker.GEvent.LANGUAGE_CHANGED, this, this.onLanguageChanged);
+                HoldemPoker.Sys.net.unRegisterNotifyMsg('ClubKickOutNotify');
+                HoldemPoker.Sys.net.unRegisterNotifyMsg('Club');
+                HoldemPoker.ClubScene.inst.off(HoldemPoker.EVENT_CLUB_DESTROY, this, this.updateClubMenuList);
+                HoldemPoker.ClubScene.inst.off(HoldemPoker.EVENT_CLUB_DEACTIVATE, this, this.updateClubMenuList);
+                this.msgBtn.off(Laya.Event.CLICK, this, this.onMsgOpen);
+            };
+            MatchUI.prototype.Pause = function () {
+                Laya.timer.clear(this, this.getClubTableDataByTimer);
+            };
+            MatchUI.prototype.ClubListResum = function () {
+                this.tipMassage.visible = HoldemPoker.Sys.message.isHaveNewMessageData();
+                if (this.matchLIstTab.selectedIndex === FoundTapType.Club) {
+                    this.updateClubMenuList();
+                    Laya.timer.clear(this, this.getClubTableDataByTimer);
+                    Laya.timer.loop(15000, this, this.getClubTableDataByTimer);
+                }
+            };
+            MatchUI.prototype.Refresh = function () {
+            };
+            MatchUI.prototype.Dispose = function () {
+                Laya.timer.clearAll(this); // 清除此页面的定时器
+                this.UnregisterUIEvent();
+                if (this.clubMenu) {
+                    this.clubMenu.Dispose();
+                    this.clubMenu = null;
+                }
+            };
+            MatchUI.prototype.onLanguageChanged = function () {
+                this.clubBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.normalTable);
+                this.officialBtn1.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.normalTable);
+                // this.clubBtn1.label = Sys.localization.get(stringtable.normalTable);
+                // // this.clubBtn.label = Sys.localization.get(stringtable.officialgamelistText);
+                // // this.clubBtn1.label = Sys.localization.get(stringtable.officialgamelistText);
+                this.myBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubgamelistText);
+                this.top_myBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubgamelistText);
+                // this.myBtn1.label = Sys.localization.get(stringtable.clubgamelistText);
+            };
+            /**
+             * 创建列表
+             */
+            MatchUI.prototype.createList = function () {
+                this.myMatchList = new HoldemPoker.ListView();
+                this.myMatchList.itemRender = HoldemPoker.GameListItemUI;
+                this.listRepeatX = Math.floor(HoldemPoker.Sys.width / 750);
+                //列表显示区单元格的列数
+                this.myMatchList.repeatX = this.listRepeatX;
+                //列表显示区单元格的行数
+                this.myMatchList.repeatY = 7;
+                this.myMatchList.x = 0;
+                this.myMatchList.y = this.tabBox.y + this.tabBox.height + 10;
+                this.myMatchList.left = 0;
+                this.myMatchList.right = 0;
+                this.myMatchList.selectEnable = true;
+                this.myMatchList.renderHandler = new Laya.Handler(this, this.updateItem);
+                this.myMatchList.mouseHandler = new Laya.Handler(this, this.onMouse);
+                this.listView.repeatX = this.listRepeatX;
+                this.listView.itemRender = HoldemPoker.GameListItemUI;
+                this.listView.selectEnable = true;
+                this.listView.zOrder = 100;
+                this.listView.renderHandler = new Laya.Handler(this, this.updateItem);
+                // this.listView.scrollBar.elasticBackTime = 200;
+                // this.listView.scrollBar.elasticDistance = 50;
+                this.listView.mouseHandler = new Laya.Handler(this, this.onMouse);
+                this.listView.visible = false;
+                this.isListScroll = true;
+                this.listView.scrollBar.changeHandler = new Laya.Handler(this, this.listScroll);
+                // this.mScrollView.vScrollBar.elasticBackTime = 600;
+                // this.mScrollView.vScrollBar.elasticDistance = 100;
+            };
+            MatchUI.prototype.listScroll = function () {
+                // if (this.listView.scrollBar.value > 50) {
+                //     this.isListScroll = true;
+                // }
+                if (this.listView.scrollBar.value === 0) {
+                    this.isListScroll = true;
+                    this.listView.scrollBar.changeHandler = null;
+                    this.mScrollView.vScrollBar.value = 224;
+                    this.listView.visible = false;
+                    this.mScrollView.mouseEnabled = true;
+                    this.mScrollView.visible = true;
+                    this.myMatchList.scrollTo(0);
+                }
+            };
+            /**
+             * 更新列表数据
+             */
+            MatchUI.prototype.setListData = function () {
+                var _this = this;
+                if (this.currentTab === FoundTapType.Club) {
+                    this.listData.forEach(function (element) {
+                        if (!_this.currentClub) {
+                            element.creatorName = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.officialgamelistText);
+                        }
+                        else {
+                            element.creatorName = _this.currentClub.name;
+                        }
+                    });
+                }
+                var list = [];
+                for (var i = 0; i < 50; i++) {
+                    if (i < this.listData.length) {
+                        list.push(this.listData[i]);
+                    }
+                    else {
+                        break;
+                    }
+                }
+                this.myMatchList.array = list;
+                this.listView.repeatY = 6;
+                this.listView.array = this.listData;
+                if (this.listData.length > this.maxList.length) {
+                    this.maxList = this.listData;
+                }
+                // this.myMatchList.repeatY = Math.ceil(this.listData.length / this.listRepeatX);
+                this.myMatchList.refresh();
+                if (Math.ceil(this.maxList.length / this.listRepeatX) * 260 >= HoldemPoker.Sys.height - 168) {
+                    this.empBox.height = HoldemPoker.Sys.height - 168;
+                    if (this.mScrollView.vScrollBar.value > 410) {
+                        // this.mScrollView.scrollTo(0, 410);
+                    }
+                }
+                // if (this.listData.length === 0) {
+                //     this.mScrollView.vScrollBar.elasticBackTime = 0;
+                //     this.mScrollView.vScrollBar.elasticDistance = 0;
+                // } else {
+                //     this.mScrollView.vScrollBar.elasticBackTime = 600;
+                //     this.mScrollView.vScrollBar.elasticDistance = 100;
+                // }
+                if (!this.added) {
+                    this.mScrollView.addChild(this.myMatchList);
+                    this.flag = 0;
+                    this.added = true;
+                }
+                if (this.scollValue) {
+                    this.mScrollView.vScrollBar.value = this.scollValue;
+                }
+                var tipWords = [
+                    HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.clubMatchListEmptyTip),
+                    HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.mttListEmptyTip),
+                    HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.mttListEmptyTip),
+                    HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.myMatchListEmptyTip)
+                ];
+                this.emptyUi.textValue.text = tipWords[this.matchLIstTab.selectedIndex];
+                //加入了俱乐部但是没有牌桌
+                if (this.matchLIstTab.selectedIndex === FoundTapType.Club && this.listData.length === 0) {
+                    // if (this.matchLIstTab.selectedIndex === FoundTapType.Club && this.clubsData.length > 0 && this.listData.length === 0) {
+                    //属于哪个俱乐部时
+                    if (this.currentClub) {
+                        this.emptyUi.visible = true;
+                        /**
+                         * 枚举变成字符串了？
+                         */
+                        var currentClub = this.currentClub;
+                        if (this.currentClub.corpus === HoldemPoker.msg.Corpus.PRESIDENT
+                            || currentClub.corpus === HoldemPoker.msg.Corpus.VICE_PRESIDENT
+                            || currentClub.corpus === HoldemPoker.msg.Corpus.MANAGER
+                            || currentClub.corpus === HoldemPoker.msg.Corpus[HoldemPoker.msg.Corpus.PRESIDENT]
+                            || currentClub.corpus === HoldemPoker.msg.Corpus[HoldemPoker.msg.Corpus.VICE_PRESIDENT]
+                            || currentClub.corpus === HoldemPoker.msg.Corpus[HoldemPoker.msg.Corpus.VICE_PRESIDENT]) {
+                            this.emptyUi.textValue.text = "\u60A8\u4FF1\u4E50\u90E8\u7684\u6D3B\u8DC3\u503C\u4E0D\u8DB3\uFF0C\u8BF7\u8054\u7CFB\u5176\u4ED6\u4FF1\u4E50\u90E8\u83B7\u5F97\u6D3B\u8DC3\u503C\u3002";
+                        }
+                        else if (currentClub.corpus === HoldemPoker.msg.Corpus.NORMAL || currentClub.corpus === HoldemPoker.msg.Corpus[HoldemPoker.msg.Corpus.NORMAL]) {
+                            this.emptyUi.textValue.text = "\u60A8\u6240\u5728\u7684\u4FF1\u4E50\u90E8\u7684\u6D3B\u8DC3\u503C\u4E0D\u8DB3\uFF0C\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u3002";
+                        }
+                        else {
+                            this.emptyUi.visible = false;
+                        }
+                    }
+                    else {
+                        this.emptyUi.visible = false;
+                    }
+                }
+            };
+            MatchUI.prototype.onMsgOpen = function () {
+                HoldemPoker.Sys.games.mainUIMgr.openMsgView();
+            };
+            /**
+             * 点击事件
+             * @param e
+             * @param index
+             */
+            MatchUI.prototype.onMouse = function (e, index) {
+                var _this = this;
+                if (e.type === Laya.Event.CLICK) {
+                    this.added = false;
+                    this.myMatchList.mouseEnabled = false;
+                    Laya.timer.once(2000, this, function () {
+                        if (_this && _this.myMatchList) {
+                            _this.myMatchList.mouseEnabled = true;
+                        }
+                    });
+                    var room = this.myMatchList.selectedItem;
+                    if (this.currentTab === FoundTapType.Club) {
+                        if (this.currentClub) {
+                            room.clubId = this.currentClub.id;
+                        }
+                        else {
+                            room.clubId = -1;
+                            this.showRecommendClub();
+                            return;
+                        }
+                    }
+                    if (room) {
+                        this.Pause();
+                        HoldemPoker.BenchmarkHelper.time('enterGameTest');
+                        HoldemPoker.Sys.matchList.joinMatchRoom(room);
+                    }
+                }
+            };
+            //跳转推荐俱乐部 对话框
+            MatchUI.prototype.showRecommendClub = function () {
+                HoldemPoker.MessagePrompt.openPrompt(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.joinRecommendClub), Laya.Handler.create(this, function () {
+                }));
+            };
+            MatchUI.prototype.updateItem = function (cell, index) {
+                cell.renderItemData(cell.dataSource);
+            };
+            /**
+             *  tab切换
+             * @param index
+             */
+            MatchUI.prototype.onTabSelect = function (index) {
+                this.matchLIstTab.selectedIndex = index;
+                this.topTab.selectedIndex = index;
+                this.added = false;
+                //记录最后点击的tab，用于断线后重连请求
+                Laya.timer.clear(this, this.getClubTableDataByTimer);
+                switch (index) {
+                    case FoundTapType.Official:
+                        this.currentTab = FoundTapType.Official;
+                        HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: HoldemPoker.msg.RoomListType.RoomListOfficial
+                        }, true);
+                        HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GameOfficial;
+                        break;
+                    case FoundTapType.Club:
+                        this.currentTab = FoundTapType.Club;
+                        if (this.currentClub) {
+                            HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                                type: HoldemPoker.msg.RoomListType.RoomListClub,
+                                clubId: this.currentClub.id
+                            }, true);
+                        }
+                        else {
+                            // this.listData = [];
+                            // this.setListData();
+                            // this.onClubClick();
+                            HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                                type: HoldemPoker.msg.RoomListType.RoomListClub,
+                                clubId: -1
+                            }, true);
+                            // Laya.timer.loop(15000, this, this.getClubTableDataByTimer);
+                        }
+                        HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GameClub;
+                        Laya.timer.loop(15000, this, this.getClubTableDataByTimer);
+                        break;
+                    case FoundTapType.My:
+                        this.currentTab = FoundTapType.My;
+                        HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: HoldemPoker.msg.RoomListType.RoomListPersonal
+                        }, true);
+                        HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GamePersonal;
+                        break;
+                    case FoundTapType.SNG:
+                        this.currentTab = FoundTapType.Official;
+                        HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: HoldemPoker.msg.RoomListType.RoomListOfficial
+                        }, true);
+                        HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GameSNG;
+                        break;
+                }
+            };
+            MatchUI.prototype.getClubTableData = function () {
+                if (this.currentTab === FoundTapType.Club && this.currentClub) {
+                    HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: HoldemPoker.msg.RoomListType.RoomListClub,
+                        clubId: this.currentClub.id
+                    }, true, true);
+                    HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GameClub;
+                }
+            };
+            MatchUI.prototype.getClubTableDataByTimer = function () {
+                if (this.currentTab === FoundTapType.Club) {
+                    if (this.currentClub) {
+                        HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: HoldemPoker.msg.RoomListType.RoomListClub,
+                            clubId: this.currentClub.id
+                        }, true, true);
+                        HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GameClub;
+                    }
+                    else {
+                        HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: HoldemPoker.msg.RoomListType.RoomListClub,
+                            clubId: -1
+                        }, true, true);
+                        HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GameClub;
+                    }
+                }
+            };
+            MatchUI.prototype.goToCreateClub = function () {
+                HoldemPoker.Sys.club.canCreateClub().then(function (flag) {
+                    if (flag === true) {
+                        HoldemPoker.Sys.clubFsm.GoFromMatchUI(HoldemPoker.ClubState.ClubCreateState);
+                    }
+                    else {
+                        HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ErrCreateExceedMaxNumber));
+                    }
+                });
+            };
+            MatchUI.prototype.goToJoinClub = function () {
+                HoldemPoker.Sys.clubFsm.GoFromMatchUI(HoldemPoker.ClubState.ClubSearchState);
+            };
+            MatchUI.prototype.onClick = function (club) {
+                this.currentClub = club;
+                HoldemPoker.RoomRepository.inst.sendRequest('RoomListRequest', {
+                    type: HoldemPoker.msg.RoomListType.RoomListClub,
+                    clubId: club.id
+                }, true);
+                HoldemPoker.RoomRepository.roomListTabIndex = HoldemPoker.GameListLastState.GameClub;
+                this.titleText.label = HoldemPoker.Utility.abbrString(club.name, 12);
+                Laya.LocalStorage.setJSON("matchUIClub", club);
+            };
+            MatchUI.prototype.onClubClick = function () {
+                var _this = this;
+                this.added = false;
+                if (this.currentTab !== FoundTapType.Club) {
+                    this.currentTab = FoundTapType.Club;
+                }
+                else {
+                    // 获取俱乐部
+                    var requestData = {};
+                    HoldemPoker.Sys.club.getClubs(requestData).then(function (clubs) {
+                        if (clubs && clubs.length > 0) {
+                            _this.showClubMenu(clubs);
+                        }
+                        else {
+                            _this.currentClub = null;
+                            _this.menuIcon.visible = false;
+                            // this.btnBox.visible = true;
+                            // this.emptyUi.visible = false;
+                        }
+                    });
+                }
+            };
+            MatchUI.prototype.onKickOut = function (data) {
+                this.updateClubMenuList();
+            };
+            MatchUI.prototype.leaveClub = function () {
+                HoldemPoker.Sys.net.registerNotifyMsg('ClubKickOutNotify', this, this.onKickOut);
+                HoldemPoker.Sys.net.registerNotifyMsg('Club', this, this.updateClubMenuList);
+                // this.updateClubMenuList();
+            };
+            MatchUI.prototype.updateClubMenuList = function () {
+                var _this = this;
+                var requestData = {};
+                HoldemPoker.Sys.club.getClubs(requestData).then(function (clubs) {
+                    if (clubs && clubs.length > 0) {
+                    }
+                    else if (_this.currentTab === 1) {
+                        // this.listData = [];
+                        // this.setListData();
+                        // this.btnBox.visible = true;
+                    }
+                    HoldemPoker.Sys.players.self.clubData = clubs;
+                    _this.initClubTab();
+                    _this.getClubTableData();
+                });
+            };
+            MatchUI.prototype.showClubMenu = function (clubs) {
+                this.clubMenu.setClubs(clubs);
+                this.clubMenu.posMenu(250, 100);
+                this.clubMenu.show();
+            };
+            return MatchUI;
+        }(ui.found.MatchLIstViewUI));
+        HoldemPoker.MatchUI = MatchUI;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=MatchUI.js.map

@@ -1,0 +1,306 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+/*
+ * @Author: dengpeng
+ * @Date: 2017-03-25 11:47:25
+ * @Last Modified by: wesai.谢久伟
+ * @Last Modified time: 2017-10-26 17:57:15
+ */
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var GameRankUI = /** @class */ (function (_super) {
+            __extends(GameRankUI, _super);
+            function GameRankUI(rc) {
+                var _this = _super.call(this) || this;
+                _this.rc = rc;
+                _this.playerData = [];
+                _this.onLookerPerSize = 6;
+                _this.blindLeftTime = 0;
+                _this.gameLeftTime = 0;
+                _this.RegisterUIEvent();
+                _this.setPositionWithGameType();
+                _this.onLanguageChanged();
+                return _this;
+            }
+            GameRankUI.prototype.Initalize = function () {
+                this.rc.currentRankRequest();
+            };
+            GameRankUI.prototype.RegisterUIEvent = function () {
+                this.leftWatchBtn.on(Laya.Event.CLICK, this, this.watchLeftChange);
+                this.rightWatchBtn.on(Laya.Event.CLICK, this, this.watchRightChange);
+            };
+            /**
+             * sng和normal元素位置调整
+             */
+            GameRankUI.prototype.setPositionWithGameType = function () {
+                // if (this.rc.roomData.roomType === GRoomType.NL_ROOM) {
+                //     this.height = Laya.stage.height;
+                //     this.rankList.height = 853;
+                //     this.allBuyChipText.left = 454;
+                //     this.potText.left = 454;
+                //     this.nextBlindText.left = 454;
+                // } else if (this.rc.roomData.roomType === GRoomType.SNG_ROOM) {
+                //     this.height = 1246;
+                //     this.rankList.height = 729;
+                //     this.allBuyChipText.left = 482;
+                //     this.potText.left = 482;
+                //     this.nextBlindText.left = 482;
+                // }
+            };
+            GameRankUI.prototype.watchLeftChange = function () {
+                // if (this.watchMemberList.selectedIndex === 0) {
+                //     this.watchMemberList.selectedIndex = this.watchMemberList.numChildren;
+                // } else {
+                //     this.watchMemberList.selectedIndex += 1;
+                // }
+                this.onLookerListTurnPage(true);
+            };
+            GameRankUI.prototype.watchRightChange = function () {
+                // if (this.watchMemberList.selectedIndex === this.watchMemberList.numChildren) {
+                //     this.watchMemberList.selectedIndex = 0;
+                // }
+                // this.watchMemberList.selectedIndex += 1;
+                this.onLookerListTurnPage();
+            };
+            GameRankUI.prototype.onLookerListTurnPage = function (reverse) {
+                if (reverse === void 0) { reverse = false; }
+                var len = this.watchMemberList.array.length;
+                this.watchMemberList.page = reverse ? this.watchMemberList.page - 1 : this.watchMemberList.page + 1;
+                var index = this.watchMemberList.page * this.onLookerPerSize;
+                index = index > len - 1 ? len - 1 : index;
+                this.watchMemberList.tweenTo(index, 500);
+            };
+            GameRankUI.prototype.UnregisterUIEvent = function () {
+                this.offAll();
+            };
+            /**
+             * 设置语言
+             */
+            GameRankUI.prototype.onLanguageChanged = function () {
+                if (this.rc.roomData.roomType === 3 /* NL_ROOM */) {
+                    this.rankTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.rankTitleTextNormal);
+                    this.playerBankRoll.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerBankRollLableTextNormal);
+                    this.allBuyChipTextTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.allBuyChipTextTitleTextNormal);
+                    this.avgHandTimeTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.avgHandTimeTitleNormal);
+                    this.potTextTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.potTextTitleNormal);
+                    this.remainTimeTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.remainTimeTitleNormal);
+                    this.nextBlindTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.nextBlindTitleNormal);
+                    this.handCountLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.handCountLabel);
+                }
+                else {
+                    this.rankTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.rankTitleTextSng);
+                    this.playerBankRoll.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerBankRollLableTextSng);
+                    this.allBuyChipTextTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.allBuyChipTextTitleTextSng);
+                    this.avgHandTimeTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.avgHandTimeTitleSng);
+                    this.potTextTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.potTextTitleSng);
+                    this.remainTimeTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.avgHandTimeTitleNormal);
+                    this.nextBlindTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.nextBlindTitleSng);
+                    this.handCountLabel.text = "";
+                }
+                this.playerRankName.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerRankNameLableText);
+                this.playerScoreText.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.playerScoreTextLabelText);
+                this.watchPlayers.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.watchPlayersText);
+                this.handTitle.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.handTitleLableText);
+            };
+            GameRankUI.prototype.Refresh = function () {
+            };
+            GameRankUI.prototype.exit = function () {
+                // UIAnimator.Start(UIAnimator.asyncFloatDown, this, { duration: 500 },
+                //     Laya.Handler.create(this, () => { this.visible = false; }));
+            };
+            GameRankUI.prototype.onOpen = function () {
+                // this.visible = true;
+                // this.y = this.viewPosY;
+                // UIAnimator.Start(UIAnimator.asyncFadeIn, this, { duration: 200 });
+                // UIAnimator.Start(UIAnimator.asyncFloatUp, this, { duration: 600, ease: Laya.Ease.cubicOut });
+            };
+            GameRankUI.prototype.Dispose = function () {
+                this.UnregisterUIEvent();
+            };
+            GameRankUI.prototype.rankSort = function (data1, data2) {
+                if (data1.rank > data2.rank) {
+                    return 1;
+                }
+                else if (data1.rank < data2.rank) {
+                    return -1;
+                }
+                else {
+                    return 0;
+                }
+            };
+            GameRankUI.prototype.rankSortNL = function (d1, d2) {
+                if (d1.gains > d2.gains) {
+                    return -1;
+                }
+                else if (d1.gains < d2.gains) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            };
+            GameRankUI.prototype.renderSngRank = function (data) {
+                this.nextBlindTitle.visible = true;
+                this.nextBlindText.visible = true;
+                //当前级别
+                this.avgHandTimeTitle.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.avgHandTimeTitleSng, data.nowBlindRank);
+                this.roundTimeText.text = HoldemPoker.Utility.toNumberPattern(data.sb) + "/" + HoldemPoker.Utility.toNumberPattern(data.nowBb);
+                //下一级别
+                this.potTextTitle.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.potTextTitleSng, data.nextBlindRank);
+                this.potText.text = HoldemPoker.Utility.toNumberPattern(data.nextSb) + "/" + HoldemPoker.Utility.toNumberPattern(data.nextBb);
+                //平均耗时
+                this.remainTimeText.text = String(data.avgHandCostTime) + 's';
+                //升盲倒计时
+                this.nextBlindText.text = HoldemPoker.Utility.toStandardTimePattern(data.upBlindTime);
+                // this.rankTitle.text = Sys.localization.getFormated(stringtable.nowRank);
+                if (this.rc.roomData.roomType === 3 /* NL_ROOM */) {
+                    this.rankList.itemRender = HoldemPoker.RankNLItemUI;
+                }
+                else {
+                    this.rankList.itemRender = HoldemPoker.RankItemUI;
+                }
+                this.rankList.vScrollBarSkin = "";
+                this.rankList.selectEnable = true;
+                this.rankList.renderHandler = new Laya.Handler(this, this.updateSNGRankListItem);
+                this.rankList.array = data.sNGRank.sort(this.rankSort);
+                this.roundText.text = data.handCount.toString();
+                // this.roundTimeText.text = data.nowBb / 2 + "/" + data.nowBb;
+                this.allBuyChipText.text = data.playerCount + "/" + data.allPlayerCount;
+                // // this.potTextTitle.text = Sys.localization.getFormated(stringtable.currentBlindLevel);
+                // this.potText.text = "[" + data.nowBlindRank + "]" + data.nowBb / 2 + "/" + data.nowBb;
+                //发过来的是秒数
+                // this.remainTimeText.text = Utility.toTimePattern(Math.round(data.upBlindTime / 60));
+                // //不显示 剩余时间 sng
+                // this.remainTimeText.visible = false;
+                // this.remainTimeTitle.visible = false;
+                // //移动下一盲注级别 到剩余时间位置
+                // this.nextBlindTitle.x = this.remainTimeTitle.x;
+                // this.nextBlindText.x = this.remainTimeText.x;
+                // this.nextBlindText.text = "[" + data.nextBlindRank + "]" + data.nextBb / 2 + "/" + data.nextBb;
+                // this.playerBankRoll.text = Sys.localization.getFormated(stringtable.currentRank);
+                // this.allBuyChipTextTitle.text = Sys.localization.getFormated(stringtable.RemainPlayCount);
+                this.watchMemberList.itemRender = HoldemPoker.WatchPlayerUI;
+                this.watchMemberList.hScrollBarSkin = "";
+                this.watchMemberList.selectEnable = true;
+                // this.watchMemberList.repeatY = 1;
+                // this.watchMemberList.repeatX = 10;
+                this.watchMemberList.renderHandler = new Laya.Handler(this, this.updateWatchPlayers);
+                this.peopleLb.text = data.onLookers.length + HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.people);
+                this.watchMemberList.array = data.onLookers;
+                if (data.onLookers.length > 6) {
+                    this.leftWatchBtn.visible = true;
+                    this.rightWatchBtn.visible = true;
+                }
+                else {
+                    this.leftWatchBtn.visible = false;
+                    this.rightWatchBtn.visible = false;
+                }
+                //盲注倒计时
+                Laya.timer.clear(this, this.countDownTime);
+                this.blindLeftTime = data.upBlindTime;
+                Laya.timer.loop(1000, this, this.countDownTime, [this.nextBlindText]);
+                this.lb_rankInsInfo.visible = false;
+            };
+            GameRankUI.prototype.updateSNGRankListItem = function (cell, index) {
+                cell.itemBg.skin = HoldemPoker.mttItemOddEvenBg[index % 2];
+                if (cell.dataSource.playerId === HoldemPoker.Sys.players.self.id) {
+                    cell.itemBg.skin = HoldemPoker.mttItemOddEvenBg[2];
+                }
+                cell.SetupRankSNG(cell.dataSource);
+            };
+            GameRankUI.prototype.updateNormalRankListItem = function (cell, index) {
+                cell.itemBg.skin = HoldemPoker.mttItemOddEvenBg[index % 2];
+                if (cell.dataSource.playerId === HoldemPoker.Sys.players.self.id) {
+                    cell.itemBg.skin = HoldemPoker.mttItemOddEvenBg[2];
+                }
+                cell.SetupRankNormal(cell.dataSource);
+            };
+            GameRankUI.prototype.updateWatchPlayers = function (cell, index) {
+                cell.SetupWatchPlayer(cell.dataSource);
+            };
+            GameRankUI.prototype.renderCommonRank = function (data) {
+                if (this.rc.roomData.roomType === 3 /* NL_ROOM */) {
+                    this.rankList.itemRender = HoldemPoker.RankNLItemUI;
+                }
+                else {
+                    this.rankList.itemRender = HoldemPoker.RankItemUI;
+                }
+                // this.rankList.vScrollBarSkin = "";
+                this.rankList.selectEnable = true;
+                this.rankList.renderHandler = new Laya.Handler(this, this.updateNormalRankListItem);
+                this.rankList.array = data.conmmonRank.sort(this.rankSortNL);
+                this.roundText.text = data.handCount.toString();
+                this.allBuyChipText.text = HoldemPoker.Utility.toNumberPattern(data.allBankRoll);
+                this.roundTimeText.text = data.avgHandCostTime + "s";
+                this.potText.text = HoldemPoker.Utility.toNumberPattern(data.avgEndPot);
+                //剩余时间
+                this.remainTimeText.text = HoldemPoker.Utility.toStandardTimePattern(data.endTime);
+                this.nextBlindText.visible = false;
+                this.nextBlindTitle.visible = false;
+                this.peopleLb.text = data.onLookers.length + HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.people);
+                this.watchMemberList.itemRender = HoldemPoker.WatchPlayerUI;
+                this.watchMemberList.hScrollBarSkin = "";
+                this.watchMemberList.selectEnable = true;
+                this.watchMemberList.renderHandler = new Laya.Handler(this, this.updateWatchPlayers);
+                this.watchMemberList.array = data.onLookers;
+                if (data.onLookers.length > 6) {
+                    this.leftWatchBtn.visible = true;
+                    this.rightWatchBtn.visible = true;
+                }
+                else {
+                    this.leftWatchBtn.visible = false;
+                    this.rightWatchBtn.visible = false;
+                }
+                //牌局倒计时
+                Laya.timer.clear(this, this.countDownLeftTime);
+                this.gameLeftTime = data.endTime;
+                Laya.timer.loop(1000, this, this.countDownLeftTime, [this.remainTimeText]);
+                if (data.insurancePool) {
+                    if (data.insurancePool < 0) {
+                        this.lb_rankInsInfo.color = "#00991c";
+                    }
+                    else {
+                        this.lb_rankInsInfo.color = "#f1962a";
+                    }
+                    this.lb_rankInsInfo.visible = true;
+                    this.lb_rankInsInfo.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.insurancePot, data.insurancePool);
+                }
+            };
+            //盲注倒计时
+            GameRankUI.prototype.countDownTime = function (target) {
+                if (this.blindLeftTime < 0) {
+                    Laya.timer.clear(this, this.countDownTime);
+                    target.text = '00:00:00';
+                }
+                else {
+                    target.text = HoldemPoker.Utility.toStandardTimePattern(this.blindLeftTime);
+                }
+                this.blindLeftTime--;
+            };
+            //牌局倒计时
+            GameRankUI.prototype.countDownLeftTime = function (target) {
+                if (this.gameLeftTime < 0) {
+                    Laya.timer.clear(this, this.countDownLeftTime);
+                    target.text = '00:00:00';
+                }
+                else {
+                    target.text = HoldemPoker.Utility.toStandardTimePattern(this.gameLeftTime);
+                }
+                this.gameLeftTime--;
+            };
+            return GameRankUI;
+        }(ui.CurrentRankViewUI));
+        HoldemPoker.GameRankUI = GameRankUI;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=GameRankUI.js.map

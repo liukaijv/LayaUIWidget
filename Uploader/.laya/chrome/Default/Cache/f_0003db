@@ -1,0 +1,3055 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        // 通过Resourc命名空间来导出每个模块需要用的资源
+        var Resource;
+        (function (Resource) {
+            Resource.inGameUI = {
+                // cards: { url: "res/atlas/1334/cards.atlas", type: Laya.Loader.ATLAS },
+                ingame1334: { url: "res/atlas/1334/ingame.atlas", type: Laya.Loader.ATLAS },
+                ingameEN1334: { url: "res/atlas/1334/ingame/EN.atlas", type: Laya.Loader.ATLAS },
+                ingameSimple1334: { url: "res/atlas/1334/ingame/simple.atlas", type: Laya.Loader.ATLAS },
+                poker1334: { url: "res/atlas/1334/poker.atlas", type: Laya.Loader.ATLAS },
+                poker1: { url: "res/atlas/1334/poker1.atlas", type: Laya.Loader.ATLAS },
+                pubdeal1334: { url: "res/atlas/1334/dealing/pubdeal.atlas", type: Laya.Loader.ATLAS },
+                selfdeal1334: { url: "res/atlas/1334/dealing/selfdeal.atlas", type: Laya.Loader.ATLAS },
+                playerdeal1334: { url: "res/atlas/1334/dealing/playerdeal.atlas", type: Laya.Loader.ATLAS },
+                component1334: { url: "res/atlas/1334/component.atlas", type: Laya.Loader.ATLAS },
+                actionani: { url: "res/atlas/1334/actionstate.atlas", type: Laya.Loader.ATLAS },
+                allInAni: { url: "res/atlas/1334/component/allInAni.atlas", type: Laya.Loader.ATLAS },
+                playerInfoImage: { url: "1334/ingame/player_info_bg.png", type: Laya.Loader.IMAGE },
+                winnerImage: { url: "1334/ingame/winner_light.png", type: Laya.Loader.IMAGE },
+                pokerTipImage: { url: "1334/ingame/poker_tip.png", type: Laya.Loader.IMAGE },
+                //dragonBones动画预加载
+                dragonDealFlopAnim1334: {
+                    url: "1334/dragonPubDealing/dragon_pub_deal_flop.sk",
+                    type: Laya.Loader.BUFFER
+                },
+                chatEmoji: {
+                    url: "res/atlas/1334/ingame/emoji.atlas",
+                    type: Laya.Loader.ATLAS
+                }
+            };
+            Resource.inGameBackgroud = {
+                //游戏中不打包的图，单独加载
+                bgImage: { url: "1334/ingame/inGameBg.png", type: Laya.Loader.IMAGE },
+            };
+            Resource.inGameBackgroudPad = {
+                //游戏中不打包的图，单独加载
+                bgImage: { url: "pad/ingame_bg.png", type: Laya.Loader.IMAGE },
+            };
+            Resource.inGameBgSimple = {
+                bgImage: { url: "1334/ingame/simple/inGameBg.png", type: Laya.Loader.IMAGE },
+            };
+        })(Resource = HoldemPoker.Resource || (HoldemPoker.Resource = {}));
+        var InGameUI = /** @class */ (function (_super) {
+            __extends(InGameUI, _super);
+            function InGameUI(rc) {
+                var _this = _super.call(this) || this;
+                _this.recordView = null;
+                _this.overLayZOrder = 1001;
+                // 记录玩家是否移动过 
+                _this.isPlayerIconMove = false;
+                _this.isShowCancelBtn = false;
+                _this.noInsuranceData = null;
+                //#######骨骼动画############
+                _this.isRecording = false;
+                _this.anims = ["beer", "shark", "sniper", "bomb", "chicken", "fishing", "good", "head", "kiss", "nicehand", "shit", "water"];
+                _this.isShowFirst = false;
+                _this.isShowSecond = false;
+                _this.isRoundResult = false;
+                _this.startVoice = 0;
+                _this.aniRaio = 15;
+                _this.isLeftShow = false;
+                _this.isRightShow = false;
+                _this.sitXDis = 75;
+                _this.sitYDis = 68;
+                _this.selfXDis = -301;
+                _this.selfYDis = 36;
+                _this.rc = rc;
+                _this.onLanguageChanged();
+                _this.seatPosition = HoldemPoker.Sys.gameCfg["seatPosition"];
+                _this.initDragon();
+                _this.interactPropMgr = new HoldemPoker.InteractPropMgr();
+                _this.interactPropMgr.Initalize();
+                return _this;
+            }
+            //#######骨骼动画############
+            InGameUI.prototype.initDragon = function () {
+                this.dragonFlop = new HoldemPoker.DragonAni("1334/dragonPubDealing/dragon_pub_deal_flop.sk", this);
+            };
+            InGameUI.prototype.flopPlay = function () {
+                if (this.dragonFlop.aniEnable) {
+                    this.dragonFlop.visible = true;
+                    HoldemPoker.Sys.audio.play("card_turning");
+                    Laya.timer.once(400, this, function () {
+                        HoldemPoker.Sys.audio.play("button_click");
+                    });
+                    this.dragonFlop.play(0, false, true);
+                    return true;
+                }
+                return false;
+            };
+            InGameUI.prototype.Initalize = function () {
+                if (HoldemPoker.Sys.isPad) {
+                    this.gameTypeMTT.visible = false;
+                    this.gameTypeSNG.visible = false;
+                    this.mttRaceInfo.visible = false;
+                    this.gameInfoGrp.visible = false;
+                    this.cancelSngBtn.visible = false;
+                    this.startGameBtn.visible = false;
+                    this.potBox.visible = false;
+                    this.dealingBox.visible = false;
+                }
+                HoldemPoker.Sys.ui.push(this);
+                HoldemPoker.Sys.ui.hideStatusBar(); //隐藏状态栏
+                if (HoldemPoker.Sys.platformRunning) {
+                    // if (NativeModule.isIos) {
+                    //     NativeModule.isIpad((isIpad) => {
+                    //         if (!isIpad) {
+                    //             this.showStatusBar();
+                    //         }
+                    //     });
+                    // } else {
+                    //     this.showStatusBar();
+                    // }
+                    this.showStatusBar();
+                }
+                this.playerAction = new HoldemPoker.PlayerActionUI(this.rc);
+                this.playerAction.Initalize();
+                this.playerAuto = new HoldemPoker.PlayerAutoActionUI(this.rc);
+                this.playerAuto.Initalize();
+                this.accurateBetView = new HoldemPoker.AccurateBetViewUI(this.rc);
+                this.accurateBetView.Initalize();
+                this.buySlider = new HoldemPoker.BuyViewUI(this.rc);
+                this.buySlider.Initalize();
+                this.menuView = new HoldemPoker.MenuUI();
+                this.menuView.Initalize();
+                this.panels = [];
+                this.setupSeats();
+                this.betSlider = new HoldemPoker.BetSliderUI(this.rc);
+                this.betSlider.Initalize();
+                if (this.rc.roomData.roomType === 3 /* NL_ROOM */) {
+                    this.nlGameSettle = new HoldemPoker.NLGameSettleUI(this.rc);
+                    this.addChild(this.nlGameSettle);
+                }
+                else {
+                    this.gameSettle = new HoldemPoker.GameSettleUI(this.rc);
+                    this.addChild(this.gameSettle);
+                }
+                // this.gameRankUI = new GameRankUI();
+                // this.addChild(this.gameRankUI);
+                this.RegisterUIEvent();
+                this.Refresh();
+                console.log("InGameUI");
+                HoldemPoker.Sys.ui.hideAlertView();
+                this.gameUIByRoomType();
+                //将手牌回顾和 实时战绩按钮显示出来
+                this.rankAndLookBack.visible = true;
+                // this.winner.zOrder = 100;//添加 增加的
+                this.PlayStatusText.text = "waiting join resp.";
+                this.emojiBtn.visible = false;
+                this.roundPot.filters = [HoldemPoker.Utility.getYelloFilter()];
+                this.initIns();
+            };
+            InGameUI.prototype.initIns = function () {
+                if (!this.insuranceViewUI) {
+                    this.insuranceViewUI = new HoldemPoker.InsuranceViewUI();
+                }
+                if (this.rc.roomData.gameData.insuranceData) {
+                    var cards = this.rc.roomData.gameData.boardCards;
+                    if (cards === null || cards === undefined || cards.length === 0) {
+                        console.log("保险：公牌数据为空！！！");
+                    }
+                    else {
+                        this.insuranceViewUI.Initalize(this.rc);
+                        this.insuranceViewUI.visible = true;
+                    }
+                }
+            };
+            InGameUI.prototype.showStatusBar = function () {
+                if (!this.statusBar) {
+                    this.statusBar = new HoldemPoker.StatusBarUI();
+                    this.addChild(this.statusBar);
+                }
+                // this.addChild(Sys.ui.statusBar);
+            };
+            InGameUI.prototype.setPadDragon = function () {
+                if (this.setPad) {
+                    this.setPad.setDragon();
+                }
+            };
+            InGameUI.prototype.gameUIByRoomType = function () {
+                this.positionArray = this.getPositions(this.rc.roomData.seatNumber);
+                if (HoldemPoker.Sys.isPad && !this.setPad && this.positionArray) {
+                    // this.inGameBg.skin = "pad/ingame_bg.png";
+                    this.setPad = new HoldemPoker.IngameSetPad(this, this.rc.roomData.seatNumber);
+                    // this.setPad.setMyCard(this.myCardBox);
+                }
+                if (HoldemPoker.Sys.isPad && !this.positionArray) {
+                    return;
+                }
+                if (!this.setSimple) {
+                    this.setSimple = new HoldemPoker.InGameUISimple(this);
+                }
+                this.setSimple.initSimpleRes();
+                //添加房间类型判断
+                var room = this.rc;
+                if (room.roomData.roomType === 1 /* SNG_ROOM */) {
+                    this.initSNGUI();
+                }
+                else {
+                    this.initUI();
+                }
+            };
+            InGameUI.prototype.RegisterUIEvent = function () {
+                var _this = this;
+                var roomControl = this.rc;
+                this.on(HoldemPoker.GEvent.INGAME_STANDUP, roomControl, roomControl.createStandUpRequest);
+                this.on(HoldemPoker.GEvent.INGAME_CARD_TYPE, this, this.onShowCardType);
+                this.on(HoldemPoker.GEvent.INGAME_INSURANCE_INSTRUCTION, this, this.onShowInsuranceInstruction);
+                //roomControl.playMgr.registerNotifyMsg();
+                // 关联消息
+                this.quitGameBtn.on(Laya.Event.CLICK, this, this.onShowMenu);
+                this.startGameBtn.on(Laya.Event.CLICK, this, this.onStartGame);
+                this.cancelSngBtn.on(Laya.Event.CLICK, this, this.onCancelSng);
+                this.playerAction.on(HoldemPoker.GEvent.INGAME_CHECK_ACTION, this, this.onCheckAction);
+                this.playerAction.on(HoldemPoker.GEvent.INGAME_ALL_IN_ACTION, this, this.onAllInAction);
+                this.playerAction.on(HoldemPoker.GEvent.INGAME_FOLD_ACTION, this, this.onFoldAction);
+                this.playerAction.on(HoldemPoker.GEvent.INGAME_RAISE_ACTION, this, this.onRaiseAction);
+                this.playerAction.on(HoldemPoker.GEvent.INGAME_CALL_ACTION, this, this.onCallAction);
+                this.betSlider.on(HoldemPoker.GEvent.INGAME_BET_SLIDER, this, this.registerEvent);
+                this.betSlider.on(HoldemPoker.GEvent.INGAME_ALL_IN_ACTION, this, this.onSliderAllinAction);
+                this.accurateBetView.on(HoldemPoker.GEvent.INGAME_BET_SLIDER, this, this.registerEvent);
+                this.accurateBetView.on(HoldemPoker.GEvent.INGAME_ALL_IN_ACTION, this, this.onSliderAllinAction);
+                this.buySlider.on(HoldemPoker.GEvent.INGAME_REBUY_CHIP, this, this.onReBuyChipAction);
+                this.buySlider.on(HoldemPoker.GEvent.INGAME_REFUSE_REBUY_CHIP, this, this.onRefuseReBuyChipAction);
+                this.buySlider.on(HoldemPoker.GEvent.INGAME_NOT_REBUY_CHIP, this, this.onNotBuyToSit);
+                this.buySlider.on(HoldemPoker.GEvent.SIT_REBUY_CHIP, this, this.onBuyChipToSit);
+                // this.buySlider.on(GEvent.REBUY, this, this.onReBuy);
+                this.menuView.on(HoldemPoker.GEvent.INGAME_STANDUP, this, function () {
+                    _this.event(HoldemPoker.GEvent.INGAME_STANDUP);
+                });
+                this.menuView.on(HoldemPoker.GEvent.INGAME_QUIT, this, function () {
+                    _this.event(HoldemPoker.GEvent.INGAME_QUIT);
+                });
+                this.menuView.on(HoldemPoker.GEvent.INGAME_CARD_TYPE, this, function () {
+                    _this.event(HoldemPoker.GEvent.INGAME_CARD_TYPE);
+                });
+                this.menuView.on(HoldemPoker.GEvent.INGAME_INSURANCE_INSTRUCTION, this, function () {
+                    _this.event(HoldemPoker.GEvent.INGAME_INSURANCE_INSTRUCTION);
+                });
+                this.recordBtn.on(Laya.Event.MOUSE_DOWN, this, this.onRecordVoice);
+                this.recordBtn.on(Laya.Event.MOUSE_OUT, this, this.onStopRecordVoice);
+                this.recordBtn.on(Laya.Event.MOUSE_UP, this, this.onStopRecordVoice);
+                // this.rankAndLookBack.on(Laya.Event.CLICK, this, this.onTest);
+                //手牌回顾
+                this.rankAndLookBack.on(Laya.Event.CLICK, this, this.onShowHandReview);
+                this.gameInfoBtn.on(Laya.Event.CLICK, this, this.onShowGameInfoWithType);
+                this.btnHoleCard1.on(Laya.Event.CLICK, this, this.showCard, ["first"]);
+                this.btnHoleCard2.on(Laya.Event.CLICK, this, this.showCard, ["second"]);
+                this.btnHoleCard1.zOrder = 10;
+                this.btnHoleCard2.zOrder = 10;
+                this.myCardBox.zOrder = 9;
+                this.addThinkTime.on(Laya.Event.CLICK, this, this.onClickAddTime);
+                this.addThinkTime.zOrder = 1000;
+                HoldemPoker.Sys.net.on(HoldemPoker.GEvent.CHANGE_CARD_SKIN, this, this.updateCardSkin);
+                this.chatBtn.on(Laya.Event.CLICK, this, this.onShowQuickChatUI);
+            };
+            InGameUI.prototype.playPropAnim = function (data) {
+                var propdata = new HoldemPoker.PropData();
+                propdata.index = data.interactionIndex;
+                propdata.toSit = data.toSitId;
+                propdata.fromSit = data.fromSitId;
+                this.interactPropMgr.getAnimByName(propdata, this);
+            };
+            InGameUI.prototype.setAddTimeShow = function (show) {
+                this.addThinkTime.visible = show;
+            };
+            InGameUI.prototype.showCard = function (value, e) {
+                if (value === "first") {
+                    if (this.isShowFirst) {
+                        this.isShowFirst = false;
+                        this.tagShow1.visible = false;
+                    }
+                    else {
+                        this.isShowFirst = true;
+                        this.tagShow1.visible = true;
+                    }
+                }
+                else {
+                    if (this.isShowSecond) {
+                        this.isShowSecond = false;
+                        this.tagShow2.visible = false;
+                    }
+                    else {
+                        this.isShowSecond = true;
+                        this.tagShow2.visible = true;
+                    }
+                }
+                if (this.rc.state === HoldemPoker.PlayState.RoundResultState) {
+                    this.rc.showCardRequest();
+                }
+            };
+            /**
+             * 游戏信息页面
+             */
+            InGameUI.prototype.onShowGameInfoWithType = function () {
+                var roomType = this.rc.roomData.roomType;
+                switch (roomType) {
+                    case 3 /* NL_ROOM */:
+                        this.onShowNormalGameRank();
+                        break;
+                    case 1 /* SNG_ROOM */:
+                        this.onShowSngGameInfo();
+                        break;
+                    case 2 /* MTT_ROOM */:
+                        this.onShowMttGameInfo();
+                        break;
+                    default:
+                        break;
+                }
+            };
+            /**
+             * normal排名
+             */
+            InGameUI.prototype.onShowNormalGameRank = function () {
+                var gameRankUI;
+                if (this.normalGameRankUI === undefined) {
+                    gameRankUI = new HoldemPoker.GameRankUI(this.rc);
+                    this.normalGameRankUI = new HoldemPoker.LayerContentUI(gameRankUI);
+                    this.addChild(this.normalGameRankUI);
+                    this.normalGameRankUI.zOrder = this.overLayZOrder;
+                }
+                this.normalGameRankUI.contentView.Initalize();
+                this.normalGameRankUI.onOpen();
+                if (HoldemPoker.Sys.isPad && this.setPad) {
+                    this.setPad.setRank();
+                }
+            };
+            /**
+             * Sng比赛信息
+             */
+            InGameUI.prototype.onShowSngGameInfo = function () {
+                if (this.sngGameInfoUI === undefined) {
+                    this.sngGameInfoUI = new HoldemPoker.SngGameInfoUI(this.rc);
+                    this.addChild(this.sngGameInfoUI);
+                    this.sngGameInfoUI.zOrder = this.overLayZOrder;
+                }
+                this.sngGameInfoUI.onOpen();
+                if (HoldemPoker.Sys.isPad && this.setPad) {
+                    this.setPad.setSngRank();
+                }
+            };
+            /**
+             * Mtt比赛信息
+             */
+            InGameUI.prototype.onShowMttGameInfo = function () {
+                if (this.mttGameInfoUI === undefined) {
+                    this.mttGameInfoUI = new HoldemPoker.MttGameInfoUI(this.rc);
+                    this.addChild(this.mttGameInfoUI);
+                    this.mttGameInfoUI.zOrder = this.overLayZOrder;
+                }
+                this.mttGameInfoUI.onOpen();
+                if (HoldemPoker.Sys.isPad && this.setPad) {
+                    this.setPad.setMttRank();
+                }
+            };
+            /**
+             *手牌回顾
+             */
+            InGameUI.prototype.onShowHandReview = function () {
+                var handReview;
+                if (this.handReviewUI === undefined) {
+                    handReview = new HoldemPoker.HandReviewUI(this.rc);
+                    this.handReviewUI = new HoldemPoker.LayerContentUI(handReview);
+                    this.addChild(this.handReviewUI);
+                    this.handReviewUI.zOrder = this.overLayZOrder;
+                }
+                this.handReviewUI.contentView.sendRequest();
+                this.handReviewUI.onOpen();
+                if (HoldemPoker.Sys.isPad && this.setPad) {
+                    this.setPad.setHandReview();
+                }
+            };
+            InGameUI.prototype.UnregisterUIEvent = function () {
+                //取消关联消息
+                this.quitGameBtn.off(Laya.Event.CLICK, this, this.onShowMenu);
+                this.startGameBtn.off(Laya.Event.CLICK, this, this.onStartGame);
+                // this.cancelSngBtn.off(Laya.Event.CLICK, this, this.onCancelSng);
+                this.playerAction.off(HoldemPoker.GEvent.INGAME_CHECK_ACTION, this, this.onCheckAction);
+                this.playerAction.off(HoldemPoker.GEvent.INGAME_ALL_IN_ACTION, this, this.onAllInAction);
+                this.playerAction.off(HoldemPoker.GEvent.INGAME_FOLD_ACTION, this, this.onFoldAction);
+                this.playerAction.off(HoldemPoker.GEvent.INGAME_RAISE_ACTION, this, this.onRaiseAction);
+                this.playerAction.off(HoldemPoker.GEvent.INGAME_CALL_ACTION, this, this.onCallAction);
+                this.betSlider.off(HoldemPoker.GEvent.INGAME_BET_SLIDER, this, this.registerEvent);
+                this.betSlider.off(HoldemPoker.GEvent.INGAME_ALL_IN_ACTION, this, this.onSliderAllinAction);
+                this.buySlider.off(HoldemPoker.GEvent.INGAME_REBUY_CHIP, this, this.onReBuyChipAction);
+                this.buySlider.off(HoldemPoker.GEvent.INGAME_REFUSE_REBUY_CHIP, this, this.onRefuseReBuyChipAction);
+                this.buySlider.off(HoldemPoker.GEvent.INGAME_NOT_REBUY_CHIP, this, this.onNotBuyToSit);
+                this.buySlider.off(HoldemPoker.GEvent.SIT_REBUY_CHIP, this, this.onBuyChipToSit);
+                this.imgHoleCard0.off(Laya.Event.CLICK, this, this.showCard);
+                this.imgHoleCard1.off(Laya.Event.CLICK, this, this.showCard);
+                HoldemPoker.Sys.net.off(HoldemPoker.GEvent.CHANGE_CARD_SKIN, this, this.updateCardSkin);
+                this.chatBtn.off(Laya.Event.CLICK, this, this.onShowQuickChatUI);
+                this.betSlider.offAll();
+                this.buySlider.offAll();
+                this.menuView.offAll();
+                this.recordBtn.offAll();
+                this.offAll();
+            };
+            InGameUI.prototype.onClickSeatBtn = function (pos) {
+                this.event(HoldemPoker.GEvent.INGAME_SIT, pos);
+            };
+            InGameUI.prototype.onLanguageChanged = function () {
+                this.mttTableId.skin = HoldemPoker.Sys.localization.getResDir("1334/ingame/", "mtt_table_id.png");
+                this.startGameBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.startGame);
+                this.cancelSngBtn.label = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cancelSignUp);
+                this.potLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.potText);
+            };
+            /**
+             *
+             * 刷新界面，坐标，长宽和图片啥的
+             * 比如横屏竖屏切换，刷新语言啥的
+             *
+             * @abstract
+             *
+             * @memberOf MainUI
+             */
+            InGameUI.prototype.Refresh = function () {
+            };
+            InGameUI.prototype.stopAllAnim = function () {
+                //把正在播放的动画关闭
+                this.dragonFlop.stop();
+                //停止ui中存在的动画
+                // this.ani_selfwinner.stop();
+                this.dragonFlop.visible = false;
+                this.ani_fold.stop();
+                this.isRoundResult = false;
+                for (var i = 0, a = this.panels; i < a.length; i++) {
+                    var panel = a[i];
+                    panel.updateBet(null, 0);
+                    panel.showdown(false);
+                    panel.updateImgCards(null);
+                }
+            };
+            /**
+             *
+             * 销毁界面
+             *
+             * @memberOf MainUI
+             */
+            InGameUI.prototype.Dispose = function () {
+                //把正在播放的动画关闭
+                this.dragonFlop.stop();
+                //停止ui中存在的动画
+                this.ani_selfwinner.stop();
+                this.ani_fold.stop();
+                this.UnregisterUIEvent();
+                if (this.betSlider) {
+                    this.betSlider.Dispose();
+                    this.betSlider = null;
+                }
+                if (this.buySlider) {
+                    this.buySlider.Dispose();
+                    this.buySlider = null;
+                }
+                if (this.menuView) {
+                    this.menuView.Dispose();
+                    this.menuView = null;
+                }
+                if (this.playerAction) {
+                    //停止action的倒计时
+                    this.playerAction.setPlayerActionVisibe(false);
+                    this.playerAction.Dispose();
+                    this.playerAction = null;
+                }
+                if (this.recordView) {
+                    this.recordView.Dispose();
+                    this.recordView = null;
+                }
+                if (this.mttGameInfoUI) {
+                    this.mttGameInfoUI.Dispose();
+                    this.mttGameInfoUI = null;
+                }
+                if (this.handReviewUI) {
+                    this.handReviewUI.Dispose();
+                    this.handReviewUI = null;
+                }
+                if (this.normalGameRankUI) {
+                    this.normalGameRankUI.Dispose();
+                    this.normalGameRankUI = null;
+                }
+                if (this.sngGameInfoUI) {
+                    this.sngGameInfoUI.Dispose();
+                    this.sngGameInfoUI = null;
+                }
+                //清空panels 的按钮监听
+                if (this.panels) {
+                    for (var _i = 0, _a = this.panels; _i < _a.length; _i++) {
+                        var panel = _a[_i];
+                        if (panel) {
+                            panel.off(Laya.Event.CLICK, this.rc, this.rc.createSitDownRequest);
+                            panel.stopPokerClock();
+                        }
+                    }
+                }
+                if (this.interactPropMgr) {
+                    this.interactPropMgr.Dispose();
+                }
+                this.stopRemainTimeLanel();
+                HoldemPoker.Sys.ui.remove(this);
+                this.offAll();
+                this.destroy();
+            };
+            InGameUI.prototype.updateBlind = function () {
+                var blind = this.rc.roomData.gameData.blind;
+                var ante = this.rc.roomData.gameData.ante;
+                var sb = this.rc.roomData.gameData.sb;
+                this.blindBetLabel.text = HoldemPoker.Utility.toNumberPattern(sb) + "/" + HoldemPoker.Utility.toNumberPattern(blind);
+                this.blindInfo.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.blindLabelText) + (HoldemPoker.Utility.toNumberPattern(sb) + "/" + HoldemPoker.Utility.toNumberPattern(blind));
+                if (ante) {
+                    this.blindBetLabel.text += "(" + HoldemPoker.Utility.toNumberPattern(ante) + ")";
+                    this.blindInfo.text += "(" + HoldemPoker.Utility.toNumberPattern(ante) + ")";
+                }
+                this.nomBlindTxt.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.blindValue, this.blindBetLabel.text);
+                this.setNextBlindInfo();
+                this.mttblindLivel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.blindsLevel) + this.rc.roomData.gameData.blindLevel.toString();
+                if (this.rc.roomData.rEndBlind >= this.rc.roomData.gameData.blindLevel && this.rc.roomData.reBuyRestNum > 0) {
+                    this.mttblindLivel.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.rebuyTime, this.mttblindLivel.text);
+                }
+                else if (this.rc.roomData.rEndBlind + 1 === this.rc.roomData.gameData.blindLevel && this.rc.roomData.addRestNum > 0) {
+                    this.menuView.setReBuyBtn(true, HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.addBuyText));
+                    this.mttblindLivel.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.addBuyTime, this.mttblindLivel.text);
+                    // return;
+                }
+                else {
+                    this.mttblindLivel.text = this.mttblindLivel.text;
+                }
+                if (this.rc.roomData.rEndBlind + 1 < this.rc.roomData.gameData.blindLevel || this.rc.roomData.addRestNum === 0) {
+                    this.menuView.setReBuyBtn(false, "");
+                }
+            };
+            /**
+             * 更新底池  两个底池 这个用来每次收取筹码时  更新这个底池
+             *
+             * @param {number} pot
+             *
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.updateRoundPot = function (pot) {
+                if (pot && pot > 0) {
+                    this.roundPot.visible = true;
+                    this.roundPot.text = HoldemPoker.Utility.toNumberPattern(pot);
+                }
+                else {
+                    this.roundPot.visible = false;
+                    this.roundPot.text = "";
+                }
+            };
+            /**
+             * 更新底池
+             *
+             * @param {number} pot
+             *
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.updatePot = function (pot) {
+                if (pot && pot > 0) {
+                    this.potLabel.visible = true;
+                    this.potLabel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.pot) + HoldemPoker.Utility.toNumberPattern(pot);
+                    this.potImage.visible = true;
+                }
+                else {
+                    this.potLabel.visible = false;
+                    this.potImage.visible = false;
+                    this.potLabel.text = "";
+                }
+            };
+            /**
+             * 更新主界面
+             *
+             * @param {Room} room
+             *
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.updateMainUI = function () {
+                var roomData = this.rc.roomData;
+                this.passwordLabel.text = roomData.invitationCode;
+                if (this.rc.roomData.clubId === -1) {
+                    this.nomIncodeTxt.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.inviteCode, roomData.invitationCode);
+                }
+                else {
+                    this.nomIncodeTxt.text = this.rc.roomData.name;
+                }
+                this.blindBetLabel.autoSize = true;
+                this.timeRemainLabel.autoSize = true;
+                // this.updateBlind(roomData.gameData.blind, roomData.gameData.ante);
+                if (roomData.gameData.countdownTime >= 0) {
+                    this.timeRemainLabel.text = HoldemPoker.Utility.toStandardTimePattern(roomData.gameData.countdownTime);
+                }
+                else if (roomData.gameData.countdownTime < 0) {
+                    this.timeRemainLabel.text = HoldemPoker.Utility.toStandardTimePattern(0);
+                }
+                this.nomTimeTxt.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.match_time) + this.timeRemainLabel.text;
+                ///显示gameid，方便调试用
+                if (this.rc.roomData.roomType === 2 /* MTT_ROOM */) {
+                    this.gameIdLable.text = roomData.gameId + "";
+                }
+                // this.calMainUIInfoPosition();
+                this.updatePot(roomData.gameData.pot);
+                this.updatePubCard();
+                if (roomData.gameData.sidePots && roomData.gameData.sidePots.length > 0) {
+                    if (roomData.gameData.sidePots.length === 1) {
+                        this.updateRoundPot(roomData.gameData.sidePots[0].gold);
+                    }
+                }
+                //获取自己的seat数据 设置 自己的手牌信息   reconnect之后 或者 joinroom之后 会执行到这个位置
+                var seatData = this.rc.roomData.getSeatByPlayerId(HoldemPoker.Sys.players.self.id);
+                if (seatData && seatData.holeCards && seatData.holeCards.length > 0) {
+                    this.updateHoleCards(seatData.holeCards);
+                    //更新mainUI 的时候 判断是否需要 弃牌灰化 
+                    this.foldHoleCards();
+                }
+                if (roomData.clubId > 0 && roomData.seatNumber && roomData.gameData.countdownTime < 0) {
+                    var c = void 0;
+                    switch (roomData.seatNumber) {
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                            c = 2;
+                            break;
+                        case 6:
+                            c = 3;
+                            break;
+                        case 7:
+                        case 8:
+                        case 9:
+                            c = 4;
+                            break;
+                    }
+                    this.waitText.text = c + "人开桌";
+                    this.gameWaitingg.visible = true;
+                }
+            };
+            //计算 主要信息展示的 位置 需要 整个信息所需要的长度
+            InGameUI.prototype.calMainUIInfoPosition = function () {
+                var offset = 5;
+                var space = 25;
+                var rightBold = 585;
+                var minLength = 420;
+                this.chipBlindBox.width = Math.floor(this.chiper.width + offset + this.blindBetLabel.width);
+                this.timeRemainBox.width = Math.floor(this.time.width + offset + this.timeRemainLabel.width);
+                var delta = (this.timeRemainLabel.width - this.passwordLabel.width) / 2;
+                this.timeRemainBox.x = rightBold - this.timeRemainBox.width / 2;
+                this.chipBlindBox.pivotX = this.chipBlindBox.width / 2;
+                //固定 大小
+                this.chipBlindBox.x = this.width / 2;
+                var length = this.passwordBox.width + this.timeRemainBox.width + this.chipBlindBox.width + 2 * space;
+                if (length > minLength) {
+                    //计算密码框
+                    this.passwordBox.x = this.chipBlindBox.x - space - delta - this.passwordBox.width / 2 - this.chipBlindBox.width / 2;
+                    //剩余时间
+                    this.timeRemainBox.x = this.chipBlindBox.x + space + this.chipBlindBox.width / 2 + this.timeRemainBox.width / 2;
+                }
+            };
+            InGameUI.prototype.foldHoleCards = function () {
+                var seat = this.rc.roomData.getSelfSeat();
+                this.accurateBetView.close();
+                if (seat) {
+                    if (seat.actionState === 1 /* FOLD_STATE */) {
+                        this.imgHoleCard0.filters = [HoldemPoker.Utility.grayFilter()];
+                        this.imgHoleCard1.filters = [HoldemPoker.Utility.grayFilter()];
+                        // let big = this.imgHoleCard0.getChildAt(0) as Laya.Image;
+                        // big.skin = "1334/poker/card_shadow.png";
+                        // let big2 = this.imgHoleCard1.getChildAt(0) as Laya.Image;
+                        // big2.skin = "1334/poker/card_shadow.png";
+                    }
+                    // else {
+                    var mcs = seat.holeCards;
+                    if (mcs && mcs.length > 0 && this.rc.roomData.gameData.boardCards) {
+                        var big = this.imgHoleCard0.getChildAt(0);
+                        if (mcs[0].tag === 0) {
+                            big.skin = "1334/poker/card_shadow.png";
+                            this.imgHoleCard0.filters = [HoldemPoker.Utility.grayFilter()];
+                        }
+                        else if (mcs[0].tag === 2) {
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard0.filters = null;
+                            }
+                            big.skin = "1334/poker/pub_card_bg.png";
+                        }
+                        else {
+                            big.skin = "1334/poker/card_shadow.png";
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard0.filters = null;
+                            }
+                        }
+                        ///////////
+                        var big2 = this.imgHoleCard1.getChildAt(0);
+                        if (mcs[1].tag === 0) {
+                            big2.skin = "1334/poker/card_shadow.png";
+                            this.imgHoleCard1.filters = [HoldemPoker.Utility.grayFilter()];
+                        }
+                        else if (mcs[1].tag === 2) {
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard1.filters = null;
+                            }
+                            big2.skin = "1334/poker/pub_card_bg.png";
+                        }
+                        else {
+                            big2.skin = "1334/poker/card_shadow.png";
+                            if (seat.actionState !== 1 /* FOLD_STATE */) {
+                                this.imgHoleCard1.filters = null;
+                            }
+                        }
+                    }
+                    else {
+                        var big = this.imgHoleCard0.getChildAt(0);
+                        big.skin = "1334/poker/card_shadow.png";
+                        big = this.imgHoleCard1.getChildAt(0);
+                        big.skin = "1334/poker/card_shadow.png";
+                        if (seat.actionState !== 1 /* FOLD_STATE */) {
+                            this.imgHoleCard0.filters = null;
+                            this.imgHoleCard1.filters = null;
+                        }
+                    }
+                    // }
+                }
+            };
+            InGameUI.prototype.playHoleCardsAni = function (data) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                //设置手牌
+                                _this.updateHoleCards(data);
+                                _this.dismissHole();
+                                if (data && data.length > 0) {
+                                    // this.ani_holeCard.play(0, false);
+                                    var mySeat = _this.rc.roomData.getSelfSeat();
+                                    if (mySeat && mySeat.holeCards && mySeat.holeCards.length > 0) {
+                                        _this.imgHoleCard0.visible = true;
+                                        _this.imgHoleCard1.visible = true;
+                                        _this.resetSelfShow();
+                                        resolve();
+                                    }
+                                    else {
+                                        _this.imgHoleCard0.visible = false;
+                                        _this.imgHoleCard1.visible = false;
+                                        _this.btnHoleCard1.visible = false;
+                                        _this.btnHoleCard2.visible = false;
+                                        resolve();
+                                    }
+                                }
+                                else {
+                                    resolve();
+                                }
+                            })];
+                    });
+                });
+            };
+            /**
+             * 第一次更新用户的手牌
+             *
+             * @param {msg.StartCommonGameResponse} data
+             *
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.updateHoleCards = function (data) {
+                this.holeBgCard0.visible = false;
+                this.holeBgCard1.visible = false;
+                if (data === null || data.length === 0) {
+                    this.dismissHole();
+                    this.foldBoxAni.visible = false;
+                    return;
+                }
+                //每次更新手牌的时候 更新 状态复原
+                this.foldHoleCards();
+                var firstCard = data[0];
+                var firstImgName = HoldemPoker.Utility.getCardName(firstCard.cardNumber, firstCard.cardSuit);
+                this.imgHoleCard0.texture = HoldemPoker.Sys.loader.getRes(firstImgName);
+                var secondCard = data[1];
+                var secondImgName = HoldemPoker.Utility.getCardName(secondCard.cardNumber, secondCard.cardSuit);
+                this.imgHoleCard1.texture = HoldemPoker.Sys.loader.getRes(secondImgName);
+                console.log("hole动画结束3");
+                this.imgHoleCard0.visible = true;
+                this.imgHoleCard1.visible = true;
+                this.resetSelfShow();
+                this.foldBoxAni.visible = false;
+                //给弃牌动画的image 赋值
+                this.foldCard0.texture = HoldemPoker.Sys.loader.getRes(firstImgName);
+                this.foldCard1.texture = HoldemPoker.Sys.loader.getRes(secondImgName);
+                if (!this.foldCard0.filters) {
+                    this.foldCard0.filters = [HoldemPoker.Utility.grayFilter()];
+                }
+                if (!this.foldCard1.filters) {
+                    this.foldCard1.filters = [HoldemPoker.Utility.grayFilter()];
+                }
+                this.handCardBg1.skin = HoldemPoker.Utility.getCardBackSkin();
+                this.handCardBg2.skin = HoldemPoker.Utility.getCardBackSkin();
+                this.foldCard0.skin = firstImgName;
+                this.foldCard1.skin = secondImgName;
+            };
+            InGameUI.prototype.dismissHole = function () {
+                this.imgHoleCard0.visible = false;
+                this.imgHoleCard1.visible = false; //没有数据
+                var big = this.imgHoleCard0.getChildAt(0);
+                big.skin = "1334/poker/card_shadow.png";
+                big = this.imgHoleCard1.getChildAt(0);
+                big.skin = "1334/poker/card_shadow.png";
+                this.btnHoleCard1.visible = false;
+                this.btnHoleCard2.visible = false;
+                this.tagShow1.visible = false;
+                this.tagShow2.visible = false;
+                this.isShowFirst = false;
+                this.isShowSecond = false;
+                this.isRoundResult = false;
+                this.noInsuranceData = null;
+            };
+            InGameUI.prototype.updateNetStatusText = function (status) {
+                this.netStatusText.text = status;
+            };
+            InGameUI.prototype.showBoardCard = function (index, card) {
+                if (index >= 0 && index < this.boardCardGrp.numChildren) {
+                    var cardImg = this.boardCardGrp.getChildAt(index);
+                    if (card) {
+                        this.boardCardGrp.visible = true;
+                        var imageName = HoldemPoker.Utility.getCardName(card.cardNumber, card.cardSuit);
+                        cardImg.visible = true;
+                        cardImg.x = InGameUI.boardcardsPosition[index][0];
+                        cardImg.y = InGameUI.boardcardsPosition[index][1];
+                        cardImg.scaleX = 1;
+                        cardImg.scaleY = 1;
+                        cardImg.texture = HoldemPoker.Sys.loader.getRes(imageName);
+                        //cardImg.texture = Sys.loader.getRes(imageName);
+                    }
+                    else {
+                        cardImg.visible = false;
+                        cardImg.filters = null;
+                        var big = cardImg.getChildAt(0);
+                        big.skin = "1334/poker/card_shadow.png";
+                    }
+                }
+            };
+            /**
+             * 更新公牌
+             *
+             * @param {Array<msg.Card>} cards
+             * @param {GPokerStatus} status
+             * @param complete 河牌状态下 用来监听完成 然后播结算动画
+             *
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.updateTurnCard = function (card) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    var imageName;
+                    return __generator(this, function (_a) {
+                        imageName = HoldemPoker.Utility.getCardName(card.cardNumber, card.cardSuit);
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                _this.getNoInsuranceTip(1);
+                                _this.imgBoardCard3.texture = HoldemPoker.Sys.loader.getRes(imageName);
+                                _this.imgBoardCard3Bg.texture = HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin());
+                                _this.turnAnim.play(0, false);
+                                _this.turnAnim.interval = 20;
+                                _this.turnAnim.once(Laya.Event.COMPLETE, _this, function () {
+                                    _this.showBoardCard(3, card);
+                                    resolve();
+                                });
+                            })];
+                    });
+                });
+            };
+            InGameUI.prototype.getNoInsuranceTip = function (type) {
+                var tip;
+                var tips;
+                if (type === 1) {
+                    //转牌
+                    console.log("this.noInsuranceData.turnTips");
+                    if (this.noInsuranceData && this.noInsuranceData.turnTips > 0) {
+                        tips = this.noInsuranceData.turnTips;
+                    }
+                }
+                else {
+                    if (this.noInsuranceData && this.noInsuranceData.riverTips > 0) {
+                        tips = this.noInsuranceData.riverTips;
+                    }
+                }
+                switch (tips) {
+                    case HoldemPoker.msg.NoInsuranceTips.NoOuts:
+                        tip = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.neednotBuyInsurance);
+                        break;
+                    case HoldemPoker.msg.NoInsuranceTips.PotNoWinner:
+                        tip = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.TooPeopleToBuyInsurance);
+                        break;
+                    case HoldemPoker.msg.NoInsuranceTips.OutsLimit:
+                        tip = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.TooManyOutsToBuyInsurance, this.noInsuranceData.outsLimit);
+                        break;
+                }
+                if (tip) {
+                    tip = HoldemPoker.EmojiHelper.emojiDecode(tip);
+                    HoldemPoker.Utility.setInsText(this.buyInsText, 1);
+                    this.buyInsText.text = tip;
+                    this.buyInsInfo.visible = true;
+                    Laya.timer.once(2000, this, this.hideBuyInfo);
+                }
+                // return tip;
+            };
+            InGameUI.prototype.hideBuyInfo = function () {
+                this.buyInsInfo.visible = false;
+            };
+            InGameUI.prototype.updateRiverCard = function (card) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    var imageName;
+                    return __generator(this, function (_a) {
+                        imageName = HoldemPoker.Utility.getCardName(card.cardNumber, card.cardSuit);
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                _this.getNoInsuranceTip(2);
+                                _this.imgBoardCard4.texture = HoldemPoker.Sys.loader.getRes(imageName);
+                                _this.imgBoardCard4Bg.texture = HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin());
+                                _this.riverAnim.play(0, false);
+                                _this.riverAnim.interval = 20;
+                                _this.riverAnim.once(Laya.Event.COMPLETE, _this, function () {
+                                    _this.showBoardCard(4, card);
+                                    resolve();
+                                });
+                            })];
+                    });
+                });
+            };
+            InGameUI.prototype.updateFlopCard = function (cards) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    var i, imageName;
+                    return __generator(this, function (_a) {
+                        for (i = 0; i < 3; i++) {
+                            imageName = HoldemPoker.Utility.getCardName(cards[i].cardNumber, cards[i].cardSuit);
+                            this.dragonFlop.setSlotSkin("card_turn_" + (i + 1), HoldemPoker.Sys.loader.getRes(imageName));
+                            this.dragonFlop.setSlotSkin("card_" + (i + 1), HoldemPoker.Sys.loader.getRes(imageName));
+                            this.dragonFlop.setSlotSkin('cardbg_' + (i + 1), HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                        }
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                if (_this.flopPlay()) {
+                                    _this.dragonFlop.mArmature.once(Laya.Event.STOPPED, _this, function () {
+                                        _this.dragonFlop.visible = false;
+                                        for (var i = 0; i < 3; i++) {
+                                            _this.showBoardCard(i, cards[i]);
+                                        }
+                                        resolve();
+                                    });
+                                }
+                                else {
+                                    for (var i = 0; i < 3; i++) {
+                                        _this.showBoardCard(i, cards[i]);
+                                    }
+                                    resolve();
+                                }
+                            })];
+                    });
+                });
+            };
+            InGameUI.prototype.updateMadeHands = function () {
+                var meSeat = this.getSelfSeat();
+                if (meSeat) {
+                    var selfSeatData = this.rc.roomData.getSelfSeat();
+                    if (selfSeatData) {
+                        if (selfSeatData.holeCards && selfSeatData.holeCards.length > 0) {
+                            meSeat.updateSelfCardTypes(selfSeatData.madeHands);
+                        }
+                        if (selfSeatData.holeCards && selfSeatData.holeCards.length > 0) {
+                            if (this.rc.roomData.gameData.boardCards) {
+                                this.setCardHighlight(selfSeatData);
+                                this.foldHoleCards();
+                            }
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.updatePlayerIcon = function () {
+                var meSeat = this.getSelfSeat();
+                if (meSeat) {
+                    var selfSeatData = this.rc.roomData.getSelfSeat();
+                    if (selfSeatData) {
+                        if (selfSeatData.holeCards && selfSeatData.holeCards.length > 0) {
+                            this.updateHoleCards(selfSeatData.holeCards);
+                            this.imgHoleCard0.visible = true;
+                            this.imgHoleCard1.visible = true;
+                            this.resetSelfShow();
+                            //如果有手牌，检查头像是否移动过
+                            this.actionRoundStartStateAni();
+                        }
+                    }
+                }
+            };
+            //高亮牌型
+            InGameUI.prototype.setCardHighlight = function (selfSeatData) {
+                var roomData = this.rc.roomData;
+                var type = selfSeatData.madeHands;
+                var cards = new Array;
+                for (var _i = 0, _a = selfSeatData.holeCards; _i < _a.length; _i++) {
+                    var mc = _a[_i];
+                    cards.push(mc);
+                }
+                for (var _b = 0, _c = roomData.gameData.boardCards; _b < _c.length; _b++) {
+                    var mc = _c[_b];
+                    cards.push(mc);
+                }
+                cards = cards.sort(this.cardSort);
+                for (var i = 0; i < cards.length; i++) {
+                    cards[i].tag = 1;
+                }
+                switch (type) {
+                    case HoldemPoker.msg.HandPowerTypes.HIGH_CARD:
+                        for (var i = 0; i < cards.length; i++) {
+                            if (i < 5) {
+                                cards[i].tag = 1;
+                            }
+                            else {
+                                cards[i].tag = 0;
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.ONE_PAIR:
+                        for (var i = 0; i < cards.length; i++) {
+                            var one_1 = new Array;
+                            one_1.push(cards[i]);
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (cards[i].cardNumber === cards[j].cardNumber) {
+                                    one_1.push(cards[j]);
+                                    break;
+                                }
+                            }
+                            if (one_1.length === 2) {
+                                for (var _d = 0, one_2 = one_1; _d < one_2.length; _d++) {
+                                    var sc = one_2[_d];
+                                    sc.tag = 2;
+                                }
+                            }
+                        }
+                        var h = 0;
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                if (h < 3) {
+                                    cards[i].tag = 1;
+                                    h++;
+                                }
+                                else {
+                                    cards[i].tag = 0;
+                                }
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.TWO_PAIR:
+                        var one = new Array;
+                        for (var i = 0; i < cards.length; i++) {
+                            // one.push(cards[i]);
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (cards[i].cardNumber === cards[j].cardNumber) {
+                                    one.push(cards[i]);
+                                    one.push(cards[j]);
+                                    break;
+                                }
+                            }
+                            if (one.length === 4) {
+                                for (var _e = 0, one_3 = one; _e < one_3.length; _e++) {
+                                    var sc = one_3[_e];
+                                    sc.tag = 2;
+                                }
+                                break;
+                            }
+                        }
+                        h = 0;
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                if (h < 1) {
+                                    cards[i].tag = 1;
+                                    h++;
+                                }
+                                else {
+                                    cards[i].tag = 0;
+                                }
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.THREE_OF_A_KIND:
+                        var three = 0;
+                        for (var i = 0; i < cards.length; i++) {
+                            three = 0;
+                            var threeCard = new Array;
+                            threeCard.push(cards[i]);
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (cards[i].cardNumber === cards[j].cardNumber) {
+                                    threeCard.push(cards[j]);
+                                    three++;
+                                    if (three === 2) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (threeCard.length === 3) {
+                                for (var _f = 0, threeCard_1 = threeCard; _f < threeCard_1.length; _f++) {
+                                    var sc = threeCard_1[_f];
+                                    sc.tag = 2;
+                                }
+                                break;
+                            }
+                        }
+                        h = 0;
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                if (h < 2) {
+                                    cards[i].tag = 1;
+                                    h++;
+                                }
+                                else {
+                                    cards[i].tag = 0;
+                                }
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.FLUSH://同花 proto里写错了
+                        var straight = 0;
+                        for (var i = 0; i < cards.length; i++) {
+                            straight = 0;
+                            var straightCard = new Array;
+                            straightCard.push(cards[i]);
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (cards[i].cardSuit === cards[j].cardSuit) {
+                                    straightCard.push(cards[j]);
+                                    straight++;
+                                    if (straight === 4) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (straightCard.length === 5) {
+                                for (var _g = 0, straightCard_1 = straightCard; _g < straightCard_1.length; _g++) {
+                                    var sc = straightCard_1[_g];
+                                    sc.tag = 2;
+                                }
+                                break;
+                            }
+                        }
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                cards[i].tag = 0;
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.STRAIGHT://顺子 proto里写错了
+                        var flush = 0;
+                        var start = 0;
+                        for (var i = 0; i < cards.length; i++) {
+                            flush = 0;
+                            var flushCard = new Array;
+                            flushCard.push(cards[i]);
+                            start = cards[i].cardNumber;
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (start - 1 === cards[j].cardNumber) {
+                                    start = cards[j].cardNumber;
+                                    flushCard.push(cards[j]);
+                                    flush++;
+                                    if (flush === 4) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (flushCard.length === 5) {
+                                for (var _h = 0, flushCard_1 = flushCard; _h < flushCard_1.length; _h++) {
+                                    var sc = flushCard_1[_h];
+                                    sc.tag = 2;
+                                }
+                                break;
+                            }
+                            else if (flushCard.length === 4 && start === 2 && cards[0].cardNumber === 14) {
+                                //处理 A 1 2 3 4 5 
+                                flushCard.push(cards[0]);
+                                for (var _j = 0, flushCard_2 = flushCard; _j < flushCard_2.length; _j++) {
+                                    var sc = flushCard_2[_j];
+                                    sc.tag = 2;
+                                }
+                                break;
+                            }
+                        }
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                cards[i].tag = 0;
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.FULL_HOUSE:
+                        for (var i = 0; i < cards.length; i++) {
+                            var hu = new Array;
+                            hu.push(cards[i]);
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (cards[i].cardNumber === cards[j].cardNumber) {
+                                    hu.push(cards[j]);
+                                    if (hu.length === 3) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (hu.length === 3) {
+                                for (var _k = 0, hu_1 = hu; _k < hu_1.length; _k++) {
+                                    var sc = hu_1[_k];
+                                    sc.tag = 2;
+                                }
+                            }
+                        }
+                        for (var i = 0; i < cards.length; i++) {
+                            var lu = new Array;
+                            lu.push(cards[i]);
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (cards[i].cardNumber === cards[j].cardNumber) {
+                                    lu.push(cards[j]);
+                                    break;
+                                }
+                            }
+                            if (lu.length === 2) {
+                                for (var _l = 0, lu_1 = lu; _l < lu_1.length; _l++) {
+                                    var sc = lu_1[_l];
+                                    sc.tag = 2;
+                                }
+                            }
+                        }
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                cards[i].tag = 0;
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.FOUR_OF_A_KIND:
+                        for (var i = 0; i < cards.length; i++) {
+                            var kind = new Array;
+                            kind.push(cards[i]);
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (cards[i].cardNumber === cards[j].cardNumber) {
+                                    kind.push(cards[j]);
+                                    if (kind.length === 4) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (kind.length === 4) {
+                                for (var _m = 0, kind_1 = kind; _m < kind_1.length; _m++) {
+                                    var sc = kind_1[_m];
+                                    sc.tag = 2;
+                                }
+                            }
+                        }
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                cards[i].tag = 0;
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.STRAIGHT_FLUSH:
+                        flush = 0;
+                        start = 0;
+                        var hua = "";
+                        for (var i = 0; i < cards.length; i++) {
+                            flush = 0;
+                            var flushCard = new Array;
+                            flushCard.push(cards[i]);
+                            start = cards[i].cardNumber;
+                            hua = cards[i].cardSuit;
+                            for (var j = i + 1; j < cards.length; j++) {
+                                if (start - 1 === cards[j].cardNumber && hua === cards[j].cardSuit) {
+                                    start = cards[j].cardNumber;
+                                    flushCard.push(cards[j]);
+                                    flush++;
+                                    if (flush === 4) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (flushCard.length === 5) {
+                                for (var _o = 0, flushCard_3 = flushCard; _o < flushCard_3.length; _o++) {
+                                    var sc = flushCard_3[_o];
+                                    sc.tag = 2;
+                                }
+                                break;
+                            }
+                            else if (flushCard.length === 4 && start === 2 && cards[0].cardNumber === 14 && hua === cards[0].cardSuit) {
+                                //处理 A 1 2 3 4 5 
+                                flushCard.push(cards[0]);
+                                for (var _p = 0, flushCard_4 = flushCard; _p < flushCard_4.length; _p++) {
+                                    var sc = flushCard_4[_p];
+                                    sc.tag = 2;
+                                }
+                                break;
+                            }
+                        }
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                cards[i].tag = 0;
+                            }
+                        }
+                        break;
+                    case HoldemPoker.msg.HandPowerTypes.ROYAL_STRAIGHT_FLUSH:
+                        flush = 0;
+                        start = 0;
+                        hua = "";
+                        for (var i = 0; i < cards.length; i++) {
+                            flush = 0;
+                            start = cards[i].cardNumber;
+                            if (start === 14) {
+                                var flushCard = new Array;
+                                flushCard.push(cards[i]);
+                                hua = cards[i].cardSuit;
+                                for (var j = i + 1; j < cards.length; j++) {
+                                    if (start - 1 === cards[j].cardNumber && hua === cards[j].cardSuit) {
+                                        start = cards[j].cardNumber;
+                                        flushCard.push(cards[j]);
+                                        flush++;
+                                        if (flush === 4) {
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (flushCard.length === 5) {
+                                    for (var _q = 0, flushCard_5 = flushCard; _q < flushCard_5.length; _q++) {
+                                        var sc = flushCard_5[_q];
+                                        sc.tag = 2;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        for (var i = 0; i < cards.length; i++) {
+                            if (cards[i].tag !== 2) {
+                                cards[i].tag = 0;
+                            }
+                        }
+                        break;
+                    default:
+                }
+                this.setPubCards();
+            };
+            //牌型提示
+            InGameUI.prototype.setPubCards = function () {
+                var pc = this.rc.roomData.gameData.boardCards;
+                for (var i = 0; i < pc.length; i++) {
+                    var cardImg = this.boardCardGrp.getChildAt(i);
+                    var pc_1 = this.rc.roomData.gameData.boardCards[i];
+                    if (cardImg.visible) {
+                        var big = cardImg.getChildAt(0);
+                        if (pc_1.tag === 0) {
+                            cardImg.filters = [HoldemPoker.Utility.grayFilter()];
+                            big.skin = "1334/poker/card_shadow.png";
+                        }
+                        else if (pc_1.tag === 2) {
+                            cardImg.filters = null;
+                            big.skin = "1334/poker/pub_card_bg.png";
+                        }
+                        else {
+                            cardImg.filters = null;
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.cardSort = function (data1, data2) {
+                if (data1.cardNumber > data2.cardNumber) {
+                    return -1;
+                }
+                else if (data1.cardNumber < data2.cardNumber) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            };
+            //取消 按钮在 结算后 发牌前不能点击
+            InGameUI.prototype.cancleMenuClick = function () {
+                this.quitGameBtn.disabled = true;
+            };
+            InGameUI.prototype.addregisterMenuClick = function () {
+                this.quitGameBtn.disabled = false;
+            };
+            /**
+             * 更新座位信息 为了解决 翻牌之后不走updateall 方法 但是需要更新玩家状态 。就把seat相关单独拿出来处理
+             * updateall 中有updatemainUI的处理 在restart的时候调用会有手牌先出现 再消失的情况 所以只更新seat相关 信息
+             *
+             *
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.updateAllPlayerSeat = function () {
+                var roomData = this.rc.roomData;
+                if (this.panels.length === 0
+                    && roomData.seatNumber !== this.panels.length) {
+                    this.setupSeats();
+                    if (roomData.selfSitId >= 0) {
+                        this.updateSeatServerPos(roomData.selfSitId);
+                    }
+                }
+                for (var i = 0; i < this.panels.length; i++) {
+                    var panel = this.panels[i];
+                    if (panel) {
+                        var seatData = roomData.getSeatBySitId(panel.serverPos);
+                        if (seatData) {
+                            panel.updateBySeat(seatData, roomData.dealerSeatId === seatData.sitId);
+                        }
+                        else {
+                            panel.updateBySeat(seatData);
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.updateAllPlayerBankroll = function () {
+                var roomData = this.rc.roomData;
+                for (var i = 0; i < this.panels.length; i++) {
+                    var panel = this.panels[i];
+                    if (panel) {
+                        var seatData = roomData.getSeatBySitId(panel.serverPos);
+                        if (seatData) {
+                            panel.updateChipText(seatData.bankroll);
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.updateAll = function () {
+                this.updateAllPlayerSeat();
+                this.updateMainUI();
+            };
+            InGameUI.prototype.hideBoardCards = function () {
+                this.noInsuranceData = null;
+                this.boardCardGrp.visible = false;
+                for (var i = 0; i < 5; i++) {
+                    this.showBoardCard(i, null);
+                }
+            };
+            InGameUI.prototype.updatePubCard = function () {
+                var show = true;
+                var cards = this.rc.roomData.gameData.boardCards;
+                if (cards === null || cards === undefined || cards.length === 0) {
+                    this.hideBoardCards();
+                    return;
+                }
+                this.boardCardGrp.visible = true;
+                for (var i = 0; i < cards.length; i++) {
+                    this.showBoardCard(i, cards[i]);
+                }
+            };
+            InGameUI.prototype.onRaiseAction = function (gold) {
+                this.rc.dealPlayerAllActions({ action: HoldemPoker.GEvent.INGAME_RAISE_ACTION, gold: gold });
+            };
+            InGameUI.prototype.onCheckAction = function (gold) {
+                this.rc.dealPlayerAllActions({ action: HoldemPoker.GEvent.INGAME_CHECK_ACTION, gold: 0 /* CHECK */ });
+            };
+            InGameUI.prototype.onAllInAction = function (gold) {
+                var seat = this.rc.roomData.getSeatByPlayerId(HoldemPoker.Sys.players.self.id);
+                if (seat) {
+                    this.rc.dealPlayerAllActions({ action: HoldemPoker.GEvent.INGAME_ALL_IN_ACTION, gold: seat.bankroll });
+                }
+            };
+            InGameUI.prototype.onFoldAction = function (gold) {
+                this.rc.dealPlayerAllActions({ action: HoldemPoker.GEvent.INGAME_FOLD_ACTION, gold: -1 /* FOLD */ });
+            };
+            InGameUI.prototype.onCallAction = function (gold) {
+                var room = this.rc;
+                this.rc.dealPlayerAllActions({
+                    action: HoldemPoker.GEvent.INGAME_CALL_ACTION,
+                    gold: room.roomData.gameData.playerToCall
+                });
+                var panel = this.getSelfSeat();
+                if (panel) {
+                    var bank = panel.currentBankroll;
+                    room.roomData.getSelfSeat().bankroll = bank - room.roomData.gameData.playerToCall;
+                    // panel.updateChipText(br - room.roomData.gameData.playerToCall);
+                }
+            };
+            /**
+             * 根据Action更新按钮的显示
+             *
+             * @param {GAction} action
+             * thinkTime 只能穿进来 不能自己获取有可能倒计时 时间不为 actionTime时
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.updateActions = function (seat, isAuto) {
+                var sx = this.positionArray[0][0];
+                var sy = this.positionArray[0][1];
+                if (HoldemPoker.Sys.isPad) {
+                    sx = 442;
+                }
+                var roomControl = this.rc;
+                var mySeat = roomControl.roomData.getSelfSeat();
+                if (isAuto) {
+                    if (mySeat.actionState !== 1 /* FOLD_STATE */
+                        && mySeat.actionState !== 2 /* ALLIN_STATE */
+                        && !mySeat.managed) {
+                        // this.playerAuto.show(true);
+                        this.playerAuto.setBtn(mySeat);
+                    }
+                }
+                else {
+                    this.playerAuto.show(false);
+                    if (this.rc.roomData.gameData.autoAction === -1) {
+                        this.mttRaceInfo.visible = false;
+                        this.playerAction.setPlayerActionVisibe(true);
+                    }
+                    this.playerAction.isAutoAction(sx, sy, seat);
+                    // this.rc.roomData.gameData.autoAction = -1;
+                }
+            };
+            //计算转完之后的 座位的index
+            InGameUI.prototype.onStartGame = function () {
+                HoldemPoker.Sys.audio.play("button_click");
+                this.event(HoldemPoker.GEvent.INGAME_START);
+            };
+            //取消sng报名
+            InGameUI.prototype.onCancelSng = function () {
+                this.event(HoldemPoker.GEvent.CANCEL_SNG);
+            };
+            InGameUI.prototype.setupSeats = function () {
+                //添加座位
+                var room = this.rc.roomData;
+                for (var i = 0; i < room.seatNumber; ++i) {
+                    var positions = this.positionArray[i];
+                    var panel = new HoldemPoker.PlayerPanelUI(room.seatNumber);
+                    panel.serverPos = i;
+                    if (room.roomType === 3 /* NL_ROOM */) {
+                        panel.seatBtn.on(Laya.Event.CLICK, this.rc, this.rc.createSitDownRequest, [i]);
+                        // panel.seatBtn.on(Laya.Event.CLICK, this.rc, this.rc.canSitDown, [i]);
+                    }
+                    if (HoldemPoker.Sys.isPad) {
+                        // panel.pivotX = 0;
+                        // panel.pivotY = 0;
+                        panel.scale(1.4, 1.4);
+                    }
+                    console.log(positions[0] + "-1111-" + positions[1]);
+                    panel.pos(positions[0], positions[1]);
+                    panel.on(HoldemPoker.GEvent.INGAME_SHOW_PLAYER, this.rc, this.rc.showPlayerInfoView);
+                    panel.Initalize();
+                    this.addChild(panel);
+                    this.panels.push(panel);
+                    this.setSimple.setPanels();
+                }
+            };
+            InGameUI.prototype.setSimpleType = function () {
+                if (!this.setSimple) {
+                    this.setSimple = new HoldemPoker.InGameUISimple(this);
+                }
+                this.setSimple.initSimpleRes();
+                this.setSimple.setPanels();
+                this.playerAction.setSimpleType();
+                this.playerAuto.setSimpleType();
+            };
+            /**
+             * 以自己的sitId为中心，重新校正各个面板对应的srvpos
+             */
+            InGameUI.prototype.updateSeatServerPos = function (selfSitId) {
+                var room = this.rc.roomData;
+                var svrpos = selfSitId;
+                for (var i = 0; i < room.seatNumber; ++i) {
+                    var pos = i; // this.panels[i].serverPos;
+                    pos += svrpos;
+                    if (pos >= room.seatNumber) {
+                        pos -= room.seatNumber;
+                    }
+                    if (this.panels[i]) {
+                        this.panels[i].serverPos = pos;
+                        // this.panels[i].updateBySeat(room.getSeatBySitId(pos));
+                    }
+                }
+            };
+            InGameUI.prototype.getSeatByServerPos = function (srvpos) {
+                for (var i = 0; i < this.panels.length; i++) {
+                    if (this.panels[i].serverPos === srvpos) {
+                        return this.panels[i];
+                    }
+                }
+                return null;
+            };
+            InGameUI.prototype.getSeatByPlayerId = function (playerId) {
+                var sitId = this.rc.roomData.getSitIdByPlayerId(playerId);
+                for (var i = 0; i < this.panels.length; i++) {
+                    if (this.panels[i].serverPos === sitId) {
+                        return this.panels[i];
+                    }
+                }
+                return null;
+            };
+            InGameUI.prototype.getSeatByIndex = function (index) {
+                if (index >= 0 && index < this.panels.length) {
+                    return this.panels[index];
+                }
+                return null;
+            };
+            InGameUI.prototype.getSelfSeat = function () {
+                return this.getSeatByServerPos(this.rc.roomData.selfSitId);
+            };
+            InGameUI.prototype.initUI = function () {
+                this.cancelSngBtn.visible = false;
+                var roomData = this.rc.roomData;
+                if (roomData.createrId === HoldemPoker.Sys.players.self.id) {
+                    // if (!this.rc.isReplay) {
+                    //     this.startGameBtn.visible = true;
+                    // }
+                    if (roomData.gameData.countdownTime === -1) {
+                        this.startGameBtn.visible = true;
+                    }
+                    else {
+                        this.startGameBtn.visible = false;
+                        this.startRemainTimeLanel();
+                    }
+                }
+                else {
+                    //不是房间创立者
+                    this.startGameBtn.visible = false;
+                }
+                this.gameInfoGrp.visible = false;
+                this.mttRaceInfo.visible = true;
+                if (roomData.roomType === 2 /* MTT_ROOM */) {
+                    this.mttBox.visible = true;
+                    this.noBox.visible = false;
+                    this.mttblindLivel.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.blindsLevel) + roomData.gameData.blindLevel.toString();
+                    this.gameIdLable.text = roomData.gameId.toString();
+                    this.endApply.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.errMTTApplyEndBlind) + roomData.gameData.endSignupBlind.toString();
+                    this.gameTypeMTT.visible = true;
+                    this.setNextBlindInfo();
+                }
+                else {
+                    this.mttBox.visible = false;
+                    this.noBox.visible = true;
+                    var tips = "";
+                    var ip = "";
+                    if (this.rc.roomData.gpsIpTarget) {
+                        ip = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.gpsLimit) + "  ";
+                    }
+                    var ins = "";
+                    if (this.rc.roomData.insuranceTarget) {
+                        ins = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.insurance);
+                    }
+                    var str = "";
+                    if (this.rc.roomData.straddleTarget) {
+                        str = "Straddle";
+                    }
+                    this.nomForceTxt.text = ip + ins + str;
+                }
+                this.updateAll();
+                this.updateAddActionBtn();
+            };
+            InGameUI.prototype.setNextBlindInfo = function () {
+                var blindInfo = this.rc.getBlindInfoByLevel(this.rc.roomData.gameData.blindLevel + 1);
+                // this.nextBlindInfo.text = blindInfo.smallBlind + "/" + blindInfo.smallBlind * 2;
+                if (blindInfo) {
+                    this.nextBlindInfo.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.nextBlindsLevel)
+                        + (HoldemPoker.Utility.toNumberPattern(blindInfo.smallBlind) + "/" + HoldemPoker.Utility.toNumberPattern(blindInfo.smallBlind * 2));
+                    if (blindInfo.ante) {
+                        this.nextBlindInfo.text += "(" + HoldemPoker.Utility.toNumberPattern(blindInfo.ante) + ")";
+                    }
+                }
+            };
+            InGameUI.prototype.initSNGUI = function () {
+                //this.clearInGameUI();
+                // this.gameInfoBtn.visible = false;
+                this.startGameBtn.visible = false;
+                // if (!this.isShowCancelBtn) {
+                this.cancelSngBtn.visible = this.rc.roomData.gameData.isShowCancelSng;
+                this.rc.roomData.gameData.isShowCancelSng = false;
+                this.gameTypeSNG.visible = true;
+                // }
+                this.updateAll();
+                //清空所有座位上的座位信息
+                // for (let panel of this.panels) {
+                //     panel.seatBtn.visible = false;
+                // }
+            };
+            /**
+             * 打开购买筹码面板
+             *
+             * @private maxReBuyNum 最大购买价格
+             * 目前 只能重买最大为 1-8 倍代入值  需要下发 初始代入值
+             * @memberOf InGameUI
+             */
+            InGameUI.prototype.openReBuyView = function (maxReBuyNum) {
+                this.menuView.visible = false;
+                this.buySlider.resoleSlider();
+                this.buySlider.setMaxBuyGold(maxReBuyNum, this.rc.roomData.gameData.blind);
+                var canTakeIn = this.verifyBankroll();
+                if (canTakeIn) {
+                    this.buySlider.visible = true;
+                }
+                else {
+                    this.buySlider.visible = false;
+                }
+            };
+            /**
+             * 开赛倒计时
+             * @param time
+             */
+            InGameUI.prototype.countDownGo = function (time) {
+                var _this = this;
+                if (time <= 0) {
+                    this.cdgoImg.visible = false;
+                }
+                this.cdgoImg.visible = true;
+                switch (time) {
+                    case 1:
+                        this.cdgoImg.skin = "1334/ingame/countDown1.png";
+                        HoldemPoker.UIAnimator.cdGo(this.cdgoImg, Laya.Handler.create(this, function () {
+                            _this.cdgoImg.skin = "";
+                            _this.cdgoImg.visible = false;
+                        }));
+                        break;
+                    case 2:
+                        this.cdgoImg.skin = "1334/ingame/countDown2.png";
+                        HoldemPoker.UIAnimator.cdGo(this.cdgoImg);
+                        break;
+                    case 3:
+                        this.cdgoImg.skin = "1334/ingame/countDown3.png";
+                        HoldemPoker.UIAnimator.cdGo(this.cdgoImg);
+                        break;
+                    case 4:
+                        this.cdgoImg.skin = "1334/ingame/countDown4.png";
+                        HoldemPoker.UIAnimator.cdGo(this.cdgoImg);
+                        break;
+                    case 5:
+                        this.cdgoImg.skin = "1334/ingame/countDown5.png";
+                        HoldemPoker.UIAnimator.cdGo(this.cdgoImg);
+                        break;
+                }
+            };
+            InGameUI.prototype.updateTimeRemain = function (time) {
+                this.timeRemainLabel.visible = true;
+                if (time <= 0) {
+                    this.timeRemainLabel.text = HoldemPoker.Utility.toStandardTimePattern(0);
+                    this.upBlindTime.text = HoldemPoker.Utility.toStandardTimePattern(0);
+                    this.nomTimeTxt.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.match_time) + HoldemPoker.Utility.toStandardTimePattern(0);
+                    return;
+                }
+                this.timeRemainLabel.text = HoldemPoker.Utility.toStandardTimePattern(time);
+                this.upBlindTime.text = HoldemPoker.Utility.toStandardTimePattern(time);
+                if (time && this.rc.roomData.roomType === 3 /* NL_ROOM */) {
+                    if (time === 60 || time === 300) {
+                        var timer = Math.ceil(time / 60);
+                        this.raiseBlindNotify(-1, HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.timeToGameover, timer), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.gameTip));
+                    }
+                }
+                this.nomTimeTxt.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.match_time) + HoldemPoker.Utility.toStandardTimePattern(time);
+            };
+            InGameUI.prototype.updateStartGameBtn = function (val) {
+                this.startGameBtn.visible = val;
+            };
+            InGameUI.prototype.removeSidePotGrpChildren = function (val) {
+                this.sidePotGrp.visible = val;
+                this.sidePotGrp.removeChildren();
+            };
+            //next round ui 
+            InGameUI.prototype.restartGame = function () {
+                this.isRoundResult = false;
+                this.rc.roomData.newRound();
+                // //开始倒计时 。原因  restartgame在 结算时   调用 。    start的时候 已新一轮的  数据 不能在执行这个所以 把开始倒计时 放到 。    roundstart中 执行
+                this.rc.startGameCountDown();
+                this.updateStartGameBtn(false);
+                this.stopAllClock();
+                this.updateHoleCards(null);
+                this.updateMadeHands();
+                //重新开始游戏 要把 边池box 就是清楚所有子节点 并且设置边吃为 假
+                this.removeSidePotGrpChildren(false);
+                //之所以拿到外面处理 在接收升盲通知或者 其他在游戏中更新主界面消息的时候 不能更新这个 底池的数值 
+                //会导致 roundpot 值更改 只有在 新一轮开始 ，还有 收筹码的时候才会更改这个值 。hzl
+                this.updateRoundPot(this.rc.roomData.gameData.pot);
+                this.updateAll();
+                //this.updatePot(0);
+                for (var i = 0, a = this.panels; i < a.length; i++) {
+                    var panel = a[i];
+                    panel.updateBet(null, 0);
+                    panel.showdown(false);
+                    panel.updateImgCards(null);
+                    panel.clearStatus(true);
+                }
+                //this.startRemainTimeLanel(this.rc.roomData.gameData.showTime);
+            };
+            InGameUI.prototype.addReplayView = function (data) {
+                this.replayView = new HoldemPoker.ReplayProgressUI();
+                this.replayView.Initalize();
+                this.replayView.pos(0, 1090);
+                this.replayView.setupData(data);
+                HoldemPoker.Sys.ui.push(this.replayView);
+            };
+            InGameUI.prototype.hiddenOperationButton = function () {
+                this.betSlider.closeAction();
+                this.accurateBetView.close();
+                if (this.rc.roomData.roomType !== 1 /* SNG_ROOM */) {
+                    this.mttRaceInfo.visible = true;
+                }
+                this.playerAction.setPlayerActionVisibe(false);
+            };
+            InGameUI.prototype.onRecordVoice = function () {
+                if (HoldemPoker.Sys.platformRunning) {
+                    //已经在录制
+                    if (this.isRecording) {
+                        return;
+                    }
+                    //为防止录制过于频繁
+                    var nowDate = new Date();
+                    this.startVoice = nowDate.getTime();
+                    var timeOffset = this.startVoice - HoldemPoker.RecordVoiceUI.timestamp;
+                    if (timeOffset < 5 * 1000) {
+                        HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.voiceBusyError));
+                        return;
+                    }
+                    var roomControl = this.rc;
+                    if (roomControl === null) {
+                        return;
+                    }
+                    console.log("=========onRecordVoice=========");
+                    console.log(HoldemPoker.RecordVoiceMgr.STATE_NULL);
+                    console.log(roomControl.recordVoiceMgr.state);
+                    console.log("=========onRecordVoice=========");
+                    //空闲状态才可以录制
+                    if (roomControl.recordVoiceMgr.state === HoldemPoker.RecordVoiceMgr.STATE_NULL) {
+                        this.startVoice = nowDate.getTime();
+                        if (this.recordView === null) {
+                            this.recordView = new HoldemPoker.RecordVoiceUI(this.rc);
+                            this.addChild(this.recordView);
+                        }
+                        Laya.timer.once(15 * 1000, this, this.onStopRecordVoice);
+                        this.isRecording = true;
+                        this.recordView.visible = true;
+                        this.recordView.startRecord();
+                    }
+                }
+            };
+            InGameUI.prototype.onStopRecordVoice = function () {
+                if (HoldemPoker.Sys.platformRunning) {
+                    //不在录音状态，不能停止录音
+                    if (!this.isRecording) {
+                        return;
+                    }
+                    this.isRecording = false;
+                    var nowDate = new Date();
+                    var end = nowDate.getTime();
+                    if (end - this.startVoice < 500) {
+                        HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.vioceTimeLess));
+                        if (this.recordView) {
+                            this.recordView.stopOnly();
+                            this.recordView.visible = false;
+                        }
+                        return;
+                    }
+                    if (this.recordView) {
+                        this.recordView.stopRecord();
+                        this.recordView.visible = false;
+                    }
+                    HoldemPoker.RecordVoiceUI.timestamp = new Date().getTime();
+                }
+            };
+            InGameUI.prototype.onRefuseReBuyChipAction = function () {
+                this.event(HoldemPoker.GEvent.INGAME_REFUSE_REBUY_CHIP);
+            };
+            InGameUI.prototype.onNotBuyToSit = function () {
+                this.event(HoldemPoker.GEvent.INGAME_NOT_REBUY_CHIP);
+            };
+            InGameUI.prototype.onBuyChipToSit = function (value) {
+                this.event(HoldemPoker.GEvent.SIT_REBUY_CHIP, value);
+            };
+            InGameUI.prototype.onReBuyChipAction = function (value) {
+                this.event(HoldemPoker.GEvent.INGAME_REBUY_CHIP, value);
+            };
+            InGameUI.prototype.onSliderAllinAction = function () {
+                // ALLIN的数值要获取的到向服务器发送过去
+                var seat = this.rc.roomData.getSeatByPlayerId(HoldemPoker.Sys.players.self.id);
+                if (seat) {
+                    this.rc.dealPlayerAllActions({ action: HoldemPoker.GEvent.INGAME_ALL_IN_ACTION, gold: seat.bankroll });
+                    this.playerAction.setPlayerActionVisibe(false); //隐藏操作按钮
+                    //不需要调到 all状态 在返回的actioncommon的 时候才会跳转到action对应的状态
+                }
+            };
+            InGameUI.prototype.registerEvent = function (value) {
+                // 加注的数值要算出来
+                this.rc.dealPlayerAllActions({ action: HoldemPoker.GEvent.INGAME_RAISE_ACTION, gold: value });
+                this.playerAction.setPlayerActionVisibe(false);
+                //不需要调到 raise状态 在返回的actioncommon的 时候才会跳转到对应的状态
+            };
+            //停止桌面上的倒计时
+            InGameUI.prototype.stopAllClock = function () {
+                //停止桌面上其他的计时器
+                for (var i = 0, a = this.panels; i < a.length; i++) {
+                    var panel = a[i];
+                    panel.stopPokerClock();
+                }
+            };
+            InGameUI.prototype.updateRemainTimeLabel = function () {
+                if (this.rc.roomData.gameData.countdownTime >= 0) {
+                    this.updateTimeRemain(this.rc.roomData.gameData.countdownTime--);
+                }
+                else {
+                    this.stopRemainTimeLanel();
+                }
+            };
+            //突出ingameui 时 清除倒计时
+            InGameUI.prototype.stopRemainTimeLanel = function () {
+                Laya.timer.clear(this, this.updateRemainTimeLabel);
+            };
+            InGameUI.prototype.startRemainTimeLanel = function () {
+                if (this.rc.roomData.gameData.countdownTime > 0) {
+                    Laya.timer.loop(1000, this, this.updateRemainTimeLabel);
+                    if (this.noBox.y < 0) {
+                        this.noBox.y = 60;
+                    }
+                }
+                else {
+                    this.timeRemainLabel.text = HoldemPoker.Utility.toStandardTimePattern(0);
+                }
+                this.nomTimeTxt.text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.match_time) + this.timeRemainLabel.text;
+            };
+            InGameUI.prototype.onRankAndLookBack = function () {
+                this.event(HoldemPoker.GEvent.INGAME_GET_CURRENTRANK);
+            };
+            InGameUI.prototype.onShowMenu = function () {
+                var roomControl = this.rc;
+                if (roomControl.isReplay) {
+                }
+                else {
+                    this.menuView.onShowInGameMenu(this.rc);
+                }
+            };
+            InGameUI.prototype.onShareAction = function () {
+                this.rc.shareAction();
+            };
+            InGameUI.prototype.onPurchaseAction = function () {
+            };
+            InGameUI.prototype.getPositions = function (playerCount) {
+                console.log(playerCount + "  ----+++--");
+                console.log(this.seatPosition[playerCount - 2]);
+                if (playerCount >= 2 && playerCount <= 9) {
+                    return this.seatPosition[playerCount - 2];
+                }
+                return null;
+            };
+            InGameUI.prototype.playerShowDownCardTypes = function () {
+                for (var i = 0; i < this.rc.roomData.seatNumber; i++) {
+                    var sd = this.rc.roomData.getSeatByIdx(i);
+                    if (sd) {
+                        var panel = this.getSeatByServerPos(sd.sitId);
+                        if (panel) {
+                            //别人
+                            if (!HoldemPoker.Sys.players.self.isSelf(sd.playerId) && sd.madeHands) {
+                                panel.winnerCardType.text = HoldemPoker.Utility.handPowerToString(sd.madeHands);
+                                panel.winnerCardTypeBg.visible = true;
+                            }
+                            else {
+                                //自己
+                                //更新自己手牌强度
+                                if (sd.holeCards && sd.holeCards.length > 0) {
+                                    panel.updateSelfCardTypes(sd.madeHands);
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            //处理摊牌的情况
+            InGameUI.prototype.asyncPlayerShowdown = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var promiseAll, i, sd, panel;
+                    return __generator(this, function (_a) {
+                        promiseAll = [];
+                        for (i = 0; i < this.rc.roomData.seatNumber; i++) {
+                            sd = this.rc.roomData.getSeatByIdx(i);
+                            if (sd) {
+                                if (sd.holeCards && sd.holeCards.length > 0 && !HoldemPoker.Sys.players.self.isSelf(sd.playerId)) {
+                                    panel = this.getSeatByServerPos(sd.sitId);
+                                    if (panel) {
+                                        console.log(sd.holeCards);
+                                        promiseAll.push(panel.asyncPlayerShowdown(sd.holeCards, sd.madeHands));
+                                    }
+                                }
+                            }
+                        }
+                        return [2 /*return*/, Promise.all(promiseAll)];
+                    });
+                });
+            };
+            InGameUI.prototype.playerShowCard = function (data) {
+                if (HoldemPoker.Sys.players.self.isSelf(data.playerId)) {
+                    return;
+                }
+                var holeCards = [];
+                holeCards.push(data.cardone);
+                // }
+                // if (data.cardtwo){
+                holeCards.push(data.cardtwo);
+                // }
+                var panel = this.getSeatByServerPos(data.sitId);
+                panel.asyncPlayerShowCards(holeCards);
+            };
+            InGameUI.prototype.resetSelfShow = function () {
+                this.isLeftShow = false;
+                this.isRightShow = false;
+                this.btnHoleCard1.visible = true;
+                this.btnHoleCard2.visible = true;
+                this.btnHoleCard1.mouseEnabled = true;
+                this.btnHoleCard2.mouseEnabled = true;
+            };
+            InGameUI.prototype.selfShowCard = function (cardNo) {
+                switch (cardNo) {
+                    case 1:
+                        this.btnHoleCard1.mouseEnabled = false;
+                        this.tagShow1.visible = false;
+                        if (!this.isLeftShow) {
+                            this.holeCard0_show.play(0, false);
+                            this.isLeftShow = true;
+                            this.holeCard0_show.interval = this.aniRaio;
+                        }
+                        break;
+                    case 2:
+                        this.btnHoleCard2.mouseEnabled = false;
+                        this.tagShow2.visible = false;
+                        if (!this.isRightShow) {
+                            this.isRightShow = true;
+                            this.holeCard1_show.play(0, false);
+                            this.holeCard1_show.interval = this.aniRaio;
+                        }
+                        break;
+                    case 3:
+                        this.btnHoleCard1.mouseEnabled = false;
+                        this.btnHoleCard2.mouseEnabled = false;
+                        this.tagShow1.visible = false;
+                        this.tagShow2.visible = false;
+                        if (!this.isLeftShow) {
+                            this.isLeftShow = true;
+                            this.holeCard0_show.play(0, false);
+                            this.holeCard0_show.interval = this.aniRaio;
+                        }
+                        if (!this.isRightShow) {
+                            this.holeCard1_show.play(0, false);
+                            this.holeCard1_show.interval = this.aniRaio;
+                        }
+                        break;
+                }
+            };
+            InGameUI.prototype.actionRoundStartStateAni = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var seat, sitID, panel;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!!this.isPlayerIconMove) return [3 /*break*/, 2];
+                                seat = this.rc.roomData.getSelfSeat();
+                                sitID = this.rc.roomData.getSitIdByPlayerId(HoldemPoker.Sys.players.self.id);
+                                panel = this.getSelfSeat();
+                                if (seat) {
+                                    if (seat.state === HoldemPoker.msg.EPlayerState.sngover && seat.rank > 0) {
+                                        if (panel) {
+                                            panel.setSNGRankLabel(seat);
+                                        }
+                                        console.log("!!!!!!!!!you rank no move");
+                                        return [2 /*return*/];
+                                    }
+                                }
+                                if (!panel) return [3 /*break*/, 2];
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncPlayerIconMove(panel)];
+                            case 1:
+                                _a.sent();
+                                this.isPlayerIconMove = true;
+                                // panel.on(GEvent.INGAME_SHOW_PLAYER, this.rc, this.rc.showPlayerInfoView); 
+                                this.myAvtBtn.zOrder = 99;
+                                this.myAvtBtn.visible = true;
+                                this.myAvtBtn.on(Laya.Event.CLICK, this, this.showMyInfo);
+                                _a.label = 2;
+                            case 2: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.showMyInfo = function () {
+                var myseat = this.rc.roomData.getSelfSeat();
+                if (myseat) {
+                    this.rc.showPlayerInfoView(myseat.sitId);
+                }
+            };
+            InGameUI.prototype.selfFoldAni = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                HoldemPoker.Sys.audio.play("player_fold");
+                                if (!HoldemPoker.Sys.isPad) {
+                                    _this.ani_fold.play(0, false);
+                                    _this.ani_fold.once(Laya.Event.COMPLETE, _this, function () {
+                                        resolve();
+                                    });
+                                }
+                                else {
+                                    _this.foldBoxAni.visible = true;
+                                    HoldemPoker.UIAnimator.foldAnim(_this.foldBoxAni, Laya.Handler.create(_this, function () {
+                                        resolve();
+                                    }));
+                                }
+                            })];
+                    });
+                });
+            };
+            InGameUI.prototype.showFold = function (seat) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var panel;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!seat) return [3 /*break*/, 4];
+                                HoldemPoker.Sys.audio.stop("timeout");
+                                HoldemPoker.Sys.audio.play("player_fold");
+                                panel = this.rc.gameUI.getSeatByServerPos(seat.sitId);
+                                if (panel) {
+                                    panel.updateUIWithAction(seat.actionResult, seat, true);
+                                }
+                                if (!HoldemPoker.Sys.players.self.isSelf(seat.playerId)) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.selfFoldAni()];
+                            case 1:
+                                _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2:
+                                panel.imgCards.visible = false;
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncPlayerFoldAni(panel, this)];
+                            case 3:
+                                _a.sent();
+                                _a.label = 4;
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.showRaise = function (seat) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    var panel_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!seat) return [3 /*break*/, 3];
+                                HoldemPoker.Sys.audio.stop("timeout");
+                                HoldemPoker.Sys.audio.play("chips_to_table");
+                                panel_1 = this.rc.gameUI.getSeatByServerPos(seat.sitId);
+                                if (!panel_1) return [3 /*break*/, 2];
+                                panel_1.updateUIWithAction(seat.actionResult, seat, true);
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncChipPlayAni(this, panel_1.PlayerAniAnchor, panel_1.BetAniAnchor, //seat.betImgColor
+                                    HoldemPoker.Utility.getBetImgColor(this.rc.roomData.gameData.blind, seat.bet), Laya.Handler.create(this, function () {
+                                        panel_1.updateBet(seat, seat.bet, _this.rc.roomData.gameData.blind);
+                                        panel_1.updateChipText(seat.bankroll);
+                                    }))];
+                            case 1:
+                                _a.sent();
+                                _a.label = 2;
+                            case 2:
+                                this.updatePot(this.rc.roomData.gameData.pot);
+                                _a.label = 3;
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.showCall = function (seat) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    var panel_2;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!seat) return [3 /*break*/, 3];
+                                HoldemPoker.Sys.audio.stop("timeout");
+                                HoldemPoker.Sys.audio.play("chips_to_table");
+                                panel_2 = this.rc.gameUI.getSeatByServerPos(seat.sitId);
+                                if (!panel_2) return [3 /*break*/, 2];
+                                panel_2.updateUIWithAction(seat.actionResult, seat, true);
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncChipPlayAni(this, panel_2.PlayerAniAnchor, panel_2.BetAniAnchor, //seat.betImgColor,
+                                    HoldemPoker.Utility.getBetImgColor(this.rc.roomData.gameData.blind, seat.bet), Laya.Handler.create(this, function () {
+                                        panel_2.updateBet(seat, seat.bet, _this.rc.roomData.gameData.blind);
+                                        panel_2.updateChipText(seat.bankroll);
+                                    }))];
+                            case 1:
+                                _a.sent();
+                                _a.label = 2;
+                            case 2:
+                                this.updatePot(this.rc.roomData.gameData.pot);
+                                _a.label = 3;
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.showAllin = function (seat) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    var panel_3;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!seat) return [3 /*break*/, 3];
+                                HoldemPoker.Sys.audio.stop("timeout");
+                                HoldemPoker.Sys.audio.play("chips_to_table");
+                                panel_3 = this.rc.gameUI.getSeatByServerPos(seat.sitId);
+                                if (!panel_3) return [3 /*break*/, 2];
+                                panel_3.updateUIWithAction(seat.actionResult, seat, true);
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncChipPlayAni(this, panel_3.PlayerAniAnchor, panel_3.BetAniAnchor, //seat.betImgColor,
+                                    HoldemPoker.Utility.getBetImgColor(this.rc.roomData.gameData.blind, seat.bet), Laya.Handler.create(this, function () {
+                                        panel_3.updateBet(seat, seat.bet, _this.rc.roomData.gameData.blind);
+                                        panel_3.updateChipText(null);
+                                    }))];
+                            case 1:
+                                _a.sent();
+                                _a.label = 2;
+                            case 2:
+                                this.updatePot(this.rc.roomData.gameData.pot);
+                                _a.label = 3;
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.showCheck = function (seat) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                HoldemPoker.Sys.audio.stop("timeout");
+                                HoldemPoker.Sys.audio.play("player_check");
+                                var panel = _this.rc.gameUI.getSeatByServerPos(seat.sitId);
+                                if (panel) {
+                                    panel.updateUIWithAction(seat.actionResult, seat, true);
+                                }
+                                setTimeout(function () {
+                                    resolve();
+                                }, 500);
+                            })];
+                    });
+                });
+            };
+            InGameUI.prototype.clearBets = function () {
+                for (var i = 0; i < this.rc.roomData.seatNumber; i++) {
+                    var seat = this.rc.roomData.getSeatByIdx(i);
+                    if (seat) {
+                        //在清空筹码的时候 做 筹码图片的默认赋值 清空之后使用默认的筹码图片
+                        //seat.betImgColor = Utility.getBetImgColor(0, 0);
+                        var panel = this.rc.gameUI.getSeatByServerPos(seat.sitId);
+                        if (panel) {
+                            panel.updateBet(null, 0);
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.clearPanelBets = function (panels) {
+                if (panels) {
+                    for (var i = 0; i < panels.length; i++) {
+                        var panel = panels[i];
+                        if (panel) {
+                            panel.updateBet(null, 0);
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.clearPanelStatus = function (panels) {
+                if (!panels) {
+                    panels = this.panels;
+                }
+                if (panels) {
+                    for (var i = 0; i < panels.length; i++) {
+                        var panel = panels[i];
+                        var seatData = this.rc.roomData.getSeatBySitId(panel.serverPos);
+                        if (panel &&
+                            (seatData && seatData.actionState !== 2 /* ALLIN_STATE */
+                                && seatData.actionState !== 1 /* FOLD_STATE */)) {
+                            panel.clearStatus(true);
+                        }
+                    }
+                }
+            };
+            //清除所有dealer显示
+            InGameUI.prototype.clearAllPanelDealer = function () {
+                var room = this.rc;
+                for (var _i = 0, _a = this.panels; _i < _a.length; _i++) {
+                    var panel = _a[_i];
+                    if (panel) {
+                        panel.updateDealer(false);
+                        panel.asyncPlayerShowCards(null);
+                    }
+                }
+            };
+            /**
+             *获取所有有下注操作的面板
+             */
+            InGameUI.prototype.getAllBetPanels = function (betType, bySeatData) {
+                var room = this.rc;
+                //将所有需要前注的面板放入到targets中
+                var targets = [];
+                for (var i = 0; i < room.roomData.seatNumber; i++) {
+                    // let seatData = room.roomData.getSeatByIdx(i);
+                    // if (seatData) {
+                    //     let panel = this.getSeatByIndex(i);
+                    //     if (betType === GBetType.BET_STATE) {
+                    //         if ((bySeatData && seatData && seatData.bet > 0)
+                    //             || panel.betImage.visible) {
+                    //             targets.push(panel);
+                    //         }
+                    //     }
+                    //     //如果是ante，添加所有没被干掉的人
+                    //     else if (betType === GBetType.ANTE_STATE) {
+                    //         if ((seatData.ante > 0)
+                    //             || panel.betImage.visible) {
+                    //             targets.push(panel);
+                    //         }
+                    //         // }
+                    //     }
+                    // } else {
+                    ///站起、但下了bet
+                    var nullPanel = this.getSeatByIndex(i);
+                    if (nullPanel.betImage.visible) {
+                        targets.push(nullPanel);
+                    }
+                    // }
+                }
+                return targets;
+            };
+            /**
+             *获取所有有下注操作的面板(飞向自己面前)
+             */
+            InGameUI.prototype.getAllBetPanelsToSelf = function (betType, bySeatData) {
+                var room = this.rc;
+                //将所有需要前注的面板放入到targets中
+                var targets = [];
+                for (var i = 0; i < room.roomData.seatNumber; i++) {
+                    var seatData = room.roomData.getSeatByIdx(i);
+                    if (seatData) {
+                        console.log("--------:" + i);
+                        var panel = this.getSeatByServerPos(seatData.sitId);
+                        if (betType === 2 /* BET_STATE */) {
+                            if ((bySeatData && seatData && seatData.bet > 0)
+                                || panel.betImage.visible) {
+                                targets.push(panel);
+                            }
+                        }
+                        else if (betType === 1 /* ANTE_STATE */) {
+                            if ((seatData.ante > 0)
+                                || panel.betImage.visible) {
+                                targets.push(panel);
+                            }
+                            // }
+                        }
+                    }
+                }
+                return targets;
+            };
+            //筹码飞向底池
+            InGameUI.prototype.asyncChipToPotGrpAni = function (panels) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var promiseArr, i, seat;
+                    return __generator(this, function (_a) {
+                        promiseArr = [];
+                        for (i = 0; i < panels.length; i++) {
+                            seat = this.rc.roomData.getSeatBySitId(panels[i].serverPos);
+                            // let betStr = panels[i].betText.text;
+                            // if (betStr === "") {
+                            //     betStr = "0";
+                            // }
+                            // let bet = +betStr;
+                            // console.log(bet + " - " + betStr);
+                            // if (seat) {
+                            promiseArr.push(HoldemPoker.UIAnimator.asyncChipToPotAni(panels[i].BetAniAnchor, this.ChipsAniAnchor, this, panels[i].betImage.skin));
+                            // }
+                        }
+                        return [2 /*return*/, Promise.all(promiseArr)];
+                    });
+                });
+            };
+            //ante飞向底池
+            InGameUI.prototype.asyncAnteChipToPotGrpAni = function (panels) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var promiseArr, i;
+                    return __generator(this, function (_a) {
+                        promiseArr = [];
+                        for (i = 0; i < panels.length; i++) {
+                            //panels[i].betText.text = "";
+                            promiseArr.push(HoldemPoker.UIAnimator.asyncChipToPotAni(panels[i].AnteAniAnchor, this.ChipsAniAnchor, this, null));
+                        }
+                        ;
+                        return [2 /*return*/, Promise.all(promiseArr)];
+                    });
+                });
+            };
+            InGameUI.prototype.asyncCollectBetAnimation = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var panels;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, HoldemPoker.Utility.waitForSeconds(500)];
+                            case 1:
+                                _a.sent();
+                                panels = this.getAllBetPanels(2 /* BET_STATE */, false);
+                                //收筹码 先清空panels 上的 bet筹码数值 播放收筹码动画
+                                this.clearPanelBets(panels);
+                                //清除面板上的状态
+                                this.clearPanelStatus(panels);
+                                //bet筹码动画
+                                return [4 /*yield*/, this.asyncChipToPotGrpAni(panels)];
+                            case 2:
+                                //bet筹码动画
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.asyncDoSidePotsAni = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!(this.rc.roomData.gameData.sidePots && this.rc.roomData.gameData.sidePots.length > 1
+                                    && this.rc.roomData.gameData.sidePots.length > this.sidePotGrp.numChildren)) return [3 /*break*/, 2];
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncPotToSidePotAin(this.rc)];
+                            case 1:
+                                _a.sent();
+                                _a.label = 2;
+                            case 2: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.restartUpBlindCountDown = function () {
+                //将保存的升盲时间 赋值给要显示的时间然后 开始新的倒计时
+                this.rc.roomData.gameData.countdownTime = this.rc.roomData.gameData.blindGoUpTime;
+                //停止之前的倒计时
+                this.stopRemainTimeLanel();
+                //开始新的倒计时
+                this.startRemainTimeLanel();
+            };
+            InGameUI.prototype.raiseBlindNotify = function (bb, tip, title) {
+                var _this = this;
+                var label = this.upblindTip;
+                label.autoSize = true;
+                label.zOrder = 1002;
+                if (title === HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.gameTip)) {
+                    label.upBlindTipText.y = 92;
+                    label.upBlindTipText.fontSize = 24;
+                }
+                else {
+                    label.upBlindTipText.y = 82;
+                    label.upBlindTipText.fontSize = 35;
+                }
+                var str;
+                if (bb > 0) {
+                    label.upBlindTipTit.text = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.improveBlindTip);
+                    str = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.nextBlindLevelValue, this.rc.roomData.gameData.blindLevel, this.rc.roomData.gameData.sb, bb);
+                    if (this.rc.roomData.gameData.ante > 0) {
+                        str = str + "(" + this.rc.roomData.gameData.ante + ")";
+                    }
+                }
+                else {
+                    label.upBlindTipTit.text = title;
+                    str = tip;
+                }
+                label.upBlindTipText.text = str;
+                HoldemPoker.UIAnimator.asyncTipDownToUp(label, function () {
+                    label.visible = false;
+                    if (bb > 0) {
+                        _this.restartUpBlindCountDown();
+                    }
+                });
+            };
+            InGameUI.prototype.showReEntry = function (countDown, cost, bankroll) {
+                var _this = this;
+                var text;
+                console.log(cost);
+                if (cost) {
+                    text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.buyChipsTip, cost, bankroll);
+                    if (countDown === 0) {
+                        text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.rebuyChipsTip, cost, bankroll, this.rc.roomData.reBuyRestNum);
+                    }
+                    else if (countDown === -1) {
+                        text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.addBuyChipsTip, cost, bankroll);
+                    }
+                }
+                else {
+                    text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.freeBuyChipsTip, bankroll);
+                    if (countDown === 0) {
+                        text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.freeRebuyChipsTip, bankroll, this.rc.roomData.reBuyRestNum);
+                    }
+                    else if (countDown === -1) {
+                        text = HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.freeAddBuyChipsTip, bankroll);
+                    }
+                }
+                HoldemPoker.MessagePrompt.openPrompt(text, Laya.Handler.create(this, function () {
+                    if (countDown === 0) {
+                        _this.event(HoldemPoker.GEvent.MTT_REBUY_OK);
+                    }
+                    else if (countDown === -1) {
+                        _this.event(HoldemPoker.GEvent.MTT_ADDCHIPS_OK);
+                    }
+                    else {
+                        _this.event(HoldemPoker.GEvent.MTT_REENTRY_OK);
+                        Laya.timer.clearAll(_this);
+                    }
+                }), Laya.Handler.create(this, function () {
+                    if (countDown > 0) {
+                        _this.event(HoldemPoker.GEvent.MTT_REENTRY_CANEL);
+                        Laya.timer.clearAll(_this);
+                    }
+                }));
+                if (countDown > 0) {
+                    Laya.timer.once(1000, this, this.reEntryCoundDown, [countDown, text], true);
+                }
+                if (countDown === 0) {
+                    HoldemPoker.MessagePrompt.setConfText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.reBuyText));
+                }
+                else if (countDown === -1) {
+                    HoldemPoker.MessagePrompt.setConfText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.addBuyText));
+                }
+            };
+            InGameUI.prototype.reEntryCoundDown = function (countDown, text) {
+                countDown -= 1;
+                if (countDown <= 0) {
+                    this.event(HoldemPoker.GEvent.MTT_REENTRY_CANEL);
+                    HoldemPoker.MessagePrompt.cancel();
+                    return;
+                }
+                HoldemPoker.MessagePrompt.setDialogText(text);
+                if (countDown > 0) {
+                    HoldemPoker.MessagePrompt.setCannelText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cancel) + "(" + countDown + ")");
+                }
+                else if (countDown === -1) {
+                    HoldemPoker.MessagePrompt.setCannelText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.cancel));
+                }
+                Laya.timer.once(1000, this, this.reEntryCoundDown, [countDown, text], true);
+            };
+            InGameUI.prototype.onShowCardType = function () {
+                var _this = this;
+                if (!this.cardTypeView) {
+                    this.cardTypeView = new ui.ingame.CardTypeViewUI();
+                    for (var i = 0; i < this.cardTypeView.cardBox.numChildren; i++) {
+                        var image = this.cardTypeView.cardBox.getChildAt(i);
+                        var skin = image.skin.replace('smallCards', 'smallCards' + HoldemPoker.Sys.players.self.cardStyleString);
+                        image.skin = skin;
+                    }
+                    this.cardTypeView.backgroundBtn.on(Laya.Event.CLICK, this, function () {
+                        Laya.Tween.to(_this.cardTypeView, { y: -1334 }, 500, Laya.Ease.elasticOut, Laya.Handler.create(_this, function () {
+                            _this.cardTypeView.removeSelf();
+                            _this.cardTypeView.offAll();
+                        }));
+                    });
+                }
+                this.addChild(this.cardTypeView);
+                this.cardTypeView.zOrder = 1001;
+                this.cardTypeView.y = -1334;
+                Laya.Tween.to(this.cardTypeView, { y: 0 }, 500, null, null);
+            };
+            InGameUI.prototype.onShowInsuranceInstruction = function () {
+                var _this = this;
+                if (!this.insuranceInstructionView) {
+                    this.insuranceInstructionView = new ui.ingame.InsuranceInstructionViewUI();
+                    this.insuranceInstructionView.backBtn.on(Laya.Event.CLICK, this, function () {
+                        Laya.Tween.to(_this.insuranceInstructionView, { y: -1334 }, 500, Laya.Ease.elasticOut, Laya.Handler.create(_this, function () {
+                            _this.insuranceInstructionView.removeSelf();
+                            _this.insuranceInstructionView.offAll();
+                        }));
+                    });
+                }
+                this.addChild(this.insuranceInstructionView);
+                this.insuranceInstructionView.zOrder = 1001;
+                this.insuranceInstructionView.y = -1334;
+                Laya.Tween.to(this.insuranceInstructionView, { y: 0 }, 500, null, null);
+            };
+            InGameUI.prototype.moveSeatAni = function (offset) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    var targets, i, panel, afterindex, promiseArr;
+                    return __generator(this, function (_a) {
+                        console.debug("start move seat");
+                        targets = [];
+                        for (i = 0; i < this.rc.roomData.seatNumber; i++) {
+                            panel = this.getSeatByServerPos(i);
+                            afterindex = 0;
+                            if (i - offset >= 0) {
+                                afterindex = i - offset;
+                            }
+                            else {
+                                afterindex = i - offset + this.rc.roomData.seatNumber;
+                            }
+                            panel.clientPos = afterindex;
+                            targets.push({ panel: panel, afterindex: afterindex });
+                        }
+                        promiseArr = [];
+                        targets.forEach(function (target) {
+                            var ex = _this.positionArray[target.afterindex][0];
+                            var ey = _this.positionArray[target.afterindex][1];
+                            var v1 = target.panel.playerState.visible;
+                            var v2 = target.panel.betImage.visible;
+                            var v3 = target.panel.imgDeal.visible;
+                            target.panel.playerState.visible = false;
+                            target.panel.betImage.visible = false;
+                            target.panel.imgDeal.visible = false;
+                            promiseArr.push(HoldemPoker.TweenWrapper.to(target.panel, {
+                                x: ex,
+                                y: ey
+                            }, 500, null, Laya.Handler.create(_this, function (state, bet, dealer) {
+                                target.panel.playerState.visible = state;
+                                target.panel.betImage.visible = bet;
+                                target.panel.imgDeal.visible = dealer;
+                                target.panel.updateComponentPosition(_this.rc.gameUI.getSelfSeat() === target.panel);
+                            }, [v1, v2, v3])));
+                            console.log(ex + "-22222-" + ey);
+                            target.panel.pos(ex, ey);
+                        });
+                        return [2 /*return*/, Promise.all(promiseArr)];
+                    });
+                });
+            };
+            InGameUI.prototype.asyncPlayDelarAni = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var lastDelar, startPanel, endPanel, startpos, currDelar;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                lastDelar = this.rc.roomData.lastdelarPos;
+                                this.cleanAllDelar();
+                                if (lastDelar >= 0) {
+                                    startPanel = this.getSeatByServerPos(lastDelar);
+                                    if (startPanel) {
+                                        startpos = HoldemPoker.Utility.LocalToRef(startPanel.imgDeal, this);
+                                        startPanel.imgDeal.visible = false;
+                                    }
+                                }
+                                else {
+                                    startpos = HoldemPoker.Utility.LocalToRef(this.ChipsAniAnchor, this);
+                                }
+                                currDelar = this.rc.roomData.currdelarPos;
+                                if (currDelar !== -1) {
+                                    endPanel = this.getSeatByServerPos(currDelar);
+                                }
+                                if (!endPanel) return [3 /*break*/, 2];
+                                return [4 /*yield*/, HoldemPoker.UIAnimator.asyncdealrAni(startpos, endPanel, this)];
+                            case 1:
+                                _a.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                console.debug("startpso is " + startpos + " ");
+                                console.debug("play delar target is null delar sitid is null ");
+                                _a.label = 3;
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            InGameUI.prototype.cleanAllDelar = function () {
+                if (this.panels) {
+                    for (var _i = 0, _a = this.panels; _i < _a.length; _i++) {
+                        var panel = _a[_i];
+                        if (panel) {
+                            panel.cleanDelar();
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.asyncSelfPlayerWinner = function (madeHands) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                _this.winnerAni.visible = true;
+                                //获取什么赢的东西设置上去
+                                _this.mttRaceInfo.visible = false;
+                                var win;
+                                if (madeHands) {
+                                    win = HoldemPoker.Utility.handPowerToString(madeHands) + HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.win);
+                                }
+                                else {
+                                    win = HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.youWin);
+                                }
+                                HoldemPoker.Sys.audio.play("pokerwin2");
+                                _this.winnerCardTypeText.text = win;
+                                _this.ani_selfwinner.play(0, false);
+                                _this.ani_selfwinner.on(Laya.Event.COMPLETE, _this, function () {
+                                    if (_this.rc.roomData.roomType !== 1 /* SNG_ROOM */) {
+                                        _this.mttRaceInfo.visible = true;
+                                    }
+                                    resolve();
+                                });
+                            })];
+                    });
+                });
+            };
+            InGameUI.prototype.showSitId = function () {
+                if (this.panels) {
+                    for (var _i = 0, _a = this.panels; _i < _a.length; _i++) {
+                        var panel = _a[_i];
+                        if (panel) {
+                            panel.sitId.text = panel.serverPos + "";
+                            panel.sitId.visible = true;
+                        }
+                    }
+                }
+            };
+            InGameUI.prototype.updateAddActionBtn = function () {
+                this.addThinkTime.label = this.rc.roomData.addThinkTime + "s";
+                if (this.rc.roomData.addThinkTimeCostCount === 0) {
+                    this.resetTimeCost.text = "免费";
+                }
+                else {
+                    this.resetTimeCost.text = this.rc.roomData.addThinkTimeCostCount + "";
+                }
+                this.resetTimeIcon.skin = HoldemPoker.Sys.itemMgr.itemRepository.getItemIcon(this.rc.roomData.addThinkTimeCostItemId);
+            };
+            InGameUI.prototype.onClickAddTime = function () {
+                // let myseat = this.getSelfSeat();
+                // if (myseat) {
+                //     console.log("dsdfsdfasdfasdfasdf");
+                //     // myseat.startPokerClock(60, 60);
+                // }
+                // if (this.playerAction.visible) {
+                //     this.playerAction.startPokerTimer(60, 60 * 1000);
+                // }
+                //拼出需要的费用字符串
+                var entryStr = this.rc.roomData.addThinkTimeCostItemId + ":" + this.rc.roomData.addThinkTimeCostCount;
+                //验证费用
+                var applyValidError = HoldemPoker.Sys.itemMgr.itemRepository.validateEntryFee(entryStr, HoldemPoker.ApplyType.And, 0);
+                //只处理微赛币和钻石的情况
+                if (applyValidError.flag === false) {
+                    var errorTemplate = applyValidError.errorTemplate;
+                    if (errorTemplate) {
+                        if (errorTemplate.itemTempId === HoldemPoker.VirtualCurrencyType.WesaiCurrency || errorTemplate.itemTempId === HoldemPoker.VirtualCurrencyType.DiamondCurrency) {
+                            //处理快捷支付
+                            HoldemPoker.Sys.itemMgr.itemRepository.resolveQuickPay(applyValidError, function () {
+                            });
+                            return;
+                        }
+                    }
+                }
+                var data = { roomId: this.rc.roomData.id, gameId: this.rc.roomData.gameId };
+                this.rc.net.requestNotify("AddThinkTimeRequest", data);
+            };
+            /**
+             * 互动道具加载完成
+             * @param propData
+             */
+            InGameUI.prototype.parseComplete = function (propData) {
+                if (!propData || !propData.anims) {
+                    return;
+                }
+                if (HoldemPoker.Sys.isPad) {
+                    propData.anims[0].scale(1.5, 1.5);
+                    propData.anims[1].scale(1.5, 1.5);
+                    this.sitXDis = 113;
+                    this.sitYDis = 102;
+                    this.selfXDis = -434;
+                    this.selfYDis = 46;
+                }
+                switch (propData.type) {
+                    case 1:
+                        this.propAnimType1(propData);
+                        break;
+                    case 2:
+                        this.propAnimType2(propData);
+                        break;
+                    case 3:
+                        this.propAnimType3(propData);
+                        break;
+                    default:
+                        break;
+                }
+            };
+            /**
+             * 互动道具动画路径1
+             * 出发地出现移动到目的地播放动画
+             */
+            InGameUI.prototype.propAnimType1 = function (propData) {
+                var _this = this;
+                if (!propData) {
+                    return;
+                }
+                this.addChild(propData.anims[0]);
+                var seat = this.getSeatByServerPos(propData.fromSit);
+                var seat2 = this.getSeatByServerPos(propData.toSit);
+                var fromPos = new Laya.Point(seat.x, seat.y);
+                var toPos = new Laya.Point(seat2.x, seat2.y);
+                if (propData.fromSit === this.rc.roomData.selfSitId && this.isPlayerIconMove) {
+                    fromPos.x = seat.x + this.selfXDis;
+                    fromPos.y = seat.y + this.selfYDis;
+                }
+                if (propData.toSit === this.rc.roomData.selfSitId && this.isPlayerIconMove) {
+                    toPos.x = seat2.x + this.selfXDis;
+                    toPos.y = seat2.y + this.selfYDis;
+                }
+                propData.anims[0].pos(fromPos.x + this.sitXDis, fromPos.y + this.sitYDis);
+                propData.anims[0].play(0, false, true);
+                HoldemPoker.Sys.audio.play(propData.name);
+                propData.anims[0].once(Laya.Event.STOPPED, this, function () {
+                    Laya.Tween.to(propData.anims[0], {
+                        x: toPos.x + _this.sitXDis,
+                        y: toPos.y + _this.sitYDis
+                    }, 300, Laya.Ease.linearNone, Laya.Handler.create(_this, function () {
+                        propData.anims[0].play(1, false, true);
+                        propData.anims[0].once(Laya.Event.STOPPED, _this, function () {
+                            propData.anims[0].visible = false;
+                            propData.anims[0].removeSelf();
+                            propData.anims[0].destroy();
+                            propData = null;
+                            seat = null;
+                            seat2 = null;
+                            fromPos = null;
+                            toPos = null;
+                        });
+                    }));
+                });
+            };
+            /**
+             * 互动道具动画路径2
+             * 两边同时出现后一边播放动画
+             */
+            InGameUI.prototype.propAnimType2 = function (propData) {
+                if (!propData) {
+                    return;
+                }
+                this.addChild(propData.anims[0]);
+                this.addChild(propData.anims[1]);
+                var seat = this.getSeatByServerPos(propData.fromSit);
+                var seat2 = this.getSeatByServerPos(propData.toSit);
+                var fromPos = new Laya.Point(seat.x, seat.y);
+                var toPos = new Laya.Point(seat2.x, seat2.y);
+                if (propData.fromSit === this.rc.roomData.selfSitId && this.isPlayerIconMove) {
+                    fromPos.x = seat.x + this.selfXDis;
+                    fromPos.y = seat.y + this.selfYDis;
+                }
+                if (propData.toSit === this.rc.roomData.selfSitId && this.isPlayerIconMove) {
+                    toPos.x = seat2.x + this.selfXDis;
+                    toPos.y = seat2.y + this.selfYDis;
+                }
+                propData.anims[0].pos(fromPos.x + this.sitXDis, fromPos.y + this.sitYDis);
+                propData.anims[0].play(0, false, true);
+                Laya.timer.once(650, this, function () {
+                    if (propData && propData.name) {
+                        HoldemPoker.Sys.audio.play(propData.name);
+                    }
+                });
+                propData.anims[1].pos(toPos.x + this.sitXDis, toPos.y + this.sitYDis);
+                propData.anims[1].play(1, false, true);
+                propData.anims[1].once(Laya.Event.STOPPED, this, function () {
+                    propData.anims[0].visible = false;
+                    propData.anims[1].visible = false;
+                    propData.anims[0].removeSelf();
+                    propData.anims[1].removeSelf();
+                    propData.anims[0].destroy();
+                    propData.anims[1].destroy();
+                    propData = null;
+                    seat = null;
+                    seat2 = null;
+                    fromPos = null;
+                    toPos = null;
+                });
+            };
+            /**
+             * 互动道具动画路径3
+             * 两边同时出现，一边移动到另一边播放动画
+             */
+            InGameUI.prototype.propAnimType3 = function (propData) {
+                var _this = this;
+                if (!propData) {
+                    return;
+                }
+                this.addChild(propData.anims[0]);
+                this.addChild(propData.anims[1]);
+                var seat = this.getSeatByServerPos(propData.fromSit);
+                var seat2 = this.getSeatByServerPos(propData.toSit);
+                var fromPos = new Laya.Point(seat.x, seat.y);
+                var toPos = new Laya.Point(seat2.x, seat2.y);
+                if (propData.fromSit === this.rc.roomData.selfSitId && this.isPlayerIconMove) {
+                    fromPos.x = seat.x + this.selfXDis;
+                    fromPos.y = seat.y + this.selfYDis;
+                }
+                if (propData.toSit === this.rc.roomData.selfSitId && this.isPlayerIconMove) {
+                    toPos.x = seat2.x + this.selfXDis;
+                    toPos.y = seat2.y + this.selfYDis;
+                }
+                propData.anims[0].pos(fromPos.x + this.sitXDis, fromPos.y + this.sitYDis);
+                propData.anims[0].play(0, false, true);
+                propData.anims[1].pos(toPos.x + this.sitXDis, toPos.y + this.sitYDis);
+                propData.anims[1].play(1, false, true);
+                propData.anims[0].once(Laya.Event.STOPPED, this, function () {
+                    Laya.Tween.to(propData.anims[0], {
+                        x: toPos.x + _this.sitXDis,
+                        y: toPos.y + _this.sitYDis
+                    }, 300, Laya.Ease.linearNone, Laya.Handler.create(_this, function () {
+                        propData.anims[0].play(2, false, true);
+                        if (propData && propData.name) {
+                            HoldemPoker.Sys.audio.play(propData.name);
+                        }
+                        propData.anims[1].visible = false;
+                        propData.anims[0].once(Laya.Event.STOPPED, _this, function () {
+                            propData.anims[0].visible = false;
+                            propData.anims[1].visible = false;
+                            propData.anims[0].removeSelf();
+                            propData.anims[1].removeSelf();
+                            propData.anims[0].destroy();
+                            propData.anims[1].destroy();
+                            propData = null;
+                            seat = null;
+                            seat2 = null;
+                            fromPos = null;
+                            toPos = null;
+                        });
+                    }));
+                });
+            };
+            /**
+             * 监听更换牌皮肤
+             */
+            InGameUI.prototype.updateCardSkin = function () {
+                var _this = this;
+                var seatData = this.rc.roomData.getSelfSeat();
+                if (!seatData)
+                    return;
+                //大牌牌背
+                var handCards = seatData.holeCards;
+                if (handCards && handCards.length === 2) {
+                    this.imgHoleCard0.skin = HoldemPoker.Utility.getCardName(handCards[0].cardNumber, handCards[0].cardSuit);
+                    this.imgHoleCard1.skin = HoldemPoker.Utility.getCardName(handCards[1].cardNumber, handCards[1].cardSuit);
+                    this.handCardBg1.skin = HoldemPoker.Utility.getCardBackSkin();
+                    this.handCardBg2.skin = HoldemPoker.Utility.getCardBackSkin();
+                    this.foldCard0.skin = HoldemPoker.Utility.getCardName(handCards[0].cardNumber, handCards[0].cardSuit);
+                    this.foldCard1.skin = HoldemPoker.Utility.getCardName(handCards[1].cardNumber, handCards[1].cardSuit);
+                }
+                if (this.dragonFlop) {
+                    this.dragonFlop.setSlotSkin('cardbg_1', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                    this.dragonFlop.setSlotSkin('cardbg_2', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                    this.dragonFlop.setSlotSkin('cardbg_3', HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin()));
+                }
+                this.imgBoardCard4Bg.texture = HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin());
+                this.imgBoardCard3Bg.texture = HoldemPoker.Sys.loader.getRes(HoldemPoker.Utility.getCardBackSkin());
+                var boardCards = this.rc.roomData.gameData.boardCards;
+                if (boardCards) {
+                    boardCards.forEach(function (item, index) {
+                        _this['imgBoardCard' + index].skin = HoldemPoker.Utility.getCardName(item.cardNumber, item.cardSuit);
+                    });
+                }
+            };
+            //显示聊天窗口
+            InGameUI.prototype.onShowQuickChatUI = function () {
+                if (!this.quickChatUI) {
+                    this.quickChatUI = new HoldemPoker.QuickChatUI(this.rc);
+                }
+                this.addChild(this.quickChatUI);
+                this.quickChatUI.zOrder = 1000;
+                this.quickChatUI.Initalize();
+            };
+            /**
+             * 验证带入
+             */
+            InGameUI.prototype.verifyBankroll = function () {
+                var _this = this;
+                var rebuyData = this.buySlider.rebuyData;
+                //带入模板
+                var itemTemplateId = rebuyData.itemTemplateId;
+                var serviceTemplateId = rebuyData.serviceTemplateId;
+                //需要多少报名费
+                var needApplyCost = rebuyData.baseBankRoll;
+                //需要多少服务费
+                var needFeeCost = 0;
+                var entryStr = '';
+                //拼出需要的费用字符串
+                if (serviceTemplateId === 0) {
+                    entryStr = itemTemplateId + ": " + needApplyCost;
+                }
+                else {
+                    //比例服务
+                    if (rebuyData.servicePercentage) {
+                        needFeeCost += Math.ceil(rebuyData.baseBankRoll * parseFloat(rebuyData.servicePercentage));
+                        if (itemTemplateId === serviceTemplateId) {
+                            entryStr = itemTemplateId + ": " + (needApplyCost + needFeeCost);
+                        }
+                        else {
+                            entryStr = itemTemplateId + ": " + needApplyCost + "," + serviceTemplateId + ": " + needFeeCost;
+                        }
+                    }
+                    else if (rebuyData.serviceCount) {
+                        needFeeCost = rebuyData.serviceCount;
+                        if (itemTemplateId === serviceTemplateId) {
+                            entryStr = itemTemplateId + ": " + (needApplyCost + needFeeCost);
+                        }
+                        else {
+                            entryStr = itemTemplateId + ": " + needApplyCost + "," + serviceTemplateId + ": " + needFeeCost;
+                        }
+                    }
+                }
+                //验证费用
+                var applyValidError = HoldemPoker.Sys.itemMgr.itemRepository.validateEntryFee(entryStr, HoldemPoker.ApplyType.And, 0);
+                //只处理微赛币和钻石的情况
+                if (applyValidError.flag === false) {
+                    var errorTemplate = applyValidError.errorTemplate;
+                    if (errorTemplate && (errorTemplate.itemTempId === HoldemPoker.VirtualCurrencyType.WesaiCurrency || errorTemplate.itemTempId === HoldemPoker.VirtualCurrencyType.DiamondCurrency)) {
+                        //处理快捷支付
+                        HoldemPoker.Sys.itemMgr.itemRepository.resolveQuickPay(applyValidError, function (quickPayResult) {
+                            //买的是微赛币再走一次流程
+                            if (quickPayResult.payType === HoldemPoker.QuickPayType.Gold) {
+                                var costItem = HoldemPoker.Sys.itemMgr.itemRepository.findOneByTemplateId(itemTemplateId);
+                                if (costItem) {
+                                    _this.buySlider.myMoney = costItem.amount;
+                                }
+                                _this.openReBuyView(rebuyData.rebuy);
+                            }
+                            else {
+                                _this.buySlider.closeAction();
+                            }
+                        }, function () {
+                            _this.buySlider.closeAction();
+                        });
+                        return false;
+                    }
+                }
+                return true;
+            };
+            InGameUI.boardcardsPosition = [[48, 55], [48 + 84 * 1, 55], [48 + 84 * 2, 55], [48 + 84 * 3, 55], [48 + 84 * 4, 55]];
+            return InGameUI;
+        }(ui.ingame.InGameViewUI));
+        HoldemPoker.InGameUI = InGameUI;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=InGameUI.js.map

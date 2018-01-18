@@ -1,0 +1,1304 @@
+[
+    {
+        "countryEn": "China",
+        "countryCn": "中国",
+        "acronym": "CN",
+        "code": "86"
+    },
+    {
+        "countryEn": "Hong Kong",
+        "countryCn": "中国香港",
+        "acronym": "HK",
+        "code": "852"
+    },
+    {
+        "countryEn": "Macau",
+        "countryCn": "中国澳门",
+        "acronym": "MO",
+        "code": "853"
+    },
+    {
+        "countryEn": "Taiwan",
+        "countryCn": "中国台湾",
+        "acronym": "TW",
+        "code": "886"
+    },
+    {
+        "countryEn": "Andorra",
+        "countryCn": "安道尔",
+        "acronym": "AD",
+        "code": "376"
+    },
+    {
+        "countryEn": "United Arab Emirates",
+        "countryCn": "阿拉伯联合酋长国",
+        "acronym": "AE",
+        "code": "971"
+    },
+    {
+        "countryEn": "Afghanistan",
+        "countryCn": "阿富汗",
+        "acronym": "AF",
+        "code": "93"
+    },
+    {
+        "countryEn": "Antigua and Barbuda",
+        "countryCn": "安提瓜和巴布达",
+        "acronym": "AG",
+        "code": "1268"
+    },
+    {
+        "countryEn": "Anguilla",
+        "countryCn": "安圭拉",
+        "acronym": "AI",
+        "code": "1264"
+    },
+    {
+        "countryEn": "Albania",
+        "countryCn": "阿尔巴尼亚",
+        "acronym": "AL",
+        "code": "355"
+    },
+    {
+        "countryEn": "Armenia",
+        "countryCn": "亚美尼亚",
+        "acronym": "AM",
+        "code": "374"
+    },
+    {
+        "countryEn": "Angola",
+        "countryCn": "安哥拉",
+        "acronym": "AO",
+        "code": "244"
+    },
+    {
+        "countryEn": "Argentina",
+        "countryCn": "阿根廷",
+        "acronym": "AR",
+        "code": "54"
+    },
+    {
+        "countryEn": "American Samoa",
+        "countryCn": "美属萨摩亚",
+        "acronym": "AS",
+        "code": "1684"
+    },
+    {
+        "countryEn": "Austria",
+        "countryCn": "奥地利",
+        "acronym": "AT",
+        "code": "43"
+    },
+    {
+        "countryEn": "Australia",
+        "countryCn": "澳大利亚",
+        "acronym": "AU",
+        "code": "61"
+    },
+    {
+        "countryEn": "Aruba",
+        "countryCn": "阿鲁巴",
+        "acronym": "AW",
+        "code": "297"
+    },
+    {
+        "countryEn": "Azerbaijan",
+        "countryCn": "阿塞拜疆",
+        "acronym": "AZ",
+        "code": "994"
+    },
+    {
+        "countryEn": "Bosniaand Herzegovina",
+        "countryCn": "波斯尼亚和黑塞哥维那",
+        "acronym": "BA",
+        "code": "387"
+    },
+    {
+        "countryEn": "Barbados",
+        "countryCn": "巴巴多斯",
+        "acronym": "BB",
+        "code": "1246"
+    },
+    {
+        "countryEn": "Bangladesh",
+        "countryCn": "孟加拉国",
+        "acronym": "BD",
+        "code": "880"
+    },
+    {
+        "countryEn": "Belgium",
+        "countryCn": "比利时",
+        "acronym": "BE",
+        "code": "32"
+    },
+    {
+        "countryEn": "Burkina Faso",
+        "countryCn": "布基纳法索",
+        "acronym": "BF",
+        "code": "226"
+    },
+    {
+        "countryEn": "Bulgaria",
+        "countryCn": "保加利亚",
+        "acronym": "BG",
+        "code": "359"
+    },
+    {
+        "countryEn": "Bahrain",
+        "countryCn": "巴林",
+        "acronym": "BH",
+        "code": "973"
+    },
+    {
+        "countryEn": "Burundi",
+        "countryCn": "布隆迪",
+        "acronym": "BI",
+        "code": "257"
+    },
+    {
+        "countryEn": "Benin",
+        "countryCn": "贝宁",
+        "acronym": "BJ",
+        "code": "229"
+    },
+    {
+        "countryEn": "Bermuda",
+        "countryCn": "百慕大群岛",
+        "acronym": "BM",
+        "code": "1441"
+    },
+    {
+        "countryEn": "Brunei",
+        "countryCn": "文莱",
+        "acronym": "BN",
+        "code": "673"
+    },
+    {
+        "countryEn": "Bolivia",
+        "countryCn": "玻利维亚",
+        "acronym": "BO",
+        "code": "591"
+    },
+    {
+        "countryEn": "Caribisch Nederland",
+        "countryCn": "荷兰加勒比",
+        "acronym": "BQ",
+        "code": "599"
+    },
+    {
+        "countryEn": "Brazil",
+        "countryCn": "巴西",
+        "acronym": "BR",
+        "code": "55"
+    },
+    {
+        "countryEn": "Bahamas",
+        "countryCn": "巴哈马",
+        "acronym": "BS",
+        "code": "1242"
+    },
+    {
+        "countryEn": "Bhutan",
+        "countryCn": "不丹",
+        "acronym": "BT",
+        "code": "975"
+    },
+    {
+        "countryEn": "Botswana",
+        "countryCn": "博茨瓦纳",
+        "acronym": "BW",
+        "code": "267"
+    },
+    {
+        "countryEn": "Belarus",
+        "countryCn": "白俄罗斯",
+        "acronym": "BY",
+        "code": "375"
+    },
+    {
+        "countryEn": "Belize",
+        "countryCn": "伯利兹",
+        "acronym": "BZ",
+        "code": "501"
+    },
+    {
+        "countryEn": "Canada",
+        "countryCn": "加拿大",
+        "acronym": "CA",
+        "code": "1"
+    },
+    {
+        "countryEn": "Democratic Republic of theCongo",
+        "countryCn": "刚果民主共和国",
+        "acronym": "CD",
+        "code": "243"
+    },
+    {
+        "countryEn": "Central African Republic",
+        "countryCn": "中非共和国",
+        "acronym": "CF",
+        "code": "236"
+    },
+    {
+        "countryEn": "Republic Of The Congo",
+        "countryCn": "刚果共和国",
+        "acronym": "CG",
+        "code": "242"
+    },
+    {
+        "countryEn": "Switzerland",
+        "countryCn": "瑞士",
+        "acronym": "CH",
+        "code": "41"
+    },
+    {
+        "countryEn": "Ivory Coast",
+        "countryCn": "象牙海岸",
+        "acronym": "CI",
+        "code": "225"
+    },
+    {
+        "countryEn": "Cook Islands",
+        "countryCn": "库克群岛",
+        "acronym": "CK",
+        "code": "682"
+    },
+    {
+        "countryEn": "Chile",
+        "countryCn": "智利",
+        "acronym": "CL",
+        "code": "56"
+    },
+    {
+        "countryEn": "Cameroon",
+        "countryCn": "喀麦隆",
+        "acronym": "CM",
+        "code": "237"
+    },
+    {
+        "countryEn": "Colombia",
+        "countryCn": "哥伦比亚",
+        "acronym": "CO",
+        "code": "57"
+    },
+    {
+        "countryEn": "CostaRica",
+        "countryCn": "哥斯达黎加",
+        "acronym": "CR",
+        "code": "506"
+    },
+    {
+        "countryEn": "Cuba",
+        "countryCn": "古巴",
+        "acronym": "CU",
+        "code": "53"
+    },
+    {
+        "countryEn": "Cape Verde",
+        "countryCn": "开普",
+        "acronym": "CV",
+        "code": "238"
+    },
+    {
+        "countryEn": "Curacao",
+        "countryCn": "库拉索",
+        "acronym": "CW",
+        "code": "599"
+    },
+    {
+        "countryEn": "Cyprus",
+        "countryCn": "塞浦路斯",
+        "acronym": "CY",
+        "code": "357"
+    },
+    {
+        "countryEn": "Czech",
+        "countryCn": "捷克",
+        "acronym": "CZ",
+        "code": "420"
+    },
+    {
+        "countryEn": "Germany",
+        "countryCn": "德国",
+        "acronym": "DE",
+        "code": "49"
+    },
+    {
+        "countryEn": "Djibouti",
+        "countryCn": "吉布提",
+        "acronym": "DJ",
+        "code": "253"
+    },
+    {
+        "countryEn": "Denmark",
+        "countryCn": "丹麦",
+        "acronym": "DK",
+        "code": "45"
+    },
+    {
+        "countryEn": "Dominica",
+        "countryCn": "多米尼加",
+        "acronym": "DM",
+        "code": "1767"
+    },
+    {
+        "countryEn": "dominican republic",
+        "countryCn": "多米尼加共和国",
+        "acronym": "DO",
+        "code": "1809"
+    },
+    {
+        "countryEn": "Algeria",
+        "countryCn": "阿尔及利亚",
+        "acronym": "DZ",
+        "code": "213"
+    },
+    {
+        "countryEn": "Ecuador",
+        "countryCn": "厄瓜多尔",
+        "acronym": "EC",
+        "code": "593"
+    },
+    {
+        "countryEn": "Estonia",
+        "countryCn": "爱沙尼亚",
+        "acronym": "EE",
+        "code": "372"
+    },
+    {
+        "countryEn": "Egypt",
+        "countryCn": "埃及",
+        "acronym": "EG",
+        "code": "20"
+    },
+    {
+        "countryEn": "Eritrea",
+        "countryCn": "厄立特里亚",
+        "acronym": "ER",
+        "code": "291"
+    },
+    {
+        "countryEn": "Spain",
+        "countryCn": "西班牙",
+        "acronym": "ES",
+        "code": "34"
+    },
+    {
+        "countryEn": "Ethiopia",
+        "countryCn": "埃塞俄比亚",
+        "acronym": "ET",
+        "code": "251"
+    },
+    {
+        "countryEn": "Finland",
+        "countryCn": "芬兰",
+        "acronym": "FI",
+        "code": "358"
+    },
+    {
+        "countryEn": "Fiji",
+        "countryCn": "斐济",
+        "acronym": "FJ",
+        "code": "679"
+    },
+    {
+        "countryEn": "Micronesia",
+        "countryCn": "密克罗尼西亚",
+        "acronym": "FM",
+        "code": "691"
+    },
+    {
+        "countryEn": "Faroe Islands",
+        "countryCn": "法罗群岛",
+        "acronym": "FO",
+        "code": "298"
+    },
+    {
+        "countryEn": "France",
+        "countryCn": "法国",
+        "acronym": "FR",
+        "code": "33"
+    },
+    {
+        "countryEn": "Gabon",
+        "countryCn": "加蓬",
+        "acronym": "GA",
+        "code": "241"
+    },
+    {
+        "countryEn": "United Kingdom",
+        "countryCn": "英国",
+        "acronym": "GB",
+        "code": "44"
+    },
+    {
+        "countryEn": "Grenada",
+        "countryCn": "格林纳达",
+        "acronym": "GD",
+        "code": "1473"
+    },
+    {
+        "countryEn": "Georgia",
+        "countryCn": "格鲁吉亚",
+        "acronym": "GE",
+        "code": "995"
+    },
+    {
+        "countryEn": "French Guiana",
+        "countryCn": "法属圭亚那",
+        "acronym": "GF",
+        "code": "594"
+    },
+    {
+        "countryEn": "Ghana",
+        "countryCn": "加纳",
+        "acronym": "GH",
+        "code": "233"
+    },
+    {
+        "countryEn": "Gibraltar",
+        "countryCn": "直布罗陀",
+        "acronym": "GI",
+        "code": "350"
+    },
+    {
+        "countryEn": "Greenland",
+        "countryCn": "格陵兰岛",
+        "acronym": "GL",
+        "code": "299"
+    },
+    {
+        "countryEn": "Gambia",
+        "countryCn": "冈比亚",
+        "acronym": "GM",
+        "code": "220"
+    },
+    {
+        "countryEn": "Guinea",
+        "countryCn": "几内亚",
+        "acronym": "GN",
+        "code": "224"
+    },
+    {
+        "countryEn": "Guadeloupe",
+        "countryCn": "瓜德罗普岛",
+        "acronym": "GP",
+        "code": "590"
+    },
+    {
+        "countryEn": "Equatorial Guinea",
+        "countryCn": "赤道几内亚",
+        "acronym": "GQ",
+        "code": "240"
+    },
+    {
+        "countryEn": "Greece",
+        "countryCn": "希腊",
+        "acronym": "GR",
+        "code": "30"
+    },
+    {
+        "countryEn": "Guatemala",
+        "countryCn": "瓜地马拉",
+        "acronym": "GT",
+        "code": "502"
+    },
+    {
+        "countryEn": "Guam",
+        "countryCn": "关岛",
+        "acronym": "GU",
+        "code": "1671"
+    },
+    {
+        "countryEn": "Guinea-Bissau",
+        "countryCn": "几内亚比绍共和国",
+        "acronym": "GW",
+        "code": "245"
+    },
+    {
+        "countryEn": "Guyana",
+        "countryCn": "圭亚那",
+        "acronym": "GY",
+        "code": "592"
+    },
+    {
+        "countryEn": "Honduras",
+        "countryCn": "洪都拉斯",
+        "acronym": "HN",
+        "code": "504"
+    },
+    {
+        "countryEn": "Croatia",
+        "countryCn": "克罗地亚",
+        "acronym": "HR",
+        "code": "385"
+    },
+    {
+        "countryEn": "Haiti",
+        "countryCn": "海地",
+        "acronym": "HT",
+        "code": "509"
+    },
+    {
+        "countryEn": "Hungary",
+        "countryCn": "匈牙利",
+        "acronym": "HU",
+        "code": "36"
+    },
+    {
+        "countryEn": "Indonesia",
+        "countryCn": "印度尼西亚",
+        "acronym": "ID",
+        "code": "62"
+    },
+    {
+        "countryEn": "Ireland",
+        "countryCn": "爱尔兰",
+        "acronym": "IE",
+        "code": "353"
+    },
+    {
+        "countryEn": "Israel",
+        "countryCn": "以色列",
+        "acronym": "IL",
+        "code": "972"
+    },
+    {
+        "countryEn": "India",
+        "countryCn": "印度",
+        "acronym": "IN",
+        "code": "91"
+    },
+    {
+        "countryEn": "Iraq",
+        "countryCn": "伊拉克",
+        "acronym": "IQ",
+        "code": "964"
+    },
+    {
+        "countryEn": "Iran",
+        "countryCn": "伊朗",
+        "acronym": "IR",
+        "code": "98"
+    },
+    {
+        "countryEn": "Iceland",
+        "countryCn": "冰岛",
+        "acronym": "IS",
+        "code": "354"
+    },
+    {
+        "countryEn": "Italy",
+        "countryCn": "意大利",
+        "acronym": "IT",
+        "code": "39"
+    },
+    {
+        "countryEn": "Jamaica",
+        "countryCn": "牙买加",
+        "acronym": "JM",
+        "code": "1876"
+    },
+    {
+        "countryEn": "Jordan",
+        "countryCn": "约旦",
+        "acronym": "JO",
+        "code": "962"
+    },
+    {
+        "countryEn": "Japan",
+        "countryCn": "日本",
+        "acronym": "JP",
+        "code": "81"
+    },
+    {
+        "countryEn": "Kenya",
+        "countryCn": "肯尼亚",
+        "acronym": "KE",
+        "code": "254"
+    },
+    {
+        "countryEn": "Kyrgyzstan",
+        "countryCn": "吉尔吉斯斯坦",
+        "acronym": "KG",
+        "code": "996"
+    },
+    {
+        "countryEn": "Cambodia",
+        "countryCn": "柬埔寨",
+        "acronym": "KH",
+        "code": "855"
+    },
+    {
+        "countryEn": "Kiribati",
+        "countryCn": "基里巴斯",
+        "acronym": "KI",
+        "code": "686"
+    },
+    {
+        "countryEn": "Comoros",
+        "countryCn": "科摩罗",
+        "acronym": "KM",
+        "code": "269"
+    },
+    {
+        "countryEn": "Saint Kitts and Nevis",
+        "countryCn": "圣基茨和尼维斯",
+        "acronym": "KN",
+        "code": "1869"
+    },
+    {
+        "countryEn": "Korea Democratic Rep",
+        "countryCn": "朝鲜",
+        "acronym": "KP",
+        "code": "850"
+    },
+    {
+        "countryEn": "South Korea",
+        "countryCn": "韩国",
+        "acronym": "KR",
+        "code": "82"
+    },
+    {
+        "countryEn": "Kuwait",
+        "countryCn": "科威特",
+        "acronym": "KW",
+        "code": "965"
+    },
+    {
+        "countryEn": "Cayman Islands",
+        "countryCn": "开曼群岛",
+        "acronym": "KY",
+        "code": "1345"
+    },
+    {
+        "countryEn": "Kazakhstan",
+        "countryCn": "哈萨克斯坦",
+        "acronym": "KZ",
+        "code": "7"
+    },
+    {
+        "countryEn": "Laos",
+        "countryCn": "老挝",
+        "acronym": "LA",
+        "code": "856"
+    },
+    {
+        "countryEn": "Lebanon",
+        "countryCn": "黎巴嫩",
+        "acronym": "LB",
+        "code": "961"
+    },
+    {
+        "countryEn": "Saint Lucia",
+        "countryCn": "圣露西亚",
+        "acronym": "LC",
+        "code": "1758"
+    },
+    {
+        "countryEn": "Liechtenstein",
+        "countryCn": "列支敦士登",
+        "acronym": "LI",
+        "code": "423"
+    },
+    {
+        "countryEn": "Sri Lanka",
+        "countryCn": "斯里兰卡",
+        "acronym": "LK",
+        "code": "94"
+    },
+    {
+        "countryEn": "Liberia",
+        "countryCn": "利比里亚",
+        "acronym": "LR",
+        "code": "231"
+    },
+    {
+        "countryEn": "Lesotho",
+        "countryCn": "莱索托",
+        "acronym": "LS",
+        "code": "266"
+    },
+    {
+        "countryEn": "Lithuania",
+        "countryCn": "立陶宛",
+        "acronym": "LT",
+        "code": "370"
+    },
+    {
+        "countryEn": "Luxembourg",
+        "countryCn": "卢森堡",
+        "acronym": "LU",
+        "code": "352"
+    },
+    {
+        "countryEn": "Latvia",
+        "countryCn": "拉脱维亚",
+        "acronym": "LV",
+        "code": "371"
+    },
+    {
+        "countryEn": "Libya",
+        "countryCn": "利比亚",
+        "acronym": "LY",
+        "code": "218"
+    },
+    {
+        "countryEn": "Morocco",
+        "countryCn": "摩洛哥",
+        "acronym": "MA",
+        "code": "212"
+    },
+    {
+        "countryEn": "Monaco",
+        "countryCn": "摩纳哥",
+        "acronym": "MC",
+        "code": "377"
+    },
+    {
+        "countryEn": "Moldova",
+        "countryCn": "摩尔多瓦",
+        "acronym": "MD",
+        "code": "373"
+    },
+    {
+        "countryEn": "Montenegro",
+        "countryCn": "黑山",
+        "acronym": "ME",
+        "code": "382"
+    },
+    {
+        "countryEn": "Madagascar",
+        "countryCn": "马达加斯加",
+        "acronym": "MG",
+        "code": "261"
+    },
+    {
+        "countryEn": "Marshall Islands",
+        "countryCn": "马绍尔群岛",
+        "acronym": "MH",
+        "code": "692"
+    },
+    {
+        "countryEn": "Macedonia",
+        "countryCn": "马其顿",
+        "acronym": "MK",
+        "code": "389"
+    },
+    {
+        "countryEn": "Mali",
+        "countryCn": "马里",
+        "acronym": "ML",
+        "code": "223"
+    },
+    {
+        "countryEn": "Myanmar",
+        "countryCn": "缅甸",
+        "acronym": "MM",
+        "code": "95"
+    },
+    {
+        "countryEn": "Mongolia",
+        "countryCn": "蒙古",
+        "acronym": "MN",
+        "code": "976"
+    },
+    {
+        "countryEn": "Mauritania",
+        "countryCn": "毛里塔尼亚",
+        "acronym": "MR",
+        "code": "222"
+    },
+    {
+        "countryEn": "Montserrat",
+        "countryCn": "蒙特塞拉特岛",
+        "acronym": "MS",
+        "code": "1664"
+    },
+    {
+        "countryEn": "Malta",
+        "countryCn": "马耳他",
+        "acronym": "MT",
+        "code": "356"
+    },
+    {
+        "countryEn": "Mauritius",
+        "countryCn": "毛里求斯",
+        "acronym": "MU",
+        "code": "230"
+    },
+    {
+        "countryEn": "Maldives",
+        "countryCn": "马尔代夫",
+        "acronym": "MV",
+        "code": "960"
+    },
+    {
+        "countryEn": "Malawi",
+        "countryCn": "马拉维",
+        "acronym": "MW",
+        "code": "265"
+    },
+    {
+        "countryEn": "Mexico",
+        "countryCn": "墨西哥",
+        "acronym": "MX",
+        "code": "52"
+    },
+    {
+        "countryEn": "Malaysia",
+        "countryCn": "马来西亚",
+        "acronym": "MY",
+        "code": "60"
+    },
+    {
+        "countryEn": "Mozambique",
+        "countryCn": "莫桑比克",
+        "acronym": "MZ",
+        "code": "258"
+    },
+    {
+        "countryEn": "Namibia",
+        "countryCn": "纳米比亚",
+        "acronym": "NA",
+        "code": "264"
+    },
+    {
+        "countryEn": "New Caledonia",
+        "countryCn": "新喀里多尼亚",
+        "acronym": "NC",
+        "code": "687"
+    },
+    {
+        "countryEn": "Niger",
+        "countryCn": "尼日尔",
+        "acronym": "NE",
+        "code": "227"
+    },
+    {
+        "countryEn": "Nigeria",
+        "countryCn": "尼日利亚",
+        "acronym": "NG",
+        "code": "234"
+    },
+    {
+        "countryEn": "Nicaragua",
+        "countryCn": "尼加拉瓜",
+        "acronym": "NI",
+        "code": "505"
+    },
+    {
+        "countryEn": "Netherlands",
+        "countryCn": "荷兰",
+        "acronym": "NL",
+        "code": "31"
+    },
+    {
+        "countryEn": "Norway",
+        "countryCn": "挪威",
+        "acronym": "NO",
+        "code": "47"
+    },
+    {
+        "countryEn": "Nepal",
+        "countryCn": "尼泊尔",
+        "acronym": "NP",
+        "code": "977"
+    },
+    {
+        "countryEn": "Nauru",
+        "countryCn": "拿鲁岛",
+        "acronym": "NR",
+        "code": "674"
+    },
+    {
+        "countryEn": "New Zealand",
+        "countryCn": "新西兰",
+        "acronym": "NZ",
+        "code": "64"
+    },
+    {
+        "countryEn": "Oman",
+        "countryCn": "阿曼",
+        "acronym": "OM",
+        "code": "968"
+    },
+    {
+        "countryEn": "Panama",
+        "countryCn": "巴拿马",
+        "acronym": "PA",
+        "code": "507"
+    },
+    {
+        "countryEn": "Peru",
+        "countryCn": "秘鲁",
+        "acronym": "PE",
+        "code": "51"
+    },
+    {
+        "countryEn": "French Polynesia",
+        "countryCn": "法属波利尼西亚",
+        "acronym": "PF",
+        "code": "689"
+    },
+    {
+        "countryEn": "Papua New Guinea",
+        "countryCn": "巴布亚新几内亚",
+        "acronym": "PG",
+        "code": "675"
+    },
+    {
+        "countryEn": "Philippines",
+        "countryCn": "菲律宾",
+        "acronym": "PH",
+        "code": "63"
+    },
+    {
+        "countryEn": "Pakistan",
+        "countryCn": "巴基斯坦",
+        "acronym": "PK",
+        "code": "92"
+    },
+    {
+        "countryEn": "Poland",
+        "countryCn": "波兰",
+        "acronym": "PL",
+        "code": "48"
+    },
+    {
+        "countryEn": "Saint Pierreand Miquelon",
+        "countryCn": "圣彼埃尔和密克隆岛",
+        "acronym": "PM",
+        "code": "508"
+    },
+    {
+        "countryEn": "Puerto Rico",
+        "countryCn": "波多黎各",
+        "acronym": "PR",
+        "code": "1787"
+    },
+    {
+        "countryEn": "Portugal",
+        "countryCn": "葡萄牙",
+        "acronym": "PT",
+        "code": "351"
+    },
+    {
+        "countryEn": "Palau",
+        "countryCn": "帕劳",
+        "acronym": "PW",
+        "code": "680"
+    },
+    {
+        "countryEn": "Paraguay",
+        "countryCn": "巴拉圭",
+        "acronym": "PY",
+        "code": "595"
+    },
+    {
+        "countryEn": "Qatar",
+        "countryCn": "卡塔尔",
+        "acronym": "QA",
+        "code": "974"
+    },
+    {
+        "countryEn": "Réunion Island",
+        "countryCn": "留尼汪",
+        "acronym": "RE",
+        "code": "262"
+    },
+    {
+        "countryEn": "Romania",
+        "countryCn": "罗马尼亚",
+        "acronym": "RO",
+        "code": "40"
+    },
+    {
+        "countryEn": "Serbia",
+        "countryCn": "塞尔维亚",
+        "acronym": "RS",
+        "code": "381"
+    },
+    {
+        "countryEn": "Russia",
+        "countryCn": "俄罗斯",
+        "acronym": "RU",
+        "code": "7"
+    },
+    {
+        "countryEn": "Rwanda",
+        "countryCn": "卢旺达",
+        "acronym": "RW",
+        "code": "250"
+    },
+    {
+        "countryEn": "Saudi Arabia",
+        "countryCn": "沙特阿拉伯",
+        "acronym": "SA",
+        "code": "966"
+    },
+    {
+        "countryEn": "Solomon Islands",
+        "countryCn": "所罗门群岛",
+        "acronym": "SB",
+        "code": "677"
+    },
+    {
+        "countryEn": "Seychelles",
+        "countryCn": "塞舌尔",
+        "acronym": "SC",
+        "code": "248"
+    },
+    {
+        "countryEn": "Sudan",
+        "countryCn": "苏丹",
+        "acronym": "SD",
+        "code": "249"
+    },
+    {
+        "countryEn": "Sweden",
+        "countryCn": "瑞典",
+        "acronym": "SE",
+        "code": "46"
+    },
+    {
+        "countryEn": "Singapore",
+        "countryCn": "新加坡",
+        "acronym": "SG",
+        "code": "65"
+    },
+    {
+        "countryEn": "Slovenia",
+        "countryCn": "斯洛文尼亚",
+        "acronym": "SI",
+        "code": "386"
+    },
+    {
+        "countryEn": "Slovakia",
+        "countryCn": "斯洛伐克",
+        "acronym": "SK",
+        "code": "421"
+    },
+    {
+        "countryEn": "Sierra Leone",
+        "countryCn": "塞拉利昂",
+        "acronym": "SL",
+        "code": "232"
+    },
+    {
+        "countryEn": "San Marino",
+        "countryCn": "圣马力诺",
+        "acronym": "SM",
+        "code": "378"
+    },
+    {
+        "countryEn": "Senegal",
+        "countryCn": "塞内加尔",
+        "acronym": "SN",
+        "code": "221"
+    },
+    {
+        "countryEn": "Somalia",
+        "countryCn": "索马里",
+        "acronym": "SO",
+        "code": "252"
+    },
+    {
+        "countryEn": "Suriname",
+        "countryCn": "苏里南",
+        "acronym": "SR",
+        "code": "597"
+    },
+    {
+        "countryEn": "Sao Tome and Principe",
+        "countryCn": "圣多美和普林西比",
+        "acronym": "ST",
+        "code": "239"
+    },
+    {
+        "countryEn": "ElSalvador",
+        "countryCn": "萨尔瓦多",
+        "acronym": "SV",
+        "code": "503"
+    },
+    {
+        "countryEn": "Syria",
+        "countryCn": "叙利亚",
+        "acronym": "SY",
+        "code": "963"
+    },
+    {
+        "countryEn": "Swaziland",
+        "countryCn": "斯威士兰",
+        "acronym": "SZ",
+        "code": "268"
+    },
+    {
+        "countryEn": "Turksand Caicos Islands",
+        "countryCn": "特克斯和凯科斯群岛",
+        "acronym": "TC",
+        "code": "1649"
+    },
+    {
+        "countryEn": "Chad",
+        "countryCn": "乍得",
+        "acronym": "TD",
+        "code": "235"
+    },
+    {
+        "countryEn": "Togo",
+        "countryCn": "多哥",
+        "acronym": "TG",
+        "code": "228"
+    },
+    {
+        "countryEn": "Thailand",
+        "countryCn": "泰国",
+        "acronym": "TH",
+        "code": "66"
+    },
+    {
+        "countryEn": "Tajikistan",
+        "countryCn": "塔吉克斯坦",
+        "acronym": "TJ",
+        "code": "992"
+    },
+    {
+        "countryEn": "East Timor",
+        "countryCn": "东帝汶",
+        "acronym": "TL",
+        "code": "670"
+    },
+    {
+        "countryEn": "Turkmenistan",
+        "countryCn": "土库曼斯坦",
+        "acronym": "TM",
+        "code": "993"
+    },
+    {
+        "countryEn": "Tunisia",
+        "countryCn": "突尼斯",
+        "acronym": "TN",
+        "code": "216"
+    },
+    {
+        "countryEn": "Tonga",
+        "countryCn": "汤加",
+        "acronym": "TO",
+        "code": "676"
+    },
+    {
+        "countryEn": "Turkey",
+        "countryCn": "土耳其",
+        "acronym": "TR",
+        "code": "90"
+    },
+    {
+        "countryEn": "Trinidadand Tobago",
+        "countryCn": "特立尼达和多巴哥",
+        "acronym": "TT",
+        "code": "1868"
+    },
+    {
+        "countryEn": "Tanzania",
+        "countryCn": "坦桑尼亚",
+        "acronym": "TZ",
+        "code": "255"
+    },
+    {
+        "countryEn": "Ukraine",
+        "countryCn": "乌克兰",
+        "acronym": "UA",
+        "code": "380"
+    },
+    {
+        "countryEn": "Uganda",
+        "countryCn": "乌干达",
+        "acronym": "UG",
+        "code": "256"
+    },
+    {
+        "countryEn": "United States",
+        "countryCn": "美国",
+        "acronym": "US",
+        "code": "1"
+    },
+    {
+        "countryEn": "Uruguay",
+        "countryCn": "乌拉圭",
+        "acronym": "UY",
+        "code": "598"
+    },
+    {
+        "countryEn": "Uzbekistan",
+        "countryCn": "乌兹别克斯坦",
+        "acronym": "UZ",
+        "code": "998"
+    },
+    {
+        "countryEn": "Saint Vincent and The Grenadines",
+        "countryCn": "圣文森特和格林纳丁斯",
+        "acronym": "VC",
+        "code": "1784"
+    },
+    {
+        "countryEn": "Venezuela",
+        "countryCn": "委内瑞拉",
+        "acronym": "VE",
+        "code": "58"
+    },
+    {
+        "countryEn": "VirginIslands,British",
+        "countryCn": "英属处女群岛",
+        "acronym": "VG",
+        "code": "1284"
+    },
+    {
+        "countryEn": "Vietnam",
+        "countryCn": "越南",
+        "acronym": "VN",
+        "code": "84"
+    },
+    {
+        "countryEn": "Vanuatu",
+        "countryCn": "瓦努阿图",
+        "acronym": "VU",
+        "code": "678"
+    },
+    {
+        "countryEn": "Samoa",
+        "countryCn": "萨摩亚",
+        "acronym": "WS",
+        "code": "685"
+    },
+    {
+        "countryEn": "Yemen",
+        "countryCn": "也门",
+        "acronym": "YE",
+        "code": "967"
+    },
+    {
+        "countryEn": "Mayotte",
+        "countryCn": "马约特",
+        "acronym": "YT",
+        "code": "269"
+    },
+    {
+        "countryEn": "South Africa",
+        "countryCn": "南非",
+        "acronym": "ZA",
+        "code": "27"
+    },
+    {
+        "countryEn": "Zambia",
+        "countryCn": "赞比亚",
+        "acronym": "ZM",
+        "code": "260"
+    },
+    {
+        "countryEn": "Zimbabwe",
+        "countryCn": "津巴布韦",
+        "acronym": "ZW",
+        "code": "263"
+    }
+]

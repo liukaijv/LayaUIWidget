@@ -1,0 +1,932 @@
+/*
+ * @Author: devilsome.曾挚
+ * @Date: 2017-02-15 17:54:55
+ * @Last Modified by: wesai.谢久伟
+ * @Last Modified time: 2017-12-13 11:03:02
+ *
+ *
+ * Token处理流程：
+ * 1. 客户端发送账号密码登录，服务器下发登录结果。成功的结果中包含token
+ * 2. 客户端在本地，以账号为名称，存储token到文件并记录最后一次登录的账号。
+ * 3. 重新登录时，如果手机端，直接读取token并发送login请求；如果是web端，输入账号自动查找token，并发送login请求
+ * 4. 游戏内，重新登录时候，重新读取账号对应的token并发送连接请求
+ * 处理游戏的登录状态
+ */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var wesai;
+(function (wesai) {
+    var HoldemPoker;
+    (function (HoldemPoker) {
+        var LoginMgr = /** @class */ (function (_super) {
+            __extends(LoginMgr, _super);
+            function LoginMgr() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.serverURL = null;
+                //特殊处理
+                _this.hasError = false;
+                _this.reconnectCount = 0;
+                _this.isLogin = false;
+                _this.loginData = null;
+                _this.registerData = null;
+                _this.changePwdData = null;
+                _this.captchaData = null;
+                _this.wechatCodeData = null;
+                _this.isReLogin = false;
+                _this.hasListenNetwork = false;
+                _this.isWeixinLogin = false;
+                _this.isUploadAv = false;
+                return _this;
+            }
+            LoginMgr.prototype.Initalize = function () {
+            };
+            LoginMgr.prototype.LoadFromRes = function () {
+            };
+            LoginMgr.prototype.saveAccount = function (isWechat) {
+                if (!HoldemPoker.Sys.players.account) {
+                    Laya.LocalStorage.setItem("lastLoginAccount", "");
+                    Laya.LocalStorage.setItem("wechat.token", "");
+                    Laya.LocalStorage.setItem("lastNationCode", "");
+                    this.lastAccountId = null;
+                    this.lastNationCode = null;
+                    return;
+                }
+                this.lastAccountId = HoldemPoker.Sys.players.account.accountId;
+                Laya.LocalStorage.setItem("lastLoginAccount", HoldemPoker.Sys.players.account.accountId);
+                var token = HoldemPoker.Sys.players.account.token;
+                if (!token) {
+                    token = "";
+                }
+                //如果是手机模式
+                if (HoldemPoker.Sys.platformRunning) {
+                    //如果使用了手机注册
+                    if (HoldemPoker.Sys.players.account.hasPhone) {
+                        Laya.LocalStorage.setItem(HoldemPoker.Sys.players.account.accountId + ".token", token);
+                    }
+                    else {
+                        Laya.LocalStorage.setItem("wechat.token", token);
+                    }
+                }
+                else {
+                    //直接存储
+                    Laya.LocalStorage.setItem(HoldemPoker.Sys.players.account.accountId + ".token", token);
+                }
+            };
+            /**
+             * 根据accountId读取对应的token
+             * 如果没有读取到对应的token，走正常的账号密码登录流程
+             *
+             * 如果读取到对应token，则直接发送服务器验证
+             *
+             * 如果accountId为null，则按微信登陆的token方式读取
+             * @private
+             * @param {string} accountId
+             * @returns {string}
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.loadToken = function (accountId) {
+                var token = null;
+                if (accountId) {
+                    token = Laya.LocalStorage.getItem(accountId + ".token");
+                }
+                if (!token) {
+                    token = Laya.LocalStorage.getItem("wechat.token");
+                }
+                return token;
+            };
+            LoginMgr.prototype.loadLastAccountId = function () {
+                if (this.lastAccountId) {
+                    return this.lastAccountId;
+                }
+                return Laya.LocalStorage.getItem("lastLoginAccount");
+            };
+            LoginMgr.prototype.loadLastNationCode = function () {
+                if (this.lastNationCode) {
+                    return this.lastNationCode;
+                }
+                return Laya.LocalStorage.getItem("lastNationCode");
+            };
+            LoginMgr.validPhone = function (phoneNumber) {
+                if (phoneNumber.length <= 0) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.emptyAccountName));
+                    return false;
+                }
+                // if (phoneNumber.length !== 11) {
+                //     MessageDialog.showWithText(Sys.localization.get(stringtable.accountNumberError));
+                //     return false;
+                // }
+                if (!(/^[\d]+$/.test(phoneNumber))) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.accountTypeError));
+                    return false;
+                }
+                return true;
+            };
+            LoginMgr.validPassword = function (password) {
+                if (password.length <= 0) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.passwordEmptyError));
+                    return false;
+                }
+                if (password.length > 0 && password.length < 6) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.passwordTooShort));
+                    return false;
+                }
+                if (password.length >= 32) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.passwordTooLong));
+                    return false;
+                }
+                if (!(/^[\da-zA-Z_*]+$/.test(password))) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.passwordError));
+                    return false;
+                }
+                return true;
+            };
+            /**
+             * 登录
+             *
+             * @param {msg.PlayerLoginRequest} data
+             * @param {string} [srv]
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.login = function (data, isAuto) {
+                HoldemPoker.Sys.ui.startLoading();
+                this.isLogin = true;
+                this.loginData = data;
+                if (HoldemPoker.Sys.net.insureConnected) {
+                    this.startLogin(isAuto);
+                }
+                else {
+                    this.connectServer();
+                }
+            };
+            /**
+             * 从房间服务器断开，连接主服务器
+             *
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.reLogin = function () {
+                this.isReLogin = true;
+                if (HoldemPoker.Sys.net.insureConnected) {
+                    this.autoLogin();
+                }
+                else {
+                    this.connectServer();
+                }
+            };
+            /**
+             * 用户自动登录
+             *
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.autoLogin = function () {
+                var lastAccountId = this.loadLastAccountId();
+                var nationCode = this.loadLastNationCode();
+                if (!nationCode) {
+                    nationCode = "86";
+                }
+                if (lastAccountId && lastAccountId.length > 0) {
+                    var lastToken = this.loadToken(lastAccountId);
+                    if (!lastToken) {
+                        return false;
+                    }
+                    var data = {
+                        accountId: lastAccountId,
+                        password: "",
+                        token: lastToken,
+                        version: HoldemPoker.Utility.getVersionJSONString(),
+                        nationCode: nationCode,
+                    };
+                    this.login(data, true);
+                    return true;
+                }
+                return false;
+            };
+            /**
+             * 注册
+             *
+             * @param {msg.PlayerSignUpRequest} data
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.register = function (data) {
+                HoldemPoker.Sys.ui.startLoading();
+                this.isLogin = false;
+                this.registerData = data;
+                if (HoldemPoker.Sys.net.insureConnected) {
+                    this.startRegister();
+                }
+                else {
+                    this.connectServer();
+                }
+            };
+            /**
+             * 忘记密码
+             *
+             * @param {msg.PlayerChangePasswordRequest} data
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.changePwd = function (data) {
+                this.isLogin = false;
+                HoldemPoker.Sys.ui.startLoading();
+                this.changePwdData = data;
+                if (HoldemPoker.Sys.net.insureConnected) {
+                    this.startChangePwd();
+                }
+                else {
+                    this.connectServer();
+                }
+            };
+            /**
+             * 编辑用户信息
+             *
+             * @param {msg.PlayerEditRequest} data
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.editPlayerInfo = function (data) {
+                this.isLogin = false;
+                HoldemPoker.Sys.ui.startLoading();
+                HoldemPoker.Sys.net.sendMesage("PlayerEditRequest", data, Laya.Handler.create(this, this.onEditPlayerInfoResponse), Laya.Handler.create(this, this.onEditPlayerInfoError));
+            };
+            /**
+             * 重新登录
+             *
+             * @param {isInit} boolean
+             *
+             * @memberOf LoginMgr
+             */
+            //public reLogin() {
+            //    if (this.hasConnected) {
+            //        this.startReLogin();
+            //    } else {
+            //        this.connectServer();
+            //    }
+            //}
+            LoginMgr.prototype.sendCaptcha = function (data) {
+                HoldemPoker.Sys.ui.startLoading();
+                this.captchaData = data;
+                if (HoldemPoker.Sys.net.insureConnected) {
+                    this.startSendCaptcha();
+                }
+                else {
+                    this.connectServer();
+                }
+            };
+            LoginMgr.prototype.bindPhone = function (data) {
+                HoldemPoker.Sys.ui.startLoading();
+                HoldemPoker.Sys.net.sendMesage("PlayerBindPhoneRequest", data, Laya.Handler.create(this, this.onBindPhoneResponse), Laya.Handler.create(this, this.onBindPhoneError));
+            };
+            LoginMgr.prototype.unBindPhone = function (data) {
+                HoldemPoker.Sys.ui.startLoading();
+                HoldemPoker.Sys.net.sendMesage("PlayerUnbindPhoneRequest", data, Laya.Handler.create(this, this.onUnBindPhoneResponse), Laya.Handler.create(this, this.onBindPhoneError));
+            };
+            LoginMgr.prototype.startLogin = function (isAuto) {
+                if (isAuto) {
+                    this.loginData.token = this.loadToken(this.loginData.accountId);
+                }
+                HoldemPoker.Sys.net.sendMesage("PlayerLoginRequest", this.loginData, Laya.Handler.create(this, this.onSessionKeyResponse), Laya.Handler.create(this, this.onLoginError));
+            };
+            LoginMgr.prototype.getPlayerInfo = function () {
+                HoldemPoker.Sys.net.sendMesage("PlayerInfoRequest", {}, Laya.Handler.create(this, this.onPlayerInfoResponse), Laya.Handler.create(this, this.onPlayerInfoError));
+            };
+            LoginMgr.prototype.sendWechatCode = function (code) {
+                this.isWeixinLogin = true;
+                this.wechatCodeData = {
+                    code: code,
+                    version: HoldemPoker.Utility.getVersionJSONString(),
+                };
+                // Sys.ui.startLoading();
+                if (HoldemPoker.Sys.net.insureConnected) {
+                    this.startSendWechatCode();
+                }
+                else {
+                    this.connectServer();
+                }
+                // this.getIP().then(flag => {
+                //     if (flag === false) {
+                //         MessageDialog.showWithText('获取服务器地址失败');
+                //         return;
+                //     }
+                //     this.isWeixinLogin = true;
+                //     this.wechatCodeData = {
+                //         code: code,
+                //         version: Utility.getVersionJSONString(),
+                //     };
+                //     if (Sys.net.insureConnected) {
+                //         this.startSendWechatCode();
+                //     } else {
+                //         if (Sys.net.insureConnected) {
+                //             return;
+                //         }
+                //         this.registerEvent();
+                //         if (OFFLINE_MODE) {
+                //             this.event(GEvent.LOGIN_SUCCESS);
+                //         }
+                //         else {
+                //             Sys.net.connectServerByName(null, this.serverIp, 9555);
+                //         }
+                //     }
+                // });
+            };
+            LoginMgr.prototype.logout = function () {
+                HoldemPoker.Sys.net.sendMesage("PlayerLogoutRequest", {}, Laya.Handler.create(this, this.onLogoutResponse), Laya.Handler.create(this, this.onLogoutError));
+            };
+            LoginMgr.prototype.cleanLoginData = function () {
+                HoldemPoker.Sys.players.account = null;
+                this.saveAccount(false);
+            };
+            LoginMgr.prototype.startRegister = function () {
+                HoldemPoker.Sys.net.sendMesage("PlayerSignUpRequest", this.registerData, Laya.Handler.create(this, this.onSessionKeyResponse), Laya.Handler.create(this, this.onRegisterError));
+            };
+            LoginMgr.prototype.startChangePwd = function () {
+                HoldemPoker.Sys.net.sendMesage("PlayerChangePasswordRequest", this.changePwdData, Laya.Handler.create(this, this.onSessionKeyResponse), Laya.Handler.create(this, this.onChangePwdError));
+            };
+            LoginMgr.prototype.startSendCaptcha = function () {
+                HoldemPoker.Sys.net.sendMesage("PlayerCaptchaRequest", this.captchaData, Laya.Handler.create(this, this.onSendCaptchaResponse), Laya.Handler.create(this, this.onSendCaptchaError));
+            };
+            LoginMgr.prototype.startSendWechatCode = function () {
+                HoldemPoker.Sys.net.sendMesage("PlayerWechatLoginRequest", this.wechatCodeData, Laya.Handler.create(this, this.onSessionKeyResponse), Laya.Handler.create(this, this.onWechatLoginError));
+            };
+            LoginMgr.prototype.registerEvent = function () {
+                if (this.hasListenNetwork) {
+                    return;
+                }
+                HoldemPoker.Sys.net.on(HoldemPoker.GEvent.CONNECT_OK, this, this.onConnectSuccess);
+                HoldemPoker.Sys.net.on(HoldemPoker.GEvent.CONNECT_ERROR, this, this.onConnectFail);
+                HoldemPoker.Sys.net.on(HoldemPoker.GEvent.CONNECT_CLOSE, this, this.onConnectFail);
+                this.hasListenNetwork = true;
+            };
+            LoginMgr.prototype.unregisterEvent = function () {
+                this.hasListenNetwork = false;
+                HoldemPoker.Sys.net.off(HoldemPoker.GEvent.CONNECT_OK, this, this.onConnectSuccess);
+                HoldemPoker.Sys.net.off(HoldemPoker.GEvent.CONNECT_ERROR, this, this.onConnectFail);
+                HoldemPoker.Sys.net.off(HoldemPoker.GEvent.CONNECT_CLOSE, this, this.onConnectFail);
+            };
+            LoginMgr.prototype.connectServer = function () {
+                if (HoldemPoker.Sys.net.insureConnected) {
+                    return;
+                }
+                this.registerEvent();
+                if (HoldemPoker.OFFLINE_MODE) {
+                    this.event(HoldemPoker.GEvent.LOGIN_SUCCESS);
+                }
+                else {
+                    if (this.serverURL === null) {
+                        this.serverURL = "public";
+                    }
+                    HoldemPoker.Sys.net.connectServerByName(this.serverURL, this.serverIp);
+                }
+                // this.getIP().then(flag => {
+                //     if (flag === false) {
+                //         MessageDialog.showWithText('获取服务器地址失败');
+                //         return;
+                //     }
+                //     if (Sys.net.insureConnected) {
+                //         this.startSendWechatCode();
+                //     } else {
+                //         if (Sys.net.insureConnected) {
+                //             return;
+                //         }
+                //         this.registerEvent();
+                //         if (OFFLINE_MODE) {
+                //             this.event(GEvent.LOGIN_SUCCESS);
+                //         }
+                //         else {
+                //             Sys.net.connectServerByName(null, this.serverIp, 9555);
+                //         }
+                //     }
+                // });
+            };
+            // mark by David，
+            // 删除单独的token请求，直接在login消息中下发
+            /*
+             public requestToken() {
+             Sys.net.sendMesage("PlayerTokenRequest", { tokenType: 1 },
+             Laya.Handler.create(this, this.onRequestTokenResponse),
+             Laya.Handler.create(this, this.onRequestTokenError));
+             }
+             */
+            LoginMgr.prototype.onConnectSuccess = function () {
+                // todo: 不能取消网络状态监听。最好重构，把状态监听放入state中
+                // davidzeng
+                //成功后取消连接用的消息回调
+                //this.unregisterEvent();
+                //重置重连次数
+                this.reconnectCount = 0;
+                console.debug("[MainServer] connect succeed.");
+                if (this.isReLogin) {
+                    this.isReLogin = false;
+                    this.autoLogin();
+                }
+                else if (this.loginData) {
+                    this.startLogin(false);
+                }
+                else if (this.registerData) {
+                    this.startRegister();
+                }
+                else if (this.changePwdData) {
+                    this.startChangePwd();
+                }
+                else if (this.captchaData) {
+                    this.startSendCaptcha();
+                }
+                else if (this.wechatCodeData) {
+                    this.startSendWechatCode();
+                }
+            };
+            /**
+             * 请求改为返回session
+             * 用sessionKey去连接
+             * by guo
+             * @param sessionData
+             */
+            LoginMgr.prototype.onSessionKeyResponse = function (sessionData) {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        HoldemPoker.BenchmarkHelper.timeEnd('LoginAction-MainUI', 'getLoginToken', false);
+                        //设置sessionKey到账户信息
+                        if (!HoldemPoker.Sys.players.account) {
+                            HoldemPoker.Sys.players.account = new HoldemPoker.AccountInfo();
+                        }
+                        HoldemPoker.Sys.net.event(HoldemPoker.GEvent.NET_OK);
+                        HoldemPoker.Sys.players.account.sessionKey = sessionData.sessionKey;
+                        // await Utility.waitForSeconds(2000);
+                        HoldemPoker.Sys.net.sendMesage("PlayerConnectRequest", { sessionKey: sessionData.sessionKey }, Laya.Handler.create(this, this.onPlayerConnectResponse), Laya.Handler.create(this, this.onLoginError));
+                        return [2 /*return*/];
+                    });
+                });
+            };
+            /**
+             * 替换以前的onLoginResponse
+             * by guo
+             * @param data
+             */
+            LoginMgr.prototype.onPlayerConnectResponse = function (data) {
+                HoldemPoker.BenchmarkHelper.timeEnd('LoginAction-MainUI', 'PlayerConnectResponse', false);
+                if (HoldemPoker.Sys.ui.statusBar) {
+                    HoldemPoker.Sys.ui.statusBar.netOk();
+                }
+                try {
+                    var clubData_1 = JSON.parse(data.player.club);
+                    var aa = Object.keys(clubData_1).map(function (key) {
+                        return {
+                            id: key,
+                            name: clubData_1[key]
+                        };
+                    });
+                    HoldemPoker.Sys.players.self.clubData = aa;
+                    HoldemPoker.NativeModule.registerNotification(data.player.playerId);
+                }
+                catch (e) {
+                    console.log(e);
+                }
+                this.reconnectCount = 0;
+                HoldemPoker.Sys.net.event(HoldemPoker.GEvent.NET_RECONNECT_SUCCESS);
+                // Sys.ui.stopLoading();
+                HoldemPoker.NativeModule.onGameLoaded();
+                this.reconnectData = data.player.reconnect;
+                if (this.wechatCodeData) {
+                    this.setLocalData(data, true);
+                }
+                else {
+                    this.setLocalData(data, false);
+                }
+                if (HoldemPoker.Sys.fsm.currentState() === HoldemPoker.GameState.LoadingState) {
+                    HoldemPoker.Sys.ui.stopLoading();
+                    this.event(HoldemPoker.GEvent.LOGIN_SUCCESS);
+                    HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.MainState);
+                }
+                else {
+                    if (this.registerData) {
+                        HoldemPoker.Sys.ui.stopLoading();
+                        this.event(HoldemPoker.GEvent.REGISTER_SUCCESS);
+                        this.registerData = null;
+                    }
+                    else if (this.changePwdData) {
+                        HoldemPoker.Sys.ui.stopLoading();
+                        this.event(HoldemPoker.GEvent.CHANGE_PWD_SUCCESS);
+                        this.changePwdData = null;
+                    }
+                    else if (this.wechatCodeData) {
+                        this.isWeixinLogin = false;
+                        if (this.isLogin) {
+                            this.isLogin = false;
+                            if (data.player.hasPhone === true) {
+                                this.event(HoldemPoker.GEvent.LOGIN_SUCCESS);
+                            }
+                            else {
+                                HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.BindPhoneState);
+                            }
+                        }
+                        else {
+                            this.event(HoldemPoker.GEvent.EDIT_PLAYERINFO_SUCCESS);
+                        }
+                        this.wechatCodeData = null;
+                    }
+                    else {
+                        this.event(HoldemPoker.GEvent.LOGIN_SUCCESS);
+                    }
+                }
+                HoldemPoker.Sys.net.startHearbeat();
+            };
+            LoginMgr.prototype.onLogoutResponse = function (data) {
+                HoldemPoker.Sys.players.logout();
+                HoldemPoker.Sys.net.closeSocket();
+                this.dispose();
+            };
+            LoginMgr.prototype.onPlayerInfoResponse = function (data) {
+                this.setAccountInfo(data.player);
+            };
+            /*
+             private onReLoginResponse(data: msg.PlayerConnectResponse) {
+             Sys.ui.stopLoading();
+             if (!Sys.players.self.id) {
+             this.getPlayerInfo();
+             if (Sys.fsm.currentState() === GameState.LoadingState) {
+             Sys.fsm.Go(GameState.MainState);
+             }
+             } else {
+             // 重新连接消息中心
+             Sys.message.connectNotifyCenter();
+             // 重新拉取比赛列表
+             Sys.games.mainUIMgr.matchViewUI.firstRenderList();
+             }
+             }
+             */
+            LoginMgr.prototype.onEditPlayerInfoResponse = function (data) {
+                this.reconnectCount = 0;
+                HoldemPoker.Sys.ui.stopLoading();
+                if (data.player.isUpload) {
+                    this.event(HoldemPoker.GEvent.UPLOAD_AVATAR_SUCCESS, data.player.icon);
+                }
+                else {
+                    this.setLocalData(data, false);
+                    this.event(HoldemPoker.GEvent.EDIT_PLAYERINFO_SUCCESS);
+                }
+            };
+            LoginMgr.prototype.onSendCaptchaResponse = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                var restTime = data.banTime ? data.banTime : 0;
+                this.event(HoldemPoker.GEvent.SEND_CAPTCHA_SUCCESS, data);
+            };
+            /**
+             * 设置玩家自己的账号信息
+             * @param player 玩家账户信息
+             */
+            LoginMgr.prototype.setAccountInfo = function (player) {
+                var account = HoldemPoker.Sys.players.account;
+                if (!account) {
+                    account = new HoldemPoker.AccountInfo();
+                }
+                account.playerId = player.playerId;
+                account.token = player.token;
+                account.hasPhone = player.hasPhone;
+                account.openId = null;
+                if (player.isWeixin) {
+                    account.isWeixin = player.isWeixin;
+                }
+                account.accountId = player.accountId;
+                HoldemPoker.Sys.players.account = account;
+                // todo: 需要区分账号信息和个人信息
+                //       个人信息和其他玩家信息一致
+                this.setPlayerInfo(player);
+            };
+            /**
+             * 设置玩家个人信息
+             *
+             * @private
+             * @param {msg.Player} player
+             *
+             * @memberOf LoginMgr
+             */
+            LoginMgr.prototype.setPlayerInfo = function (player) {
+                var self = HoldemPoker.Sys.players.self;
+                self.name = player.name;
+                /**
+                 * 兼容以前
+                 * http开头的 | base64的
+                 */
+                if (/^http.*/.test(player.icon) || /:(.*?);/.test(player.icon)) {
+                    self.icon = player.icon;
+                }
+                else {
+                    self.icon = HoldemPoker.Utility.getImgUrl + player.icon;
+                }
+                self.id = player.playerId;
+                self.gold = player.gold;
+                self.gender = player.gender;
+                self.signature = player.signature;
+                self.playerName = player.playerName;
+                self.token = player.token;
+                self.servers = player.servers;
+                self.diamond = player.diamond;
+                if (player.playerData) {
+                    self.handCount = player.playerData.handCount;
+                    self.inPotCount = player.playerData.inPotCount;
+                    self.raceCount = player.playerData.raceCount;
+                    self.rewardCount = player.playerData.rewardCount;
+                }
+                if (player.settings) {
+                    var jsonObject = JSON.parse(player.settings);
+                    self.settingsObject = jsonObject;
+                }
+                //装备的吉祥物
+                self.equippedMascot = player.takeMascot;
+                if (player.clubLevel) {
+                    self.clubLevel = JSON.parse(player.clubLevel);
+                }
+                if (player.cardStyle) {
+                    self.cardStyle = player.cardStyle;
+                }
+                if (player.tableStyle) {
+                    self.tableStyle = player.tableStyle;
+                    HoldemPoker.Sys.isSimple = self.tableStyle === "simple";
+                }
+                Laya.LocalStorage.setItem("FasterRaise_" + HoldemPoker.Sys.players.self.id, player.addBetType);
+                //todo: 用消息的方式通知界面更新
+            };
+            //todo: 区分账号信息和玩家个人信息。
+            //      个人信息以后和其他玩家信息一致
+            LoginMgr.prototype.setLocalData = function (data, isWechat) {
+                this.reconnectCount = 0;
+                this.setAccountInfo(data.player);
+                this.saveAccount(isWechat);
+                // 连接消息中心
+                // Sys.message.connectNotifyCenter();
+                if (HoldemPoker.MainUIMgr.mttIncode) {
+                    HoldemPoker.Sys.games.mainUIMgr.joinMtt(HoldemPoker.MainUIMgr.mttIncode);
+                }
+            };
+            LoginMgr.prototype.onBindPhoneResponse = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                this.setAccountInfo(data.player);
+                this.event(HoldemPoker.GEvent.BIND_PHONE_SUCCESS);
+            };
+            LoginMgr.prototype.onUnBindPhoneResponse = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                this.setAccountInfo(data.player);
+                this.event(HoldemPoker.GEvent.UN_BIND_PHONE_SUCCESS);
+            };
+            LoginMgr.prototype.checkLoginErrorMsg = function (data) {
+                var versionInfo;
+                //如果json解析错误
+                try {
+                    versionInfo = JSON.parse(HoldemPoker.Utility.getVersionJSONString());
+                    if (HoldemPoker.msg.Codes.ErrPlayerVersionNotAllowed === data.codes) {
+                        var versionText = versionInfo.res.type + "_" + versionInfo.res.version + "_" + versionInfo.res.build_version + "_" + versionInfo.res.date;
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.notRightVersion, versionText), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                        return false;
+                    }
+                    else if (HoldemPoker.msg.Codes.ErrPlayerVersionUpgrade === data.codes) {
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.upgradeVersion), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok), Laya.Handler.create(this, function () {
+                            if (!HoldemPoker.NativeModule.isIos()) {
+                                HoldemPoker.NativeModule.openWebview("https://fir.im/androidpoker");
+                            }
+                            else {
+                                HoldemPoker.NativeModule.openWebview("https://itunes.apple.com/cn/app/%E5%BE%AE%E8%B5%9B%E5%BE%B7%E5%B7%9E%E6%89%91%E5%85%8B/id1225492097?l=zh&ls=1&mt=8");
+                            }
+                        }));
+                        return false;
+                    }
+                    else if (HoldemPoker.msg.Codes.ErrPlayerVersionRestart === data.codes) {
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.updatedVersion), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                        return false;
+                    }
+                    else if (HoldemPoker.msg.Codes.ErrServerMaintenance === data.codes) {
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ServerMaintenance), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                        return false;
+                    }
+                }
+                catch (e) {
+                    HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.upgradeVersion), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                    return false;
+                }
+                return true;
+            };
+            LoginMgr.prototype.onLoginError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                if (this.checkLoginErrorMsg(data)) {
+                    if (HoldemPoker.Sys.fsm.currentState() !== HoldemPoker.GameState.LoginState) {
+                        HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.LoginState);
+                    }
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                }
+                this.loginData = null;
+            };
+            LoginMgr.prototype.onPlayerInfoError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+            };
+            LoginMgr.prototype.onRegisterError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                this.registerData = null;
+                if (this.checkLoginErrorMsg(data)) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                }
+            };
+            LoginMgr.prototype.onLogoutError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+            };
+            LoginMgr.prototype.onChangePwdError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                this.changePwdData = null;
+            };
+            LoginMgr.prototype.onEditPlayerInfoError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+            };
+            // private onRequestTokenError(data: msg.ErrorMsg) {
+            //     Sys.ui.stopLoading();
+            //     MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+            //     this.cleanLoginData();
+            //     Sys.fsm.Go(GameState.LoginState);
+            // }
+            // private onReLoginError(data: msg.ErrorMsg) {
+            //     Sys.ui.stopLoading();
+            //     MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+            //     this.cleanLoginData();
+            //     Sys.fsm.Go(GameState.LoginState);
+            // }
+            LoginMgr.prototype.onSendCaptchaError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                var versionInfo;
+                //如果json解析错误
+                try {
+                    versionInfo = JSON.parse(HoldemPoker.Utility.getVersionJSONString());
+                    if (HoldemPoker.msg.Codes.ErrPlayerVersionNotAllowed === data.codes) {
+                        var versionText = versionInfo.res.type + "_" + versionInfo.res.version + "_" + versionInfo.res.build_version + "_" + versionInfo.res.date;
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.notRightVersion, versionText), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                        return;
+                    }
+                    else if (HoldemPoker.msg.Codes.ErrPlayerVersionUpgrade === data.codes) {
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.upgradeVersion), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok), Laya.Handler.create(this, function () {
+                            if (!HoldemPoker.NativeModule.isIos()) {
+                                HoldemPoker.NativeModule.openWebview("https://fir.im/androidpoker");
+                            }
+                            else {
+                                HoldemPoker.NativeModule.openWebview("https://itunes.apple.com/cn/app/%E5%BE%AE%E8%B5%9B%E5%BE%B7%E5%B7%9E%E6%89%91%E5%85%8B/id1225492097?l=zh&ls=1&mt=8");
+                            }
+                        }));
+                        return;
+                    }
+                    else if (HoldemPoker.msg.Codes.ErrPlayerVersionRestart === data.codes) {
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.updatedVersion), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                        return;
+                    }
+                    else if (HoldemPoker.msg.Codes.ErrServerMaintenance === data.codes) {
+                        HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ServerMaintenance), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                        return;
+                    }
+                }
+                catch (e) {
+                    HoldemPoker.AlertDialog.showWithText(HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.upgradeVersion), HoldemPoker.Sys.localization.get(HoldemPoker.stringtable.ok));
+                    return;
+                }
+                this.event(HoldemPoker.GEvent.SEND_CAPTCHA_ERROR);
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                this.captchaData = null;
+            };
+            LoginMgr.prototype.onBindPhoneError = function (data) {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+            };
+            LoginMgr.prototype.onWechatLoginError = function (data) {
+                this.isWeixinLogin = false;
+                HoldemPoker.Sys.ui.stopLoading();
+                if (this.checkLoginErrorMsg(data)) {
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(data.codes));
+                }
+                this.wechatCodeData = null;
+            };
+            LoginMgr.prototype.onConnectFail = function () {
+                // console.log('onConnectFailonConnectFail');
+                Laya.timer.clear(this, this.reLogin);
+                if (HoldemPoker.Sys.fsm.currentState() === HoldemPoker.GameState.MainState) {
+                    HoldemPoker.Sys.ui.stopLoading();
+                    if (this.reconnectCount <= 1) {
+                        this.reconnectCount++;
+                        // MessageDialog.showWithText("Disconnected, reconnecting...");
+                        if (!this.isWeixinLogin) {
+                            if (HoldemPoker.Sys.ui.statusBar) {
+                                HoldemPoker.Sys.ui.statusBar.stopNetStatusCheck();
+                            }
+                            console.log('2s后自动重连……');
+                            Laya.timer.once(2000, this, this.reLogin);
+                        }
+                        return;
+                    }
+                    if (this.reconnectCount === 2) {
+                        this.reconnectCount++;
+                        //在俱乐部，清除俱乐部所有
+                        if (HoldemPoker.ClubScene.inClubState) {
+                            HoldemPoker.ClubScene.inst.deactivate();
+                        }
+                        HoldemPoker.MessagePrompt.openPrompt(HoldemPoker.Sys.localization.getFormated(HoldemPoker.stringtable.reConnectionSocket), Laya.Handler.create(this, this.reLogin), Laya.Handler.create(this, function () {
+                            HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.LoginState);
+                        }));
+                        return;
+                    }
+                    if (this.reconnectCount >= 3) {
+                        this.reconnectCount++;
+                        HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.LoginState);
+                        HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(10));
+                        //在俱乐部，清除俱乐部所有
+                        if (HoldemPoker.ClubScene.inClubState) {
+                            HoldemPoker.ClubScene.inst.deactivate();
+                        }
+                    }
+                    return;
+                }
+                else if (HoldemPoker.Sys.fsm.currentState() === HoldemPoker.GameState.InGameState) {
+                    HoldemPoker.Sys.ui.stopLoading();
+                    //在牌桌页面不作处理
+                }
+                else if (HoldemPoker.Sys.fsm.currentState() !== HoldemPoker.GameState.LoginState) {
+                    HoldemPoker.Sys.ui.stopLoading();
+                    HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(10));
+                    HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.LoginState);
+                    //在俱乐部，清除俱乐部所有
+                    if (HoldemPoker.ClubScene.inClubState) {
+                        HoldemPoker.ClubScene.inst.deactivate();
+                    }
+                }
+            };
+            LoginMgr.prototype.onConnectTimeout = function () {
+                HoldemPoker.Sys.ui.stopLoading();
+                HoldemPoker.MessageDialog.showWithText(HoldemPoker.Utility.toMessageWithCode(11));
+                if (HoldemPoker.Sys.fsm.currentState() !== HoldemPoker.GameState.LoginState) {
+                    HoldemPoker.Sys.fsm.Go(HoldemPoker.GameState.LoginState);
+                }
+            };
+            LoginMgr.prototype.dispose = function () {
+                this.serverURL = null;
+                //特殊处理
+                this.hasError = false;
+                this.reconnectCount = 0;
+                this.isLogin = false;
+                this.loginData = null;
+                this.registerData = null;
+                this.changePwdData = null;
+                this.captchaData = null;
+                this.wechatCodeData = null;
+                this.isReLogin = false;
+                this.reconnectData = null;
+                this.lastAccountId = null;
+                this.hasListenNetwork = false;
+                this.isWeixinLogin = false;
+            };
+            return LoginMgr;
+        }(Laya.EventDispatcher));
+        HoldemPoker.LoginMgr = LoginMgr;
+    })(HoldemPoker = wesai.HoldemPoker || (wesai.HoldemPoker = {}));
+})(wesai || (wesai = {}));
+//# sourceMappingURL=LoginMgr.js.map

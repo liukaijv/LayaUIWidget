@@ -1,0 +1,737 @@
+namespace wesai.HoldemPoker {
+
+    export enum FoundTapType {
+        Club = 0,
+        SNG = 1,
+        Official = 2,
+        My = 3
+    }
+
+    export class MatchUI extends ui.found.MatchLIstViewUI implements GameUIBase, MenuListClickListener {
+
+        private listData: msg.Room[] = [];
+
+        public myMatchList: ListView;
+
+        private emptyUi: Club.Components.EmptyUI;
+
+        //banner焦点图
+        private bannerCarousel: SlideWidget;
+        private bannerSlide: SlideWidget;
+
+        private bannerData = Sys.players.self.settingsObject.banners;
+
+        private clubMenu: ClubListMenu;
+
+        public currentClub: msg.Club = null;
+
+        private lastClub: msg.Club;
+
+        private listRepeatX: number;
+
+        private bannarOption: SlideOptions = {
+            container: this.bannerBox,
+            width: Laya.stage.width,
+            height: 229 * Laya.stage.width / 750,
+            x: 0,
+            y: 0,
+            defaultImageUrl: '1334/mainGame/banner.png',
+            autoPlay: true,
+            showDots: false,
+            showPager: true,
+            speed: 300,
+            delay: 4000,
+            swipeThreshold: 0.3,
+            clickHandler: this.onSlideClick
+        };
+
+        /**
+         * 点击
+         * @param index
+         */
+        private onSlideClick(index: number) {
+            if (!this.bannerData) {
+                return;
+            }
+            let len = this.bannerData.length;
+            index = index >= len ? 0 : index;
+            // console.log('clicked slide index' + index);
+            let itemData = this.bannerData[index];
+            if (itemData) {
+                itemData.linkType = parseInt(itemData.linkType);
+                if (itemData.linkType === 1) {
+                    // Laya.Browser.window.location.href = itemData.url;
+                    console.log('jump url just work in native mode');
+                    if (itemData.url.length > 0) {
+                        NativeModule.openWebview(laya.utils.Browser.window.decodeURIComponent(itemData.url));
+                    }
+                }
+                else if (itemData.linkType === 2) {
+                    let room = RoomRepository.inst.getRoomByRaceId(itemData.raceId);
+                    Sys.matchList.joinMatchRoom(room);
+                }
+            }
+        }
+
+        constructor() {
+            super();
+
+            /**
+             * 数据为空UI
+             */
+            if (this.emptyUi === undefined) {
+                this.emptyUi = Laya.Pool.getItemByClass('EmptyUI', Club.Components.EmptyUI);
+                this.emptyUi.init('', 0, 100);
+                this.addChild(this.emptyUi);
+            }
+
+            if (this.bannerCarousel === undefined) {
+                //轮播图
+                let banners: string[] = [];
+                if (this.bannerData && Array.isArray((this.bannerData))) {
+                    for (let banner of this.bannerData) {
+                        banners.push(banner.imageURL);
+                    }
+                }
+                this.bannerCarousel = new SlideWidget(banners, this.bannarOption);
+                if (Sys.isPad) {
+                    this.bannerBox.height = 229 * Laya.stage.width / 750;
+                    this.tabBox.y = this.bannerBox.y + this.bannerBox.height;
+                }
+            }
+            this.onLanguageChanged();
+            this.Initalize();
+
+            this.RegisterUIEvent();
+
+            this.createList();
+
+            this.clubMenu = new ClubListMenu();
+            this.clubMenu.visible = false;
+            Laya.stage.addChild(this.clubMenu);
+            this.clubMenu.setOnMenuListClickListener(this);
+
+            this.setListData();
+        }
+
+        /**
+         *初始化值
+         * @type {string}
+         */
+        public Initalize(): void {
+
+            this.initClubTab();
+            this.matchLIstTab.selectedIndex = 0;
+            this.topTab.selectedIndex = 0;
+            this.onTabSelect(this.matchLIstTab.selectedIndex);
+            this.currentTab = FoundTapType.Club;
+            this.tabBox.left = 0;
+            this.tabBox.right = 0;
+            this.tabBox.width = Sys.width;
+            this.matchLIstTab.left = 0;
+            this.matchLIstTab.right = 0;
+            this.matchLIstTab.width = Sys.width;
+
+            this.clubBtn.width = Sys.width / 4;
+            this.officialBtn.width = Sys.width / 4;
+            this.MTTBtn.width = Sys.width / 4;
+            this.myBtn.width = Sys.width / 4;
+        }
+
+        private initClubTab() {
+            this.lastClub = Laya.LocalStorage.getJSON("matchUIClub");
+            if (Sys.players.self.clubData && Sys.players.self.clubData.length > 0) {
+                if (this.lastClub) {
+                    for (let club of Sys.players.self.clubData) {
+                        let id = parseInt(club.id);
+                        if (id === this.lastClub.id) {
+                            this.titleText.label = Utility.abbrString(club.name, 12);
+                            this.currentClub = this.lastClub;
+                            Laya.LocalStorage.setJSON("matchUIClub", this.currentClub);
+                            return;
+                        }
+                    }
+                    this.titleText.label = Utility.abbrString(Sys.players.self.clubData[0].name, 12);
+                    this.currentClub = Sys.players.self.clubData[0];
+                    Laya.LocalStorage.setJSON("matchUIClub", this.currentClub);
+                } else {
+                    this.titleText.label = Utility.abbrString(Sys.players.self.clubData[0].name, 12);
+                    this.currentClub = Sys.players.self.clubData[0];
+                    Laya.LocalStorage.setJSON("matchUIClub", this.currentClub);
+                }
+            } else {
+                this.titleText.label = Sys.localization.get(stringtable.officialgamelistText);
+                this.currentClub = null;
+            }
+        }
+
+        RegisterUIEvent(): void {
+            Sys.localization.event.on(GEvent.LANGUAGE_CHANGED, this, this.onLanguageChanged);
+            // 断线重连成功后拉取数据
+            Sys.login.on(GEvent.LOGIN_SUCCESS, this, () => {
+                if (this.currentClub) {
+                    RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: RoomRepository.roomListTabIndex,
+                        clubId: this.currentClub.id
+                    }, true);
+                } else {
+                    RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: RoomRepository.roomListTabIndex
+                    }, true);
+                }
+
+            });
+
+
+            /**
+             * 接收数据更新通知
+             */
+            RoomRepository.inst.on(EVENT_ROOM_UPDATE, this, this.onRoomListUpdate);
+            /**
+             * 接收数据列表通知
+             */
+            RoomRepository.inst.on(EVENT_ROOM_LIST, this, this.onRoomListResponse);
+            this.mScrollView.vScrollBar.changeHandler = new Laya.Handler(this, this.scroll);
+            this.mScrollView.vScrollBarSkin = "";
+            this.titleText.on(Laya.Event.CLICK, this, this.onClubClick);
+            ClubScene.inst.on(EVENT_CLUB_DESTROY, this, this.updateClubMenuList);
+            ClubScene.inst.on(EVENT_CLUB_DEACTIVATE, this, this.leaveClub);
+            Sys.net.registerNotifyMsg('ClubKickOutNotify', this, this.onKickOut);
+            Sys.net.registerNotifyMsg('Club', this, this.updateClubMenuList);
+            this.matchLIstTab.selectHandler = new Laya.Handler(this, this.onTabSelect);
+            this.msgBtn.on(Laya.Event.CLICK, this, this.onMsgOpen);
+
+            this.ckhiddeTable.on(Laya.Event.CLICK, this, this.onHiddeClick, [this.ckhiddeTable]);
+            this.ckhiddeTable1.on(Laya.Event.CLICK, this, this.onHiddeClick, [this.ckhiddeTable1]);
+        }
+
+        private onHiddeClick(ck: Laya.CheckBox) {
+            if (ck.selected) {
+                this.ckhiddeTable.selected = true;
+                this.ckhiddeTable1.selected = true;
+
+                this.listData = RoomRepository.inst.hiddeFullRoomList(this.currentList);
+                this.setListData();
+            } else {
+                this.ckhiddeTable.selected = false;
+                this.ckhiddeTable1.selected = false;
+                this.listData = this.currentList;
+                this.setListData();
+            }
+
+        }
+
+        private currentList: msg.Room[];
+
+        private onRoomListResponse(rooms: msg.Room[]) {
+            if (!this.displayedInStage) {
+                return;
+            }
+
+            this.added = false;
+            if (this.matchLIstTab.selectedIndex === FoundTapType.Official || this.matchLIstTab.selectedIndex === FoundTapType.SNG) {
+                rooms = RoomRepository.inst.getSortRoomList(rooms, this.matchLIstTab.selectedIndex);
+            }
+            this.currentList = rooms;
+            if (this.ckhiddeTable.selected) {
+                this.listData = RoomRepository.inst.hiddeFullRoomList(this.currentList);
+            } else {
+                this.listData = this.currentList;
+            }
+            this.emptyUi.visible = this.listData.length === 0;
+            this.setListData();
+        }
+
+
+        private onRoomListUpdate() {
+            if (Sys.fsm.currentState() !== GameState.MainState) {
+                return;
+            }
+            if (!this.displayedInStage) {
+                return;
+            }
+            let rooms;
+            if (this.matchLIstTab.selectedIndex === FoundTapType.Official || this.matchLIstTab.selectedIndex === FoundTapType.SNG) {
+                rooms = RoomRepository.inst.getRooms(msg.RoomListType.RoomListOfficial);
+            } else if (this.matchLIstTab.selectedIndex === FoundTapType.Club) {
+                rooms = RoomRepository.inst.getRooms(msg.RoomListType.RoomListClub);
+            } else {
+                rooms = RoomRepository.inst.getRooms(msg.RoomListType.RoomListPersonal);
+            }
+            if (this.matchLIstTab.selectedIndex === FoundTapType.Official || this.matchLIstTab.selectedIndex === FoundTapType.SNG) {
+                rooms = RoomRepository.inst.getSortRoomList(rooms, this.matchLIstTab.selectedIndex);
+            }
+            this.currentList = rooms;
+            if (this.ckhiddeTable.selected) {
+                this.listData = RoomRepository.inst.hiddeFullRoomList(this.currentList);
+            } else {
+                this.listData = this.currentList;
+            }
+            this.added = false;
+            this.emptyUi.visible = this.listData.length === 0;
+            this.setListData();
+        }
+
+        point: Laya.Point = new Laya.Point(0, 0);
+        isPos: boolean = false;
+        flag: number = 0;
+
+        private scroll() {
+            this.point.x = this.tabPos.x;
+            this.point.y = this.tabPos.y;
+            this.tabPos.localToGlobal(this.point);
+
+            let scrollValue = this.mScrollView.vScrollBar.value;
+            if (scrollValue > 225) {
+                this.tabBox.visible = false;
+                this.topBox.visible = true;
+
+                this.matchLIstTab.selectHandler = null;
+                this.topTab.selectHandler = new Laya.Handler(this, this.onTabSelect);
+
+                if (this.listData.length >= 50) {
+                    this.mScrollView.visible = false;
+                    // this.mScrollView.mouseEnabled = false;
+                    this.listView.visible = true;
+                    this.listView.scrollBar.changeHandler = new Laya.Handler(this, this.listScroll);
+                    this.listView.scrollBar.value = scrollValue - 225;
+                    // this.mScrollView.vScrollBar.mouseEnabled = false;
+                    this.isListScroll = false;
+                }
+
+            } else {
+                if (this.isListScroll) {
+                    this.tabBox.visible = true;
+                    this.topBox.visible = false;
+                    this.isPos = false;
+
+                    this.matchLIstTab.selectHandler = new Laya.Handler(this, this.onTabSelect);
+                    this.topTab.selectHandler = null;
+                }
+            }
+
+            if (this.flag < 1) {
+                this.flag++;
+                this.mScrollView.vScrollBar.max = this.mScrollView.vScrollBar.max + 100;
+            }
+            this.scollValue = this.mScrollView.vScrollBar.value;
+        }
+
+        scollValue: number;
+        canScoll: boolean;
+
+        UnregisterUIEvent(): void {
+            this.offAll();
+            Sys.localization.event.off(GEvent.LANGUAGE_CHANGED, this, this.onLanguageChanged);
+            Sys.net.unRegisterNotifyMsg('ClubKickOutNotify');
+            Sys.net.unRegisterNotifyMsg('Club');
+            ClubScene.inst.off(EVENT_CLUB_DESTROY, this, this.updateClubMenuList);
+            ClubScene.inst.off(EVENT_CLUB_DEACTIVATE, this, this.updateClubMenuList);
+            this.msgBtn.off(Laya.Event.CLICK, this, this.onMsgOpen);
+        }
+
+        Pause() {
+            Laya.timer.clear(this, this.getClubTableDataByTimer);
+        }
+
+        ClubListResum() {
+            this.tipMassage.visible = Sys.message.isHaveNewMessageData();
+            if (this.matchLIstTab.selectedIndex === FoundTapType.Club) {
+                this.updateClubMenuList();
+                Laya.timer.clear(this, this.getClubTableDataByTimer);
+                Laya.timer.loop(15000, this, this.getClubTableDataByTimer);
+            }
+        }
+
+        Refresh() {
+        }
+
+        Dispose() {
+            Laya.timer.clearAll(this); // 清除此页面的定时器
+            this.UnregisterUIEvent();
+            if (this.clubMenu) {
+                this.clubMenu.Dispose();
+                this.clubMenu = null;
+            }
+        }
+
+        onLanguageChanged() {
+            this.clubBtn.label = Sys.localization.get(stringtable.normalTable);
+            this.officialBtn1.label = Sys.localization.get(stringtable.normalTable);
+
+            // this.clubBtn1.label = Sys.localization.get(stringtable.normalTable);
+            // // this.clubBtn.label = Sys.localization.get(stringtable.officialgamelistText);
+            // // this.clubBtn1.label = Sys.localization.get(stringtable.officialgamelistText);
+            this.myBtn.label = Sys.localization.get(stringtable.clubgamelistText);
+            this.top_myBtn.label = Sys.localization.get(stringtable.clubgamelistText);
+            // this.myBtn1.label = Sys.localization.get(stringtable.clubgamelistText);
+        }
+
+        /**
+         * 创建列表
+         */
+        private createList() {
+            this.myMatchList = new ListView();
+            this.myMatchList.itemRender = GameListItemUI;
+            this.listRepeatX = Math.floor(Sys.width / 750);
+            //列表显示区单元格的列数
+            this.myMatchList.repeatX = this.listRepeatX;
+            //列表显示区单元格的行数
+            this.myMatchList.repeatY = 7;
+
+            this.myMatchList.x = 0;
+            this.myMatchList.y = this.tabBox.y + this.tabBox.height + 10;
+            this.myMatchList.left = 0;
+            this.myMatchList.right = 0;
+            this.myMatchList.selectEnable = true;
+            this.myMatchList.renderHandler = new Laya.Handler(this, this.updateItem);
+            this.myMatchList.mouseHandler = new Laya.Handler(this, this.onMouse);
+
+            this.listView.repeatX = this.listRepeatX;
+            this.listView.itemRender = GameListItemUI;
+            this.listView.selectEnable = true;
+            this.listView.zOrder = 100;
+            this.listView.renderHandler = new Laya.Handler(this, this.updateItem);
+            // this.listView.scrollBar.elasticBackTime = 200;
+            // this.listView.scrollBar.elasticDistance = 50;
+
+            this.listView.mouseHandler = new Laya.Handler(this, this.onMouse);
+            this.listView.visible = false;
+
+            this.isListScroll = true;
+            this.listView.scrollBar.changeHandler = new Laya.Handler(this, this.listScroll);
+
+            // this.mScrollView.vScrollBar.elasticBackTime = 600;
+            // this.mScrollView.vScrollBar.elasticDistance = 100;
+        }
+
+        listScrollValue: number;
+        isListScroll: boolean;
+
+        listScroll() {
+            // if (this.listView.scrollBar.value > 50) {
+            //     this.isListScroll = true;
+            // }
+
+            if (this.listView.scrollBar.value === 0) {
+                this.isListScroll = true;
+                this.listView.scrollBar.changeHandler = null;
+                this.mScrollView.vScrollBar.value = 224;
+                this.listView.visible = false;
+                this.mScrollView.mouseEnabled = true;
+                this.mScrollView.visible = true;
+                this.myMatchList.scrollTo(0);
+            }
+        }
+
+        maxList: any[] = [];
+        added: boolean = false;
+
+        /**
+         * 更新列表数据
+         */
+        private setListData() {
+            if (this.currentTab === FoundTapType.Club) {
+                this.listData.forEach(element => {
+                    if (!this.currentClub) {
+                        element.creatorName = Sys.localization.get(stringtable.officialgamelistText);
+                    } else {
+                        element.creatorName = this.currentClub.name;
+                    }
+                });
+            }
+            let list = [];
+            for (let i = 0; i < 50; i++) {
+                if (i < this.listData.length) {
+                    list.push(this.listData[i]);
+                } else {
+                    break;
+                }
+            }
+            this.myMatchList.array = list;
+            this.listView.repeatY = 6;
+            this.listView.array = this.listData;
+            if (this.listData.length > this.maxList.length) {
+                this.maxList = this.listData;
+            }
+            // this.myMatchList.repeatY = Math.ceil(this.listData.length / this.listRepeatX);
+            this.myMatchList.refresh();
+
+            if (Math.ceil(this.maxList.length / this.listRepeatX) * 260 >= Sys.height - 168) {
+                this.empBox.height = Sys.height - 168;
+                if (this.mScrollView.vScrollBar.value > 410) {
+                    // this.mScrollView.scrollTo(0, 410);
+                }
+            }
+            // if (this.listData.length === 0) {
+            //     this.mScrollView.vScrollBar.elasticBackTime = 0;
+            //     this.mScrollView.vScrollBar.elasticDistance = 0;
+            // } else {
+            //     this.mScrollView.vScrollBar.elasticBackTime = 600;
+            //     this.mScrollView.vScrollBar.elasticDistance = 100;
+            // }
+            if (!this.added) {
+                this.mScrollView.addChild(this.myMatchList);
+                this.flag = 0;
+                this.added = true;
+            }
+            if (this.scollValue) {
+                this.mScrollView.vScrollBar.value = this.scollValue;
+            }
+
+            const tipWords = [
+                Sys.localization.get(stringtable.clubMatchListEmptyTip),
+                Sys.localization.get(stringtable.mttListEmptyTip),
+                Sys.localization.get(stringtable.mttListEmptyTip),
+                Sys.localization.get(stringtable.myMatchListEmptyTip)
+            ];
+            this.emptyUi.textValue.text = tipWords[this.matchLIstTab.selectedIndex];
+
+            //加入了俱乐部但是没有牌桌
+            if (this.matchLIstTab.selectedIndex === FoundTapType.Club && this.listData.length === 0) {
+                // if (this.matchLIstTab.selectedIndex === FoundTapType.Club && this.clubsData.length > 0 && this.listData.length === 0) {
+                //属于哪个俱乐部时
+                if (this.currentClub) {
+                    this.emptyUi.visible = true;
+                    /**
+                     * 枚举变成字符串了？
+                     */
+                    let currentClub: any = this.currentClub;
+                    if (this.currentClub.corpus === msg.Corpus.PRESIDENT
+                        || currentClub.corpus === msg.Corpus.VICE_PRESIDENT
+                        || currentClub.corpus === msg.Corpus.MANAGER
+                        || currentClub.corpus === msg.Corpus[msg.Corpus.PRESIDENT]
+                        || currentClub.corpus === msg.Corpus[msg.Corpus.VICE_PRESIDENT]
+                        || currentClub.corpus === msg.Corpus[msg.Corpus.VICE_PRESIDENT]
+                    ) {
+                        this.emptyUi.textValue.text = Sys.localization.get(stringtable.needActivenessManager);
+                    } else if (currentClub.corpus === msg.Corpus.NORMAL || currentClub.corpus === msg.Corpus[msg.Corpus.NORMAL]) {//成员
+                        this.emptyUi.textValue.text = Sys.localization.get(stringtable.needActivenessMember);
+                    } else {
+                        this.emptyUi.visible = false;
+                    }
+                } else {//不知道在哪个俱乐部
+                    this.emptyUi.visible = false;
+                }
+            }
+
+        }
+
+        private onMsgOpen() {
+            Sys.games.mainUIMgr.openMsgView();
+        }
+
+        /**
+         * 点击事件
+         * @param e
+         * @param index
+         */
+        private onMouse(e: Laya.Event, index: number) {
+            if (e.type === Laya.Event.CLICK) {
+                this.added = false;
+
+                this.myMatchList.mouseEnabled = false;
+                Laya.timer.once(2000, this, () => {// 延时2秒后再接收鼠标事件
+                    if (this && this.myMatchList) {
+                        this.myMatchList.mouseEnabled = true;
+                    }
+
+                });
+
+                let room: msg.Room = this.myMatchList.selectedItem;
+                if (this.currentTab === FoundTapType.Club) {
+                    if (this.currentClub) {
+                        room.clubId = this.currentClub.id;
+                    } else {
+                        room.clubId = -1;
+                        this.showRecommendClub();
+                        return;
+                    }
+                }
+                if (room) {
+                    this.Pause();
+                    BenchmarkHelper.time('enterGameTest');
+                    Sys.matchList.joinMatchRoom(room);
+                }
+            }
+        }
+
+        //跳转推荐俱乐部 对话框
+        showRecommendClub() {
+            MessagePrompt.openPrompt(Sys.localization.get(stringtable.joinRecommendClub),
+                Laya.Handler.create(this, () => {
+
+                }));
+        }
+
+        private updateItem(cell: GameListItemUI, index: number) {
+            cell.renderItemData(cell.dataSource);
+        }
+
+        private currentTab: number;
+
+        /**
+         *  tab切换
+         * @param index
+         */
+        public onTabSelect(index: number) {
+            this.matchLIstTab.selectedIndex = index;
+            this.topTab.selectedIndex = index;
+            this.added = false;
+            //记录最后点击的tab，用于断线后重连请求
+            Laya.timer.clear(this, this.getClubTableDataByTimer);
+            switch (index) {
+                case FoundTapType.Official:
+                    this.currentTab = FoundTapType.Official;
+                    RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: msg.RoomListType.RoomListOfficial
+                    }, true);
+                    RoomRepository.roomListTabIndex = GameListLastState.GameOfficial;
+                    break;
+                case FoundTapType.Club:
+                    this.currentTab = FoundTapType.Club;
+                    if (this.currentClub) {
+                        RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: msg.RoomListType.RoomListClub,
+                            clubId: this.currentClub.id
+                        }, true);
+                    } else {
+                        // this.listData = [];
+                        // this.setListData();
+                        // this.onClubClick();
+                        RoomRepository.inst.sendRequest('RoomListRequest', {
+                            type: msg.RoomListType.RoomListClub,
+                            clubId: -1
+                        }, true);
+                        // Laya.timer.loop(15000, this, this.getClubTableDataByTimer);
+                    }
+                    RoomRepository.roomListTabIndex = GameListLastState.GameClub;
+                    Laya.timer.loop(15000, this, this.getClubTableDataByTimer);
+                    break;
+                case FoundTapType.My:
+                    this.currentTab = FoundTapType.My;
+                    RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: msg.RoomListType.RoomListPersonal
+                    }, true);
+                    RoomRepository.roomListTabIndex = GameListLastState.GamePersonal;
+                    break;
+                case FoundTapType.SNG:
+                    this.currentTab = FoundTapType.Official;
+                    RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: msg.RoomListType.RoomListOfficial
+                    }, true);
+                    RoomRepository.roomListTabIndex = GameListLastState.GameSNG;
+                    break;
+            }
+
+        }
+
+        private getClubTableData() {
+            if (this.currentTab === FoundTapType.Club && this.currentClub) {
+                RoomRepository.inst.sendRequest('RoomListRequest', {
+                    type: msg.RoomListType.RoomListClub,
+                    clubId: this.currentClub.id
+                }, true, true);
+                RoomRepository.roomListTabIndex = GameListLastState.GameClub;
+            }
+        }
+
+        private getClubTableDataByTimer() {
+            if (this.currentTab === FoundTapType.Club) {
+                if (this.currentClub) {
+                    RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: msg.RoomListType.RoomListClub,
+                        clubId: this.currentClub.id
+                    }, true, true);
+                    RoomRepository.roomListTabIndex = GameListLastState.GameClub;
+                } else {
+                    RoomRepository.inst.sendRequest('RoomListRequest', {
+                        type: msg.RoomListType.RoomListClub,
+                        clubId: -1
+                    }, true, true);
+                    RoomRepository.roomListTabIndex = GameListLastState.GameClub;
+                }
+
+            }
+        }
+
+
+        private goToCreateClub() {
+            Sys.club.canCreateClub().then(flag => {
+                if (flag === true) {
+                    Sys.clubFsm.GoFromMatchUI(ClubState.ClubCreateState);
+                } else {
+                    MessageDialog.showWithText(Sys.localization.get(stringtable.ErrCreateExceedMaxNumber));
+                }
+            });
+        }
+
+        private goToJoinClub() {
+            Sys.clubFsm.GoFromMatchUI(ClubState.ClubSearchState);
+        }
+
+        onClick(club: msg.Club) {
+            this.currentClub = club;
+            RoomRepository.inst.sendRequest('RoomListRequest', {
+                type: msg.RoomListType.RoomListClub,
+                clubId: club.id
+            }, true);
+            RoomRepository.roomListTabIndex = GameListLastState.GameClub;
+            this.titleText.label = Utility.abbrString(club.name, 12);
+            Laya.LocalStorage.setJSON("matchUIClub", club);
+
+        }
+
+        private onClubClick() {
+            this.added = false;
+            if (this.currentTab !== FoundTapType.Club) {
+                this.currentTab = FoundTapType.Club;
+            } else {
+                // 获取俱乐部
+                let requestData: msg.ClubSearchRequest = {};
+                Sys.club.getClubs(requestData).then((clubs: msg.Club[]) => {
+                    if (clubs && clubs.length > 0) {
+                        this.showClubMenu(clubs);
+                    } else {
+                        this.currentClub = null;
+                        this.menuIcon.visible = false;
+                        // this.btnBox.visible = true;
+                        // this.emptyUi.visible = false;
+                    }
+                });
+            }
+        }
+
+        private onKickOut(data: msg.ClubKickOutNotify) {
+            this.updateClubMenuList();
+        }
+
+        private leaveClub() {
+            Sys.net.registerNotifyMsg('ClubKickOutNotify', this, this.onKickOut);
+            Sys.net.registerNotifyMsg('Club', this, this.updateClubMenuList);
+            // this.updateClubMenuList();
+        }
+
+        private updateClubMenuList() {
+            let requestData: msg.ClubSearchRequest = {};
+            Sys.club.getClubs(requestData).then((clubs: msg.Club[]) => {
+                if (clubs && clubs.length > 0) {
+                } else if (this.currentTab === 1) {
+                    // this.listData = [];
+                    // this.setListData();
+                    // this.btnBox.visible = true;
+                }
+                Sys.players.self.clubData = clubs;
+                this.initClubTab();
+                this.getClubTableData();
+            });
+        }
+
+        private showClubMenu(clubs: msg.Club[]) {
+            this.clubMenu.setClubs(clubs);
+            this.clubMenu.posMenu(250, 100);
+            this.clubMenu.show();
+        }
+
+    }
+}

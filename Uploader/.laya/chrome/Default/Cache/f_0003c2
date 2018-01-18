@@ -1,0 +1,734 @@
+// /*
+//  * @Author: devilsome.曾挚
+//  * @Date: 2017-02-15 17:54:55
+//  * @Last Modified by: devilsome.曾挚
+//  * @Last Modified time: 2017-06-14 20:21:38
+//  *
+//  *
+//  * Token处理流程：
+//  * 1. 客户端发送账号密码登录，服务器下发登录结果。成功的结果中包含token
+//  * 2. 客户端在本地，以账号为名称，存储token到文件并记录最后一次登录的账号。
+//  * 3. 重新登录时，如果手机端，直接读取token并发送login请求；如果是web端，输入账号自动查找token，并发送login请求
+//  * 4. 游戏内，重新登录时候，重新读取账号对应的token并发送连接请求
+//  * 处理游戏的登录状态
+//  */
+//
+// namespace wesai.HoldemPoker {
+//     export class LoginMgr extends Laya.EventDispatcher implements Manager {
+//         public serverURL: string = null;
+//         //特殊处理
+//         public hasError: boolean = false;
+//         public reconnectCount: number = 0;
+//         public isLogin: boolean = false;
+//         private loginData: msg.PlayerLoginRequest = null;
+//         private registerData: msg.PlayerSignUpRequest = null;
+//         private changePwdData: msg.PlayerChangePasswordRequest = null;
+//         private captchaData: msg.PlayerCaptchaRequest = null;
+//         private wechatCodeData: msg.PlayerWechatLoginRequest = null;
+//
+//         private isReLogin: boolean = false;
+//
+//         public reconnectData: msg.Reconnect;
+//
+//         private lastAccountId: string;
+//
+//         private hasListenNetwork: boolean = false;
+//
+//         private isWeixinLogin: boolean = false;
+//
+//         public Initalize() {
+//         }
+//
+//         public LoadFromRes() {
+//         }
+//
+//         private saveAccount(isWechat: boolean): void {
+//             if (!Sys.players.account) {
+//                 Laya.LocalStorage.setItem("lastLoginAccount", "");
+//                 Laya.LocalStorage.setItem("wechat.token", "");
+//                 this.lastAccountId = null;
+//                 return;
+//             }
+//             this.lastAccountId = Sys.players.account.accountId;
+//             Laya.LocalStorage.setItem("lastLoginAccount", Sys.players.account.accountId);
+//             let token: string = Sys.players.account.token;
+//             if (!token) {
+//                 token = "";
+//             }
+//
+//             //如果是手机模式
+//             if (Sys.platformRunning) {
+//                 //如果使用了手机注册
+//                 if (isWechat) {
+//                     Laya.LocalStorage.setItem("wechat.token", token);
+//                 } else {
+//                     if (Sys.players.account.hasPhone) {
+//                         Laya.LocalStorage.setItem(`${Sys.players.account.accountId}.token`, token);
+//                     }
+//                     //没使用手机，就只可能用微信
+//                     else {
+//                         Laya.LocalStorage.setItem("wechat.token", token);
+//                     }
+//                 }
+//
+//             }
+//             //如果是web模式
+//             else {
+//                 //直接存储
+//                 Laya.LocalStorage.setItem(`${Sys.players.account.accountId}.token`, token);
+//             }
+//         }
+//
+//         /**
+//          * 根据accountId读取对应的token
+//          * 如果没有读取到对应的token，走正常的账号密码登录流程
+//          *
+//          * 如果读取到对应token，则直接发送服务器验证
+//          *
+//          * 如果accountId为null，则按微信登陆的token方式读取
+//          * @private
+//          * @param {string} accountId
+//          * @returns {string}
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public loadToken(accountId: string): string {
+//             if (Sys.platformRunning) {
+//                 let token = Laya.LocalStorage.getItem("wechat.token");
+//                 if (token) {
+//                     return token;
+//                 }
+//             }
+//
+//             if (accountId) {
+//                 return Laya.LocalStorage.getItem(`${accountId}.token`);
+//             }
+//
+//             return null;
+//         }
+//
+//         public loadLastAccountId(): string {
+//             if (this.lastAccountId) {
+//                 return this.lastAccountId;
+//             }
+//             return Laya.LocalStorage.getItem("lastLoginAccount");
+//         }
+//
+//         public static validPhone(phoneNumber: string): boolean {
+//             if (phoneNumber.length <= 0) {
+//                 MessageDialog.showWithText(Sys.localization.get(stringtable.emptyAccountName));
+//                 return false;
+//             }
+//
+//             // if (phoneNumber.length !== 11) {
+//             //     MessageDialog.showWithText(Sys.localization.get(stringtable.accountNumberError));
+//             //     return false;
+//             // }
+//
+//             if (!(/^[\d]+$/.test(phoneNumber))) {
+//                 MessageDialog.showWithText(Sys.localization.get(stringtable.accountTypeError));
+//                 return false;
+//             }
+//             return true;
+//         }
+//
+//         public static validPassword(password: string): boolean {
+//             if (password.length <= 0) {
+//                 MessageDialog.showWithText(Sys.localization.get(stringtable.passwordEmptyError));
+//                 return false;
+//             }
+//
+//             if (password.length > 0 && password.length < 6) {
+//                 MessageDialog.showWithText(Sys.localization.get(stringtable.passwordTooShort));
+//                 return false;
+//             }
+//
+//             if (password.length >= 32) {
+//                 MessageDialog.showWithText(Sys.localization.get(stringtable.passwordTooLong));
+//                 return false;
+//             }
+//
+//             if (!(/^[\da-zA-Z_]+$/.test(password))) {
+//                 MessageDialog.showWithText(Sys.localization.get(stringtable.passwordError));
+//                 return false;
+//             }
+//             return true;
+//         }
+//
+//         /**
+//          * 登录
+//          *
+//          * @param {msg.PlayerLoginRequest} data
+//          * @param {string} [srv]
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public login(data: msg.PlayerLoginRequest, isAuto: boolean) {
+//             Sys.ui.startLoading();
+//             this.isLogin = true;
+//             this.loginData = data;
+//             if (Sys.net.insureConnected) {
+//                 this.startLogin(isAuto);
+//             } else {
+//                 this.connectServer();
+//             }
+//         }
+//
+//         /**
+//          * 从房间服务器断开，连接主服务器
+//          *
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public reLogin() {
+//             this.isReLogin = true;
+//             if (Sys.net.insureConnected) {
+//                 this.autoLogin();
+//             } else {
+//                 this.connectServer();
+//             }
+//         }
+//
+//         /**
+//          * 用户自动登录
+//          *
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public autoLogin(): boolean {
+//             let lastAccountId: string = this.loadLastAccountId();
+//             if (lastAccountId && lastAccountId.length > 0) {
+//                 let lastToken = this.loadToken(lastAccountId);
+//                 if (!lastToken) {
+//                     return false;
+//                 }
+//                 let data: msg.PlayerLoginRequest = {
+//                     accountId: lastAccountId,
+//                     password: "",
+//                     token: lastToken,
+//                     version: ReleaseInfo.jsonText,
+//                 };
+//
+//                 this.login(data, true);
+//                 return true;
+//             }
+//             return false;
+//         }
+//
+//         /**
+//          * 注册
+//          *
+//          * @param {msg.PlayerSignUpRequest} data
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public register(data: msg.PlayerSignUpRequest) {
+//             Sys.ui.startLoading();
+//             this.isLogin = false;
+//             this.registerData = data;
+//             if (Sys.net.insureConnected) {
+//                 this.startRegister();
+//             } else {
+//                 this.connectServer();
+//             }
+//         }
+//
+//         /**
+//          * 忘记密码
+//          *
+//          * @param {msg.PlayerChangePasswordRequest} data
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public changePwd(data: msg.PlayerChangePasswordRequest) {
+//             this.isLogin = false;
+//             Sys.ui.startLoading();
+//
+//             this.changePwdData = data;
+//             if (Sys.net.insureConnected) {
+//                 this.startChangePwd();
+//             } else {
+//                 this.connectServer();
+//             }
+//         }
+//
+//         /**
+//          * 编辑用户信息
+//          *
+//          * @param {msg.PlayerEditRequest} data
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public editPlayerInfo(data: msg.PlayerEditRequest) {
+//             this.isLogin = false;
+//             Sys.ui.startLoading();
+//             Sys.net.sendMesage("PlayerEditRequest", data,
+//                 Laya.Handler.create(this, this.onEditPlayerInfoResponse),
+//                 Laya.Handler.create(this, this.onEditPlayerInfoError));
+//         }
+//
+//         /**
+//          * 重新登录
+//          *
+//          * @param {isInit} boolean
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         //public reLogin() {
+//         //    if (this.hasConnected) {
+//         //        this.startReLogin();
+//         //    } else {
+//         //        this.connectServer();
+//         //    }
+//         //}
+//         public sendCaptcha(data: msg.PlayerCaptchaRequest) {
+//             this.captchaData = data;
+//             if (Sys.net.insureConnected) {
+//                 this.startSendCaptcha();
+//             } else {
+//                 this.connectServer();
+//             }
+//         }
+//
+//         public bindPhone(data: msg.PlayerBindPhoneRequest) {
+//             Sys.ui.startLoading();
+//             Sys.net.sendMesage("PlayerBindPhoneRequest", data,
+//                 Laya.Handler.create(this, this.onBindPhoneResponse),
+//                 Laya.Handler.create(this, this.onBindPhoneError));
+//         }
+//
+//         public startLogin(isAuto: boolean) {
+//             if (isAuto) {
+//                 this.loginData.token = this.loadToken(this.loginData.accountId);
+//             }
+//             Sys.net.sendMesage("PlayerLoginRequest", this.loginData,
+//                 Laya.Handler.create(this, this.onLoginResponse),
+//                 Laya.Handler.create(this, this.onLoginError));
+//         }
+//
+//         public getPlayerInfo() {
+//             Sys.net.sendMesage("PlayerInfoRequest", {},
+//                 Laya.Handler.create(this, this.onPlayerInfoResponse),
+//                 Laya.Handler.create(this, this.onPlayerInfoError));
+//         }
+//
+//         public sendWechatCode(code: string) {
+//             this.isWeixinLogin = true;
+//             this.wechatCodeData = {
+//                 code: code,
+//                 version: ReleaseInfo.jsonText,
+//             };
+//             if (Sys.net.insureConnected) {
+//                 this.startSendWechatCode();
+//             } else {
+//                 this.connectServer();
+//             }
+//         }
+//
+//         public logout() {
+//             Sys.net.sendMesage("PlayerLogoutRequest", {},
+//                 Laya.Handler.create(this, this.onLogoutResponse),
+//                 Laya.Handler.create(this, this.onLogoutError));
+//         }
+//
+//         public cleanLoginData() {
+//             Sys.players.account = null;
+//             this.saveAccount(false);
+//         }
+//
+//         private startRegister() {
+//             Sys.net.sendMesage("PlayerSignUpRequest", this.registerData,
+//                 Laya.Handler.create(this, this.onRegisterResponse),
+//                 Laya.Handler.create(this, this.onRegisterError));
+//         }
+//
+//         private startChangePwd() {
+//             Sys.net.sendMesage("PlayerChangePasswordRequest", this.changePwdData,
+//                 Laya.Handler.create(this, this.onLoginResponse),
+//                 Laya.Handler.create(this, this.onLoginError));
+//         }
+//
+//         private startSendCaptcha() {
+//             Sys.net.sendMesage("PlayerCaptchaRequest", this.captchaData,
+//                 Laya.Handler.create(this, this.onSendCaptchaResponse),
+//                 Laya.Handler.create(this, this.onSendCaptchaError));
+//         }
+//
+//         private startSendWechatCode() {
+//             Sys.ui.startLoading();
+//             Sys.net.sendMesage("PlayerWechatLoginRequest", this.wechatCodeData,
+//                 Laya.Handler.create(this, this.onWechatLoginResponse),
+//                 Laya.Handler.create(this, this.onWechatLoginError));
+//         }
+//
+//         public registerEvent() {
+//             if (this.hasListenNetwork) {
+//                 return;
+//             }
+//             Sys.net.on(GEvent.CONNECT_OK, this, this.onConnectSuccess);
+//             Sys.net.on(GEvent.CONNECT_ERROR, this, this.onConnectFail);
+//             Sys.net.on(GEvent.CONNECT_CLOSE, this, this.onConnectFail);
+//             this.hasListenNetwork = true;
+//         }
+//
+//         public unregisterEvent() {
+//             this.hasListenNetwork = false;
+//             Sys.net.off(GEvent.CONNECT_OK, this, this.onConnectSuccess);
+//             Sys.net.off(GEvent.CONNECT_ERROR, this, this.onConnectFail);
+//             Sys.net.off(GEvent.CONNECT_CLOSE, this, this.onConnectFail);
+//         }
+//
+//         private connectServer() {
+//             if (Sys.net.insureConnected) {
+//                 return;
+//             }
+//             this.registerEvent();
+//
+//             if (OFFLINE_MODE) {
+//                 this.event(GEvent.LOGIN_SUCCESS);
+//             }
+//             else {
+//
+//                 if (this.serverURL === null) {
+//                     this.serverURL = "public";
+//                 }
+//                 Sys.net.connectServerByName(this.serverURL);
+//             }
+//         }
+//
+//         // mark by David，
+//         // 删除单独的token请求，直接在login消息中下发
+//         /*
+//          public requestToken() {
+//          Sys.net.sendMesage("PlayerTokenRequest", { tokenType: 1 },
+//          Laya.Handler.create(this, this.onRequestTokenResponse),
+//          Laya.Handler.create(this, this.onRequestTokenError));
+//          }
+//          */
+//         private onConnectSuccess() {
+//             // todo: 不能取消网络状态监听。最好重构，把状态监听放入state中
+//             // davidzeng
+//             //成功后取消连接用的消息回调
+//             //this.unregisterEvent();
+//
+//             console.debug("[MainServer] connect succeed.");
+//             if (this.isReLogin) {
+//                 this.isReLogin = false;
+//                 this.autoLogin();
+//             } else if (this.loginData) {
+//                 this.startLogin(false);
+//             } else if (this.registerData) {
+//                 this.startRegister();
+//             } else if (this.changePwdData) {
+//                 this.startChangePwd();
+//             } else if (this.captchaData) {
+//                 this.startSendCaptcha();
+//             } else if (this.wechatCodeData) {
+//                 this.startSendWechatCode();
+//             }
+//         }
+//
+//         /**
+//          * 请求改为返回session
+//          * 用sessionKey去连接
+//          * by guo
+//          * @param sessionData
+//          */
+//         private onLoginResponse(sessionData: msg.PlayerLoginResponse) {
+//             Sys.net.sendMesage("PlayerConnectRequest", {sessionKey: sessionData.sessionKey},
+//                 Laya.Handler.create(this, this.onPlayerConnectResponse),
+//                 Laya.Handler.create(this, this.onLoginError));
+//         }
+//
+//         /**
+//          * 替换以前的onLoginResponse
+//          * by guo
+//          * @param data
+//          */
+//         private onPlayerConnectResponse(data: msg.PlayerConnectResponse) {
+//             Sys.ui.stopLoading();
+//             this.reconnectData = data.player.reconnect;
+//             this.setLocalData(data, false);
+//
+//             if (Sys.fsm.currentState() === GameState.LoadingState) {
+//                 Sys.ui.stopLoading();
+//                 Sys.fsm.Go(GameState.MainState);
+//             } else {
+//                 this.event(GEvent.LOGIN_SUCCESS);
+//             }
+//         }
+//
+//         private onLogoutResponse(data: msg.PlayerLogoutResponse) {
+//             Sys.players.logout();
+//             Sys.net.closeSocket();
+//         }
+//
+//         private onPlayerInfoResponse(data: msg.PlayerInfoResponse) {
+//             this.setAccountInfo(data.player);
+//         }
+//
+//         /*
+//          private onReLoginResponse(data: msg.PlayerConnectResponse) {
+//          Sys.ui.stopLoading();
+//          if (!Sys.players.self.id) {
+//          this.getPlayerInfo();
+//          if (Sys.fsm.currentState() === GameState.LoadingState) {
+//          Sys.fsm.Go(GameState.MainState);
+//          }
+//          } else {
+//          // 重新连接消息中心
+//          Sys.message.connectNotifyCenter();
+//          // 重新拉取比赛列表
+//          Sys.games.mainUIMgr.matchViewUI.firstRenderList();
+//          }
+//          }
+//          */
+//         private onRegisterResponse(data: msg.PlayerConnectResponse) {
+//             Sys.ui.stopLoading();
+//             this.setLocalData(data, false);
+//
+//             this.event(GEvent.REGISTER_SUCCESS);
+//         }
+//
+//         private onChangePwdResponse(data: msg.PlayerConnectResponse) {
+//             Sys.ui.stopLoading();
+//             this.setLocalData(data, false);
+//
+//             this.event(GEvent.CHANGE_PWD_SUCCESS);
+//         }
+//
+//         private onEditPlayerInfoResponse(data: msg.PlayerConnectResponse) {
+//             Sys.ui.stopLoading();
+//             if (data.player.isUpload) {
+//                 this.event(GEvent.UPLOAD_AVATAR_SUCCESS, data.player.icon);
+//             } else {
+//                 this.setLocalData(data, false);
+//                 this.event(GEvent.EDIT_PLAYERINFO_SUCCESS);
+//             }
+//         }
+//
+//         private onWechatLoginResponse(data: msg.PlayerConnectResponse) {
+//             this.isWeixinLogin = false;
+//             Sys.ui.stopLoading();
+//             this.setLocalData(data, true);
+//
+//             if (this.isLogin) {
+//                 this.isLogin = false;
+//                 if (data.player.hasPhone === true) {
+//                     this.event(GEvent.LOGIN_SUCCESS);
+//                 } else {
+//                     Sys.fsm.Go(GameState.BindPhoneState);
+//                 }
+//             } else {
+//                 this.event(GEvent.EDIT_PLAYERINFO_SUCCESS);
+//             }
+//         }
+//
+//         private onSendCaptchaResponse(data: msg.PlayerCaptchaResponse) {
+//             let restTime = data.banTime ? data.banTime : 0;
+//             this.event(GEvent.SEND_CAPTCHA_SUCCESS, restTime);
+//         }
+//
+//         /**
+//          * 设置玩家自己的账号信息
+//          * @param player 玩家账户信息
+//          */
+//         private setAccountInfo(player: msg.Player) {
+//             let account = Sys.players.account;
+//             if (!account) {
+//                 account = new AccountInfo();
+//             }
+//             account.playerId = player.playerId;
+//             account.token = player.token;
+//             account.hasPhone = player.hasPhone;
+//             account.openId = null;
+//             if (player.isWeixin) {
+//                 account.isWeixin = player.isWeixin;
+//             }
+//             account.accountId = player.accountId;
+//             Sys.players.account = account;
+//             // todo: 需要区分账号信息和个人信息
+//             //       个人信息和其他玩家信息一致
+//             this.setPlayerInfo(player);
+//         }
+//
+//         /**
+//          * 设置玩家个人信息
+//          *
+//          * @private
+//          * @param {msg.Player} player
+//          *
+//          * @memberOf LoginMgr
+//          */
+//         public setPlayerInfo(player: msg.Player) {
+//             let self = Sys.players.self;
+//             self.name = player.name;
+//             self.icon = player.icon;
+//             self.id = player.playerId;
+//             self.gold = player.gold;
+//             self.gender = player.gender;
+//             self.signature = player.signature;
+//             self.playerName = player.playerName;
+//             self.token = player.token;
+//             self.servers = player.servers;
+//             self.diamond = player.diamond;
+//             if (player.playerData) {
+//                 self.handCount = player.playerData.handCount;
+//                 self.inPotCount = player.playerData.inPotCount;
+//                 self.raceCount = player.playerData.raceCount;
+//                 self.rewardCount = player.playerData.rewardCount;
+//             }
+//             if (player.settings) {
+//                 let jsonObject = JSON.parse(player.settings);
+//                 self.settingsObject = jsonObject;
+//             }
+//
+//             //todo: 用消息的方式通知界面更新
+//         }
+//
+//         //todo: 区分账号信息和玩家个人信息。
+//         //      个人信息以后和其他玩家信息一致
+//         private setLocalData(data: msg.PlayerConnectResponse, isWechat: boolean) {
+//             this.setAccountInfo(data.player);
+//             this.saveAccount(isWechat);
+//
+//             // 连接消息中心
+//             Sys.message.connectNotifyCenter();
+//
+//             // 重连拉取比赛列表
+//             // console.log('into重连拉取比赛列表---------------------11111111');
+//             // if (Sys.games.mainUIMgr) { //todo
+//             //     console.log('into拉取比赛列表---------------------1');
+//             //     Sys.games.mainUIMgr.matchViewUI.firstRenderList();
+//             // };
+//
+//             //重连拉取比赛列表
+//             RoomRepository.inst.sendRequest('RoomListRequest', {type: RoomRepository.roomListTabIndex}, true);
+//             if (MainUIMgr.mttIncode) {
+//                 Sys.games.mainUIMgr.joinMtt(MainUIMgr.mttIncode);
+//             }
+//         }
+//
+//         private onBindPhoneResponse(data: msg.PlayerBindPhoneResponse) {
+//             Sys.ui.stopLoading();
+//             this.setAccountInfo(data.player);
+//             this.event(GEvent.BIND_PHONE_SUCCESS);
+//         }
+//
+//         private onLoginError(data: msg.ErrorMsg) {
+//
+//             if (msg.Codes.ErrPlayerVersionNotAllowed === data.codes) {
+//                 let versionInfo = JSON.parse(ReleaseInfo.jsonText);
+//                 let versionText = `${versionInfo.type}_${versionInfo.version}_${versionInfo.build_version}_${versionInfo.date}`;
+//                 AlertDialog.showWithText(Sys.localization.getFormated(stringtable.notRightVersion, versionText), Sys.localization.get(stringtable.ok));
+//                 return;
+//             }
+//
+//             Sys.ui.stopLoading();
+//             if (Sys.fsm.currentState() !== GameState.LoginState) {
+//                 Sys.fsm.Go(GameState.LoginState);
+//             }
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onPlayerInfoError(data: msg.ErrorMsg) {
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onRegisterError(data: msg.ErrorMsg) {
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onLogoutError(data: msg.ErrorMsg) {
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onChangePwdError(data: msg.ErrorMsg) {
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onEditPlayerInfoError(data: msg.ErrorMsg) {
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         // private onRequestTokenError(data: msg.ErrorMsg) {
+//         //     Sys.ui.stopLoading();
+//         //     MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         //     this.cleanLoginData();
+//         //     Sys.fsm.Go(GameState.LoginState);
+//         // }
+//
+//         // private onReLoginError(data: msg.ErrorMsg) {
+//         //     Sys.ui.stopLoading();
+//         //     MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         //     this.cleanLoginData();
+//         //     Sys.fsm.Go(GameState.LoginState);
+//         // }
+//
+//         private onSendCaptchaError(data: msg.ErrorMsg) {
+//             this.event(GEvent.SEND_CAPTCHA_ERROR);
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onBindPhoneError(data: msg.ErrorMsg) {
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onWechatLoginError(data: msg.ErrorMsg) {
+//             this.isWeixinLogin = false;
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(data.codes));
+//         }
+//
+//         private onConnectFail() {
+//             Sys.ui.stopLoading();
+//             if (Sys.fsm.currentState() === GameState.MainState) {
+//                 if (this.reconnectCount === 0) {
+//                     this.reconnectCount++;
+//                     MessageDialog.showWithText("Disconnected, reconnecting...");
+//                     if (!this.isWeixinLogin) {//如果正在微信登录，不要自动登录
+//                         this.reLogin();
+//                     }
+//                     return;
+//                 }
+//                 if (this.reconnectCount === 1) {
+//                     this.reconnectCount++;
+//                     MessagePrompt.openPrompt(Sys.localization.getFormated(stringtable.reConnectionSocket),
+//                         Laya.Handler.create(this, this.reLogin),
+//                         Laya.Handler.create(this, () => {
+//                             Sys.fsm.Go(GameState.LoginState);
+//                         }));
+//                     return;
+//                 }
+//                 if (this.reconnectCount === 2) {
+//                     this.reconnectCount++;
+//                     Sys.fsm.Go(GameState.LoginState);
+//                     MessageDialog.showWithText(Utility.toMessageWithCode(10));
+//                 }
+//                 return;
+//             }
+//             else if (Sys.fsm.currentState() !== GameState.LoginState) {
+//                 Sys.fsm.Go(GameState.LoginState);
+//             }
+//             MessageDialog.showWithText(Utility.toMessageWithCode(10));
+//
+//         }
+//
+//         private onConnectTimeout() {
+//
+//             Sys.ui.stopLoading();
+//             MessageDialog.showWithText(Utility.toMessageWithCode(11));
+//             if (Sys.fsm.currentState() !== GameState.LoginState) {
+//                 Sys.fsm.Go(GameState.LoginState);
+//             }
+//         }
+//     }
+// } 
+//# sourceMappingURL=LoginMgr_bak.js.map
