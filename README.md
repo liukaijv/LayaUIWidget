@@ -43,6 +43,5 @@ this.btn = new Laya.Button(this.btnSkin);
         this.uploader.on(Uploader.FILE_UPLOADED, this, result => {
             console.log(result);
         });
-Laya.stage.addChild(slide);
 ```
 
