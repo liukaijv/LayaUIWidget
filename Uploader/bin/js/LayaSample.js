@@ -12,6 +12,9 @@ var GameMain = /** @class */ (function () {
         this.btn.pos(200, 200);
         Laya.stage.addChild(this.btn);
         this.uploader = new Uploader(this.btn);
+        this.uploader.on(Uploader.FILE_UPLOADED, this, function (result) {
+            console.log(result);
+        });
     };
     return GameMain;
 }());

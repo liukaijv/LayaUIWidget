@@ -1,9 +1,9 @@
 .DS_Store
 .idea
-*.map
-.laya
+*.js.map
+chrome
 .vscode
-node_modules/
+node_modules
 npm-debug.log
 src/**/*.js
 release

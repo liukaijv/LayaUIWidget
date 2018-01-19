@@ -65,15 +65,22 @@ if (!Laya.Browser.window.XMLHttpRequest.prototype.sendAsBinary) {
 }
 var Uploader = /** @class */ (function (_super) {
     __extends(Uploader, _super);
-    function Uploader(target, uploadType) {
-        if (uploadType === void 0) { uploadType = UploadType.Base64; }
+    function Uploader(target, opts) {
+        if (opts === void 0) { opts = {}; }
         var _this = _super.call(this) || this;
         _this.target = target;
-        _this.uploadType = uploadType;
-        _this._serverUrl = 'http://211.159.155.205:8080/poker.gm/upload.do';
-        _this.isNative = Laya.Render.isConchApp;
+        _this.isNativeUpload = false;
         _this.uploading = false;
-        if (!_this.isNative) {
+        _this.options = {
+            serverUrl: '',
+            keyName: 'file',
+            uploadType: UploadType.Base64,
+            maxSize: 200 * 1024,
+        };
+        _this.options = Object.assign(_this.options, opts);
+        //有nativeUploadHandler表示使用native上传
+        _this.isNativeUpload = _this.options.nativeUploadHandler && Laya.Render.isConchApp;
+        if (!_this.isNativeUpload) {
             _this.createFileInput();
         }
         _this.bindEvents();
@@ -85,7 +92,7 @@ var Uploader = /** @class */ (function (_super) {
     Uploader.prototype.createFileInput = function () {
         if (!this._fileInput) {
             this._fileInput = Laya.Browser.document.createElement('input');
-            this._fileInput.setAttribute('name', Uploader.FILE_INPUT_NAME);
+            this._fileInput.setAttribute('name', this.options.keyName);
             this._fileInput.setAttribute('id', String(Laya.Utils.getGID()));
             this._fileInput.setAttribute('type', 'file');
             this._fileInput.setAttribute('accept', 'image/*');
@@ -123,7 +130,7 @@ var Uploader = /** @class */ (function (_super) {
      * bindEvents
      */
     Uploader.prototype.bindEvents = function () {
-        if (this.isNative) {
+        if (this.isNativeUpload) {
             this.target.on(Laya.Event.CLICK, this, this.nativeUpload);
         }
         else {
@@ -139,7 +146,7 @@ var Uploader = /** @class */ (function (_super) {
      * unBindEvents
      */
     Uploader.prototype.unBindEvents = function () {
-        if (this.isNative) {
+        if (this.isNativeUpload) {
             this.target.off(Laya.Event.CLICK, this, this.nativeUpload);
         }
         else {
@@ -158,12 +165,27 @@ var Uploader = /** @class */ (function (_super) {
             console.log('no select file');
             return;
         }
-        if (this.uploadType === UploadType.Base64) {
-            this.readAsDataURL(file).then(this.upload);
+        if (file.size > this.options.maxSize) {
+            console.log("upload max size " + parseInt(String(this.options.maxSize / 1024)) + "k");
+            return;
+        }
+        this.uploading = true;
+        if (this.options.uploadType === UploadType.Base64) {
+            this.readAsDataURL(file).then(this.upload.bind(this)).then(function (result) {
+                _this.uploading = false;
+                _this.event(Uploader.FILE_UPLOADED, [result]);
+            }).catch(function (e) {
+                console.log('upload error');
+                _this.event(Uploader.FILE_UPLOAD_ERROR, [e]);
+            });
         }
         else {
-            this.upload(file).then(function (result) {
+            this.readAsBinary(file).then(function (binary) { return _this.upload.bind(_this, binary, file.name); }).then(function (result) {
+                _this.uploading = false;
                 _this.event(Uploader.FILE_UPLOADED, [result]);
+            }).catch(function (e) {
+                console.log('upload error');
+                _this.event(Uploader.FILE_UPLOAD_ERROR, [e]);
             });
         }
     };
@@ -185,59 +207,29 @@ var Uploader = /** @class */ (function (_super) {
         if (filename === void 0) { filename = 'test.png'; }
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var xhr, sendData, binaryData, isBase64;
+            var xhr, sendData, isBase64;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        this.uploading = true;
-                        if (!this._serverUrl) {
-                            throw new Error('no server url');
-                        }
-                        xhr = new Laya.Browser.window.XMLHttpRequest();
-                        isBase64 = (typeof file === 'string' && (/:(.*?);/).test(file));
-                        if (!!isBase64) return [3 /*break*/, 3];
-                        if (!file.name) return [3 /*break*/, 2];
-                        filename = file.name;
-                        return [4 /*yield*/, this.readAsBinary(file)];
-                    case 1:
-                        binaryData = _a.sent();
-                        return [3 /*break*/, 3];
-                    case 2:
-                        binaryData = file;
-                        _a.label = 3;
-                    case 3: 
-                    // create promise handle the xhr
-                    return [2 /*return*/, new Promise(function (resolve, reject) {
-                            xhr.onreadystatechange = function () {
-                                if (xhr.readyState < 4) {
-                                    return;
+                if (this.options.serverUrl === '') {
+                    throw new Error('no server url');
+                }
+                xhr = new Laya.Browser.window.XMLHttpRequest();
+                isBase64 = (typeof file === 'string' && (/:(.*?);/).test(file));
+                // create promise handle the xhr
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState < 4) {
+                                return;
+                            }
+                            if (xhr.readyState < 400) {
+                                try {
+                                    var res = JSON.parse(xhr.responseText);
+                                    resolve(res);
                                 }
-                                if (xhr.readyState < 400) {
-                                    try {
-                                        var res = JSON.parse(xhr.responseText);
-                                        resolve(res);
-                                    }
-                                    catch (e) {
-                                        console.log('upload error');
-                                        reject(e);
-                                    }
-                                    _this.uploading = false;
+                                catch (e) {
+                                    reject(e);
                                 }
-                                else {
-                                    try {
-                                        var err = JSON.parse(xhr.responseText);
-                                        err.status = xhr.status;
-                                        err.statusText = xhr.statusText;
-                                        reject(err);
-                                    }
-                                    catch (e) {
-                                        console.log('upload error');
-                                        reject(e);
-                                    }
-                                    _this.uploading = false;
-                                }
-                            };
-                            xhr.onerror = function () {
+                            }
+                            else {
                                 try {
                                     var err = JSON.parse(xhr.responseText);
                                     err.status = xhr.status;
@@ -245,33 +237,42 @@ var Uploader = /** @class */ (function (_super) {
                                     reject(err);
                                 }
                                 catch (e) {
-                                    console.log('upload error');
                                     reject(e);
                                 }
-                                _this.uploading = false;
-                            };
-                            xhr.open('POST', _this._serverUrl, true);
-                            if (isBase64) {
-                                sendData = Uploader.FILE_INPUT_NAME + '=' + encodeURIComponent(file);
-                                xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                                xhr.send(sendData);
                             }
-                            else {
-                                var crlf = '\r\n';
-                                var boundary = "xixixixi";
-                                var dashes = "--";
-                                var data = dashes + boundary + crlf +
-                                    "Content-Disposition: form-data;" +
-                                    "name=\"" + Uploader.FILE_INPUT_NAME + "\";" +
-                                    "filename=\"" + encodeURIComponent(filename) + "\"" + crlf +
-                                    "Content-Type: application/octet-stream" + crlf + crlf +
-                                    binaryData + crlf +
-                                    dashes + boundary + dashes;
-                                xhr.setRequestHeader("Content-Type", "multipart/form-data;boundary=" + boundary);
-                                xhr.sendAsBinary(data);
+                        };
+                        xhr.onerror = function () {
+                            try {
+                                var err = JSON.parse(xhr.responseText);
+                                err.status = xhr.status;
+                                err.statusText = xhr.statusText;
+                                reject(err);
                             }
-                        })];
-                }
+                            catch (e) {
+                                reject(e);
+                            }
+                        };
+                        xhr.open('POST', _this.options.serverUrl, true);
+                        if (isBase64) {
+                            sendData = _this.options.keyName + '=' + encodeURIComponent(file);
+                            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                            xhr.send(sendData);
+                        }
+                        else {
+                            var crlf = '\r\n';
+                            var boundary = "xixixixi";
+                            var dashes = "--";
+                            sendData = dashes + boundary + crlf +
+                                "Content-Disposition: form-data;" +
+                                "name=\"" + _this.options.keyName + "\";" +
+                                "filename=\"" + encodeURIComponent(filename) + "\"" + crlf +
+                                "Content-Type: application/octet-stream" + crlf + crlf +
+                                file + crlf +
+                                dashes + boundary + dashes;
+                            xhr.setRequestHeader("Content-Type", "multipart/form-data;boundary=" + boundary);
+                            xhr.sendAsBinary(sendData);
+                        }
+                    })];
             });
         });
     };
@@ -323,9 +324,23 @@ var Uploader = /** @class */ (function (_super) {
             });
         });
     };
+    /**
+     * 原生上传
+     */
     Uploader.prototype.nativeUpload = function () {
+        var _this = this;
         if (this.uploading) {
             return;
+        }
+        this.uploading = true;
+        if (this.options.nativeUploadHandler) {
+            this.options.nativeUploadHandler().then(this.upload.bind(this)).then(function (result) {
+                _this.uploading = false;
+                _this.event(Uploader.FILE_UPLOADED, [result]);
+            }).catch(function (e) {
+                console.log('native upload error');
+                _this.event(Uploader.FILE_UPLOAD_ERROR, [e]);
+            });
         }
     };
     Uploader.prototype.destroy = function () {
@@ -335,8 +350,8 @@ var Uploader = /** @class */ (function (_super) {
             this._fileInput = null;
         }
     };
-    Uploader.FILE_INPUT_NAME = 'file';
     Uploader.FILE_UPLOADED = 'FILE_UPLOADED';
+    Uploader.FILE_UPLOAD_ERROR = 'FILE_UPLOAD_ERROR';
     return Uploader;
 }(Laya.EventDispatcher));
 //# sourceMappingURL=Uploader.js.map
