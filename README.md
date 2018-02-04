@@ -27,7 +27,7 @@ Laya.stage.addChild(slide);
 
 ### 演示地址
 
- [演示地址](http://www.noteliu.com/LayaUIWidget/CarouselWidget/bin/index.html)
+ [演示地址](http://www.noteliu.com/LayaUIWidget/CarouselSlide/bin/index.html)
 
 ### 使用说明
 
