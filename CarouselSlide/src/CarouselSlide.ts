@@ -60,13 +60,13 @@ class CarouselWidget extends Laya.Sprite {
         //容器宽度
         containerWidth: 750,
         //容器高度
-        containerHeight: 350,
+        containerHeight: 376,
         //点击区域
         hitAreaWidth: 727,
         //点击区域
         hitAreaHeight: 270,
         //每张缩放比例
-        scaleRatio: 0.7,
+        scaleRatio: 0.8,
         //动画速度
         moveSpeed: 300,
         //最小滑动距离
@@ -93,7 +93,7 @@ class CarouselWidget extends Laya.Sprite {
      */
     private setDefaultImg() {
         let defaultImg = new Laya.Image(this.defaultImgUrl);
-        defaultImg.pos((Laya.stage.width - this.option.slideWidth) / 2, 0);
+        defaultImg.pos((Laya.stage.width - this.option.containerWidth) / 2, 0);
         this.carouselWrap.addChild(defaultImg);
         return defaultImg;
     }
