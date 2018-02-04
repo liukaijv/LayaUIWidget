@@ -103,7 +103,9 @@ var Uploader = /** @class */ (function (_super) {
             //设置位置和大小
             this.updateInputPosition(0, 0);
             Laya.Browser.document.body.appendChild(this._fileInput);
-            this.inputDisable();
+            if (Laya.Browser.onPC) {
+                this.inputDisable();
+            }
         }
     };
     /**
@@ -135,11 +137,13 @@ var Uploader = /** @class */ (function (_super) {
         }
         else {
             this._fileInput.addEventListener('change', this.onChange.bind(this), true);
-            /**
-             * laya升级后用laya 的MOUSE_OVER和MOUSE_OUT不行
-             */
-            this._fileInput.addEventListener('mouseout', this.inputDisable.bind(this), true);
-            this.target.on(Laya.Event.MOUSE_OVER, this, this.inputEnable);
+            if (Laya.Browser.onPC) {
+                /**
+                 * laya升级后用laya 的MOUSE_OVER和MOUSE_OUT不行
+                 */
+                this._fileInput.addEventListener('mouseout', this.inputDisable.bind(this), true);
+                this.target.on(Laya.Event.MOUSE_OVER, this, this.inputEnable);
+            }
         }
     };
     /**
@@ -151,8 +155,10 @@ var Uploader = /** @class */ (function (_super) {
         }
         else {
             this._fileInput.removeEventListener('change', this.onChange);
-            this._fileInput.removeEventListener('mouseout', this.inputDisable);
-            this.target.off(Laya.Event.MOUSE_OVER, this, this.inputEnable);
+            if (Laya.Browser.onPC) {
+                this._fileInput.removeEventListener('mouseout', this.inputDisable);
+                this.target.off(Laya.Event.MOUSE_OVER, this, this.inputEnable);
+            }
         }
     };
     Uploader.prototype.onChange = function (e) {
