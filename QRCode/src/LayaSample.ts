@@ -13,7 +13,7 @@ class GameMain {
         Laya.stage.addChild(image);
 
         QRCode.toDataURL('http://www.baidu.com/', {width: 200, height: 200},
-            function (err, url) {
+            (err, url) => {
                 if (err) {
                     console.log(err);
                     return;
