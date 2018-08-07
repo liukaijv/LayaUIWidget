@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@types/clipboard": "^2.0.1"
+  },
+  "devDependencies": {
+    "clipboard": "^2.0.1"
+  }
+}

@@ -1,5 +1,5 @@
 # LayaUIWidget
-Laya的一些UI小组件
+Laya的一些UI组件，解决方案
 
 ## 轮播图
 
@@ -75,3 +75,32 @@ this.btn = new Laya.Button(this.btnSkin);
         });
 ```
 
+## 缓存
+
+* 基于laya的LRUCache
+* 重新封装localstorage，支持过期时间
+
+## 复制
+
+### 演示地址
+
+ [演示地址](http://www.noteliu.com/LayaUIWidget/Clipboard/bin/index.html)
+
+### 使用说明
+
+``` typescript
+
+let label:Laya.Label = new Laya.Label();
+let btn:Laya.Button = new Laya.Button();
+
+let clipboard = new Clipboard(btn, () => label.text);
+
+clipboard.on(Clipboard.EVENT_SUCCESS, this, () => {
+     console.log("复制成功");
+});
+
+clipboard.on(Clipboard.EVENT_ERROR, this, () => {
+     console.log("复制失败");
+});
+
+```
