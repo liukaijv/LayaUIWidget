@@ -104,3 +104,9 @@ clipboard.on(Clipboard.EVENT_ERROR, this, () => {
 });
 
 ```
+
+## 二维码
+
+### 演示地址
+
+ [演示地址](http://www.noteliu.com/LayaUIWidget/QRCode/bin/index.html)
